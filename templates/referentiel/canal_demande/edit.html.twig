@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit CanalDemande{% endblock %}
+
+{% block body %}
+    <h1>Edit CanalDemande</h1>
+
+    {{ include('referentiel/canal_demande/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_canal_demande_index') }}">back to list</a>
+
+    {{ include('referentiel/canal_demande/_delete_form.html.twig') }}
+{% endblock %}

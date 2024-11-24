@@ -7,6 +7,8 @@ use App\Entity\Referentiel\SourceDemande;
 use App\Entity\Referentiel\Statut;
 use App\Entity\Referentiel\TypeDemande;
 use App\Repository\DemandeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -42,6 +44,17 @@ class Demande
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Statut $statut = null;
+
+    /**
+     * @var Collection<int, Projet>
+     */
+    #[ORM\OneToMany(targetEntity: Projet::class, mappedBy: 'demande_source')]
+    private Collection $projets;
+
+    public function __construct()
+    {
+        $this->projets = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -128,6 +141,36 @@ class Demande
     public function setStatut(?Statut $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Projet>
+     */
+    public function getProjets(): Collection
+    {
+        return $this->projets;
+    }
+
+    public function addProjet(Projet $projet): static
+    {
+        if (!$this->projets->contains($projet)) {
+            $this->projets->add($projet);
+            $projet->setDemandeSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjet(Projet $projet): static
+    {
+        if ($this->projets->removeElement($projet)) {
+            // set the owning side to null (unless already changed)
+            if ($projet->getDemandeSource() === $this) {
+                $projet->setDemandeSource(null);
+            }
+        }
 
         return $this;
     }

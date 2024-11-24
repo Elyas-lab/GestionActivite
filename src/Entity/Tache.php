@@ -44,6 +44,9 @@ class Tache
     #[ORM\JoinColumn(nullable: false)]
     private ?Statut $statut = null;
 
+    #[ORM\ManyToOne(inversedBy: 'taches')]
+    private ?Activite $activite = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -117,5 +120,17 @@ class Tache
     }    
     public function getStatut():?Statut{
         return $this->statut;
+    }
+
+    public function getActivite(): ?Activite
+    {
+        return $this->activite;
+    }
+
+    public function setActivite(?Activite $activite): static
+    {
+        $this->activite = $activite;
+
+        return $this;
     }
 }

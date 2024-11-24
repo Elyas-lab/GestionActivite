@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Referentiel\SourceDemande;
 use App\Entity\Referentiel\Statut;
 use App\Repository\ActiviteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -44,6 +45,21 @@ class Activite
     #[ORM\ManyToOne(inversedBy: 'activites')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Statut $statut = null;
+
+    #[ORM\ManyToOne(inversedBy: 'activites')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Projet $projet_source = null;
+
+    /**
+     * @var Collection<int, Tache>
+     */
+    #[ORM\OneToMany(targetEntity: Tache::class, mappedBy: 'activite')]
+    private Collection $taches;
+
+    public function __construct()
+    {
+        $this->taches = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -118,6 +134,48 @@ class Activite
     }    
     public function getStatut():?Statut{
         return $this->statut;
+    }
+
+    public function getProjetSource(): ?Projet
+    {
+        return $this->projet_source;
+    }
+
+    public function setProjetSource(?Projet $projet_source): static
+    {
+        $this->projet_source = $projet_source;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tache>
+     */
+    public function getTaches(): Collection
+    {
+        return $this->taches;
+    }
+
+    public function addTach(Tache $tach): static
+    {
+        if (!$this->taches->contains($tach)) {
+            $this->taches->add($tach);
+            $tach->setActivite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTach(Tache $tach): static
+    {
+        if ($this->taches->removeElement($tach)) {
+            // set the owning side to null (unless already changed)
+            if ($tach->getActivite() === $this) {
+                $tach->setActivite(null);
+            }
+        }
+
+        return $this;
     }
 
 }

@@ -45,9 +45,20 @@ class Projet
     #[ORM\JoinColumn(nullable: false)]
     private ?Statut $statut = null;
 
+    /**
+     * @var Collection<int, Activite>
+     */
+    #[ORM\OneToMany(targetEntity: Activite::class, mappedBy: 'projet_source', orphanRemoval: true)]
+    private Collection $activites;
+
+    #[ORM\ManyToOne(inversedBy: 'projets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Demande $demande_source = null;
+
     public function __construct()
     {
         $this->ressources = new ArrayCollection();
+        $this->activites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,5 +134,47 @@ class Projet
     }    
     public function getStatut():?Statut{
         return $this->statut;
+    }
+
+    /**
+     * @return Collection<int, Activite>
+     */
+    public function getActivites(): Collection
+    {
+        return $this->activites;
+    }
+
+    public function addActivite(Activite $activite): static
+    {
+        if (!$this->activites->contains($activite)) {
+            $this->activites->add($activite);
+            $activite->setProjetSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivite(Activite $activite): static
+    {
+        if ($this->activites->removeElement($activite)) {
+            // set the owning side to null (unless already changed)
+            if ($activite->getProjetSource() === $this) {
+                $activite->setProjetSource(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getDemandeSource(): ?Demande
+    {
+        return $this->demande_source;
+    }
+
+    public function setDemandeSource(?Demande $demande_source): static
+    {
+        $this->demande_source = $demande_source;
+
+        return $this;
     }
 }

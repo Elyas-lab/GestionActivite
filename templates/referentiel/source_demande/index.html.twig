@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SourceDemande index{% endblock %}
+
+{% block body %}
+    <h1>SourceDemande index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for source_demande in source_demandes %}
+            <tr>
+                <td>{{ source_demande.id }}</td>
+                <td>{{ source_demande.nom }}</td>
+                <td>
+                    <a href="{{ path('app_source_demande_show', {'id': source_demande.id}) }}">show</a>
+                    <a href="{{ path('app_source_demande_edit', {'id': source_demande.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_source_demande_new') }}">Create new</a>
+{% endblock %}

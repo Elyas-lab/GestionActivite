@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TypeDemande index{% endblock %}
+
+{% block body %}
+    <h1>TypeDemande index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>IsActive</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for type_demande in type_demandes %}
+            <tr>
+                <td>{{ type_demande.id }}</td>
+                <td>{{ type_demande.nom }}</td>
+                <td>{{ type_demande.description }}</td>
+                <td>{{ type_demande.isActive ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_type_demande_show', {'id': type_demande.id}) }}">show</a>
+                    <a href="{{ path('app_type_demande_edit', {'id': type_demande.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_type_demande_new') }}">Create new</a>
+{% endblock %}

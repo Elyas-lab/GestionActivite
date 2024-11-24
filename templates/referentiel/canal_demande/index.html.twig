@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CanalDemande index{% endblock %}
+
+{% block body %}
+    <h1>CanalDemande index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>IsActive</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for canal_demande in canal_demandes %}
+            <tr>
+                <td>{{ canal_demande.id }}</td>
+                <td>{{ canal_demande.nom }}</td>
+                <td>{{ canal_demande.description }}</td>
+                <td>{{ canal_demande.isActive ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_canal_demande_show', {'id': canal_demande.id}) }}">show</a>
+                    <a href="{{ path('app_canal_demande_edit', {'id': canal_demande.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_canal_demande_new') }}">Create new</a>
+{% endblock %}
