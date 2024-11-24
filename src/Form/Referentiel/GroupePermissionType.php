@@ -4,24 +4,25 @@ namespace App\Form\Referentiel;
 
 use App\Entity\Referentiel\Groupe;
 use App\Entity\Referentiel\Permission;
-use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class GroupeType extends AbstractType
+class GroupePermissionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('nom')
-            ->add('description')
-            ->add('utilisateurs', EntityType::class, [
-                'class' => Utilisateur::class,
-                'choice_label' => 'id',
+            ->add('permissions', EntityType::class, [
+                'class' => Permission::class,
+                'choice_label' => 'nom',
                 'multiple' => true,
-                'required' => false
+                'expanded' => true,
+                'group_by' => function (Permission $permission) {
+                    return $permission->getCategorie() ? $permission->getCategorie() : 'Non classé';
+                },
             ])
         ;
     }

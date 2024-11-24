@@ -3,6 +3,7 @@
 namespace App\Controller\Referentiel;
 
 use App\Entity\Referentiel\Groupe;
+use App\Form\Referentiel\GroupePermissionType;
 use App\Form\Referentiel\GroupeType;
 use App\Repository\GroupeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,7 +43,7 @@ final class GroupeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_groupe_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_groupe_show', methods: ['GET'])]
     public function show(Groupe $groupe): Response
     {
         return $this->render('referentiel/groupe/show.html.twig', [
@@ -54,6 +55,24 @@ final class GroupeController extends AbstractController
     public function edit(Request $request, Groupe $groupe, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(GroupeType::class, $groupe);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_groupe_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('referentiel/groupe/edit.html.twig', [
+            'groupe' => $groupe,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}/edit/permission', name: 'app_groupe_permission', methods: ['GET', 'POST'])]
+    public function editpermission(Request $request, Groupe $groupe, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(GroupePermissionType::class, $groupe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

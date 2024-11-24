@@ -1,45 +1,74 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
 
-{% block title %}Projet index{% endblock %}
+{% block title %}Liste des Projets{% endblock %}
 
-{% block body %}
-    <h1>Projet index</h1>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+{% endblock %}
 
-    <table class="table">
+{% block main %}
+    <h1>Liste des Projets</h1>
+
+    <a href="{{ path('app_projet_new') }}" class="btn btn-primary mb-3">Créer un nouveau projet</a>
+
+    <form action="{{ path('app_projet_index') }}" method="get" class="mb-3">
+        <div class="input-group">
+            <input 
+                type="text" 
+                name="search" 
+                class="form-control" 
+                placeholder="Rechercher un projet..." 
+                value="{{ app.request.query.get('search') }}">
+            <button type="submit" class="btn btn-outline-secondary">Rechercher</button>
+        </div>
+    </form>
+
+    <table id="projet-table" class="table table-striped">
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Titre</th>
+                <th>Nom</th>
                 <th>Description</th>
-                <th>Date_debut_estimmee</th>
-                <th>Date_fin_estimmee</th>
-                <th>Date_debut_reel</th>
-                <th>Date_fin_reel</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         {% for projet in projets %}
             <tr>
                 <td>{{ projet.id }}</td>
-                <td>{{ projet.titre }}</td>
+                <td>{{ projet.nom }}</td>
                 <td>{{ projet.description }}</td>
-                <td>{{ projet.dateDebutEstimmee ? projet.dateDebutEstimmee|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ projet.dateFinEstimmee ? projet.dateFinEstimmee|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ projet.dateDebutReel ? projet.dateDebutReel|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ projet.dateFinReel ? projet.dateFinReel|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
-                    <a href="{{ path('app_projet_show', {'id': projet.id}) }}">show</a>
-                    <a href="{{ path('app_projet_edit', {'id': projet.id}) }}">edit</a>
+                    <a href="{{ path('app_projet_show', {'id': projet.id}) }}" class="btn btn-info btn-sm">Voir</a>
+                    <a href="{{ path('app_projet_edit', {'id': projet.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="8">no records found</td>
+                <td colspan="4">Aucun projet trouvé</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_projet_new') }}">Create new</a>
+    <div class="navigation">
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    $(document).ready(function() {
+        // Activation de DataTables pour améliorer l'affichage si besoin
+        $('#projet-table').DataTable({
+            "paging": true, // Pas de pagination car KNP Paginator est utilisé
+            "info": false, // Pas d'informations additionnelles
+            "searching": true, // La recherche se fait par le formulaire en haut
+            "language": {
+                "zeroRecords": "Aucun projet trouvé",
+            }
+        });
+    });
+    </script>
 {% endblock %}

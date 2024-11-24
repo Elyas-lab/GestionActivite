@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
+
 
 {% block title %}Edit Statut{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>Edit Statut</h1>
 
     {{ include('referentiel/statut/_form.html.twig', {'button_label': 'Update'}) }}

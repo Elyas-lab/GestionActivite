@@ -64,6 +64,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Tache::class, mappedBy: 'ressources')]
     private Collection $taches;
 
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
+
     public function __construct()
     {
         $this->groupe = new ArrayCollection();
@@ -195,6 +198,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
                 $assistance->setResponsable(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
 
         return $this;
     }

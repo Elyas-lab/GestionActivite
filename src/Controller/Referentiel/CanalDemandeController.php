@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/referentiel/canal_demande')]
 final class CanalDemandeController extends AbstractController
 {
-    #[Route(name: 'app_canal_demande_index', methods: ['GET'])]
+    #[Route(name: 'app_canal_index', methods: ['GET'])]
     public function index(CanalDemandeRepository $canalDemandeRepository): Response
     {
         return $this->render('referentiel/canal_demande/index.html.twig', [
@@ -22,7 +22,7 @@ final class CanalDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_canal_demande_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_canal_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $canalDemande = new CanalDemande();
@@ -33,7 +33,7 @@ final class CanalDemandeController extends AbstractController
             $entityManager->persist($canalDemande);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_canal_demande_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_canal_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('referentiel/canal_demande/new.html.twig', [
@@ -42,7 +42,7 @@ final class CanalDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_canal_demande_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_canal_show', methods: ['GET'])]
     public function show(CanalDemande $canalDemande): Response
     {
         return $this->render('referentiel/canal_demande/show.html.twig', [
@@ -50,7 +50,7 @@ final class CanalDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_canal_demande_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_canal_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, CanalDemande $canalDemande, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(CanalDemandeType::class, $canalDemande);
@@ -59,7 +59,7 @@ final class CanalDemandeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_canal_demande_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_canal_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('referentiel/canal_demande/edit.html.twig', [
@@ -68,7 +68,7 @@ final class CanalDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_canal_demande_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_canal_delete', methods: ['POST'])]
     public function delete(Request $request, CanalDemande $canalDemande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$canalDemande->getId(), $request->getPayload()->getString('_token'))) {
@@ -76,6 +76,6 @@ final class CanalDemandeController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_canal_demande_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_canal_index', [], Response::HTTP_SEE_OTHER);
     }
 }

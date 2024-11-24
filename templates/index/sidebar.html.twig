@@ -1,0 +1,178 @@
+ <style>
+    .sidebar {
+        transition: all 0.3s;
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: #333;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        margin: 0.2rem 0;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: rgba(0, 0, 0, .05);
+    }
+
+    .sidebar-heading {
+        font-size: .75rem;
+        text-transform: uppercase;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(0, 0, 0, .05);
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+    }
+
+    .accordion-button:hover {
+        box-shadow: none;
+        background-color: rgba(0, 0, 0, .05);
+    }
+
+    /* Center content vertically when there's extra space */
+    .sidebar > div {
+        min-height: 100%;
+    }
+
+    /* Ensure icons and text are aligned */
+    .sidebar .nav-link i {
+        width: 1.5rem;
+        text-align: center;
+    }
+
+    /* Add some padding to the bottom for scrolling */
+    .sidebar .accordion {
+        padding-bottom: 2rem;
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+<div class="sidebar bg-light" id="sidebarMenu">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <!-- Sidebar Navigation Items -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_acceuil') }}">
+                    <i class="fa fa-house-door me-2"></i>Accueil
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_activite_index') }}">
+                    <i class="bi bi-list-task me-2"></i>Activité
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_assistance_index') }}">
+                    <i class="bi bi-question-circle me-2"></i>Assistance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_projet_index') }}">
+                    <i class="bi bi-diagram-3 me-2"></i>Projet
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_demande_index') }}">
+                    <i class="bi bi-file-earmark-text me-2"></i>Demande
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_tache_index') }}">
+                    <i class="bi bi-check2-square me-2"></i>Tâche
+                </a>
+            </li>
+        </ul>
+
+
+            <div class="accordion accordion-flush" id="accordionReferentiel">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                            Référentiel
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionReferentiel">
+                        <div class="accordion-body p-0">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_groupe_index') }}">
+                                        <i class="bi bi-people me-2"></i>Groupe
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_canal_index') }}">
+                                        <i class="bi bi-broadcast me-2"></i>Canal
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_source_index') }}">
+                                        <i class="bi bi-person me-2"></i>Demandeur
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_statut_index') }}">
+                                        <i class="bi bi-info-circle me-2"></i>Statut
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_type_index') }}">
+                                        <i class="bi bi-tags me-2"></i>Type
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_utilisateur_index') }}">
+                                        <i class="bi bi-person-gear me-2"></i>Utilisateur
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        // Allow opening and closing of the accordion item
+        $('.accordion-button').on('click', function() {
+            const collapseTarget = $(this).attr('data-bs-target');
+            const isExpanded = $(collapseTarget).hasClass('show');
+
+            // Close all other items
+            $('.accordion-collapse').removeClass('show').collapse('hide');
+            
+            // If the clicked item was already open, don't toggle it again
+            if (!isExpanded) {
+                $(collapseTarget).collapse('show');
+            }
+        });
+
+        // Log when the accordion item is shown or hidden
+        $('#accordionReferentiel').on('shown.bs.collapse', function() {
+            console.log('Accordion item expanded.');
+        });
+
+        $('#accordionReferentiel').on('hidden.bs.collapse', function() {
+            console.log('Accordion item collapsed.');
+        });
+    });
+</script>

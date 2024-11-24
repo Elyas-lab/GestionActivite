@@ -14,6 +14,7 @@ class PermissionType extends AbstractType
         $builder
             ->add('nom')
             ->add('description')
+            ->add('Categorie')
         ;
     }
 

@@ -42,7 +42,7 @@ final class StatutController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_statut_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_statut_show', methods: ['GET'])]
     public function show(Statut $statut): Response
     {
         return $this->render('referentiel/statut/show.html.twig', [

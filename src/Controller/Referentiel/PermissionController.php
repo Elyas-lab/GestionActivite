@@ -42,7 +42,7 @@ final class PermissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_permission_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_permission_show', methods: ['GET'])]
     public function show(Permission $permission): Response
     {
         return $this->render('referentiel/permission/show.html.twig', [

@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
+
 
 {% block title %}TypeDemande index{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>TypeDemande index</h1>
 
     <table class="table">
@@ -35,5 +36,5 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_type_demande_new') }}">Create new</a>
+    <a href="{{ path('app_type_new') }}">Create new</a>
 {% endblock %}

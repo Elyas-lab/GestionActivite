@@ -1,18 +1,50 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
 
 {% block title %}Demande index{% endblock %}
 
-{% block body %}
-    <h1>Demande index</h1>
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
 
-    <table class="table">
+{% block main %}
+    <h1>Liste des Demandes</h1>
+
+    <a href="{{ path('app_demande_new') }}" class="btn btn-primary mb-3">Create new</a>
+
+    <form action="{{ path('app_demande_index') }}" method="get" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Recherche:</label>
+                <input type="text" id="search" name="search" class="form-control" value="{{ app.request.query.get('search') }}" placeholder="Rechercher...">
+            </div>
+            <div class="col-md-3">
+                <label for="type" class="form-label">Type:</label>
+                <select id="type" name="type" class="form-select">
+                    <option value="">Tous les types</option>
+                    {# Add options for types #}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Statut:</label>
+                <select id="status" name="status" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    {# Add options for statuses #}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Rechercher</button>
+            </div>
+        </div>
+    </form>
+
+    <table id="demande-table" class="table table-striped">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Titre</th>
                 <th>Description</th>
-                <th>Date_creation</th>
-                <th>actions</th>
+                <th>Date d'insertion</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -21,19 +53,38 @@
                 <td>{{ demande.id }}</td>
                 <td>{{ demande.titre }}</td>
                 <td>{{ demande.description }}</td>
-                <td>{{ demande.dateCreation ? demande.dateCreation|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ demande.dateInsertion ? demande.dateInsertion|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
-                    <a href="{{ path('app_demande_show', {'id': demande.id}) }}">show</a>
-                    <a href="{{ path('app_demande_edit', {'id': demande.id}) }}">edit</a>
+                    <a href="{{ path('app_demande_show', {'id': demande.id}) }}" class="btn btn-info btn-sm">Show</a>
+                    <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" class="btn btn-warning btn-sm">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="5">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_demande_new') }}">Create new</a>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#demande-table').DataTable({
+            "paging": true,
+            "info": false,
+            "searching": false,
+            "language": {
+                "emptyTable": "Aucun résultat trouvé",
+                "zeroRecords": "Aucun résultat trouvé"
+            }
+        });
+    });
+    </script>
+{% endblock %}
+

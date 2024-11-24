@@ -42,7 +42,7 @@ final class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_tache_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_tache_show', methods: ['GET'])]
     public function show(Tache $tache): Response
     {
         return $this->render('tache/show.html.twig', [

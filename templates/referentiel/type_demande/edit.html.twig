@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
+
 
 {% block title %}Edit TypeDemande{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>Edit TypeDemande</h1>
 
     {{ include('referentiel/type_demande/_form.html.twig', {'button_label': 'Update'}) }}

@@ -42,7 +42,7 @@ final class UtilisateurController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_utilisateur_show', methods: ['GET'])]
     public function show(Utilisateur $utilisateur): Response
     {
         return $this->render('utilisateur/show.html.twig', [

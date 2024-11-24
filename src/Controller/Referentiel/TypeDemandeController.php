@@ -11,10 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/referentiel/type/demande')]
+#[Route('/referentiel/type_demande')]
 final class TypeDemandeController extends AbstractController
 {
-    #[Route(name: 'app_type_demande_index', methods: ['GET'])]
+    #[Route(name: 'app_type_index', methods: ['GET'])]
     public function index(TypeDemandeRepository $typeDemandeRepository): Response
     {
         return $this->render('referentiel/type_demande/index.html.twig', [
@@ -22,7 +22,7 @@ final class TypeDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_type_demande_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_type_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $typeDemande = new TypeDemande();
@@ -33,7 +33,7 @@ final class TypeDemandeController extends AbstractController
             $entityManager->persist($typeDemande);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_type_demande_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_type_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('referentiel/type_demande/new.html.twig', [
@@ -42,7 +42,7 @@ final class TypeDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_type_demande_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_type_demande_show', methods: ['GET'])]
     public function show(TypeDemande $typeDemande): Response
     {
         return $this->render('referentiel/type_demande/show.html.twig', [
@@ -50,7 +50,7 @@ final class TypeDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_type_demande_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_type_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, TypeDemande $typeDemande, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(TypeDemandeType::class, $typeDemande);
@@ -59,7 +59,7 @@ final class TypeDemandeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_type_demande_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_type_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('referentiel/type_demande/edit.html.twig', [
@@ -68,7 +68,7 @@ final class TypeDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_type_demande_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_type_delete', methods: ['POST'])]
     public function delete(Request $request, TypeDemande $typeDemande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$typeDemande->getId(), $request->getPayload()->getString('_token'))) {
@@ -76,6 +76,6 @@ final class TypeDemandeController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_type_demande_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_type_index', [], Response::HTTP_SEE_OTHER);
     }
 }

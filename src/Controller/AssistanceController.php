@@ -42,7 +42,7 @@ final class AssistanceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_assistance_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_assistance_show', methods: ['GET'])]
     public function show(Assistance $assistance): Response
     {
         return $this->render('assistance/show.html.twig', [
@@ -68,7 +68,7 @@ final class AssistanceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_assistance_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_assistance_delete', methods: ['POST'])]
     public function delete(Request $request, Assistance $assistance, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$assistance->getId(), $request->getPayload()->getString('_token'))) {

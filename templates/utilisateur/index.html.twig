@@ -1,17 +1,19 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
 
 {% block title %}Utilisateur index{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>Utilisateur index</h1>
 
+    <a href="{{ path('app_utilisateur_new') }}">Create new</a>
+    
     <table class="table">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Matricule</th>
-                <th>Roles</th>
-                <th>Password</th>
+                <th>Groupes</th>
+                <th>Nom</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -20,8 +22,16 @@
             <tr>
                 <td>{{ utilisateur.id }}</td>
                 <td>{{ utilisateur.matricule }}</td>
-                <td>{{ utilisateur.roles ? utilisateur.roles|json_encode : '' }}</td>
-                <td>{{ utilisateur.password }}</td>
+                <td>
+                    <ul>
+                        {% for groupe in utilisateur.getGroupes() %}
+                            <li  class="">{{ groupe.titre }}</li>
+                        {% else %}
+                            <li>Aucun groupe</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ utilisateur.nom }}</td>
                 <td>
                     <a href="{{ path('app_utilisateur_show', {'id': utilisateur.id}) }}">show</a>
                     <a href="{{ path('app_utilisateur_edit', {'id': utilisateur.id}) }}">edit</a>
@@ -29,11 +39,9 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_utilisateur_new') }}">Create new</a>
 {% endblock %}

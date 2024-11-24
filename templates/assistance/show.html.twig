@@ -1,8 +1,8 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
 
 {% block title %}Assistance{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>Assistance</h1>
 
     <table class="table">
@@ -20,8 +20,8 @@
                 <td>{{ assistance.description }}</td>
             </tr>
             <tr>
-                <th>Date_creation</th>
-                <td>{{ assistance.dateCreation ? assistance.dateCreation|date('Y-m-d H:i:s') : '' }}</td>
+                <th>Date_insertion</th>
+                <td>{{ assistance.dateInsertion ? assistance.dateInsertion|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
         </tbody>
     </table>

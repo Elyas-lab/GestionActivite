@@ -1,0 +1,25 @@
+{{ form_start(form) }}
+<div class="form-group">
+    <label for="permissions">Permissions</label>
+    <div class="permissions-container">
+        {{ form_widget(form.permissions) }}
+    </div>
+</div>
+{{ form_end(form) }}
+{%block style %}
+    .permissions-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .permissions-container .form-check {
+        margin-bottom: 10px;
+    }
+
+    .permissions-container optgroup {
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+{% endblock %}

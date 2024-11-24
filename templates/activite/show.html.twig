@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'inside.html.twig' %}
 
 {% block title %}Activite{% endblock %}
 
-{% block body %}
+
+{% block main %}
     <h1>Activite</h1>
 
     <table class="table">
@@ -43,4 +44,14 @@
     <a href="{{ path('app_activite_edit', {'id': activite.id}) }}">edit</a>
 
     {{ include('activite/_delete_form.html.twig') }}
+    <div class="col-md-4">
+                {# Inclusion de l'historique #}
+                {{ render(controller('App\\Controller\\HistoriqueController::elementHistorique', {
+                    'type': 'activite',
+                    'id': activite.id,
+                    'limit': 5
+                })) }}
+            </div>
+        </div>
+    </div>
 {% endblock %}
