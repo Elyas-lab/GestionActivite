@@ -18,10 +18,10 @@ class TacheType extends AbstractType
         $builder
             ->add('titre')
             ->add('description')
-            ->add('date_debut_estimmee', null, [
+            ->add('date_debut_estimee', null, [
                 'widget' => 'single_text',
             ])
-            ->add('date_fin_estimmee', null, [
+            ->add('date_fin_estimee', null, [
                 'widget' => 'single_text',
             ])
             ->add('date_debut_reel', null, [

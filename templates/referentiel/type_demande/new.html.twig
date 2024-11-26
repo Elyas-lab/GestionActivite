@@ -1,12 +1,23 @@
 {% extends 'inside.html.twig' %}
 
-
-{% block title %}New TypeDemande{% endblock %}
+{% block title %}Create New TypeDemande{% endblock %}
 
 {% block main %}
-    <h1>Create new TypeDemande</h1>
+    <h1>Create New TypeDemande</h1>
 
-    {{ include('referentiel/type_demande/_form.html.twig') }}
+    <form method="post">
+        <div class="mb-3">
+            <label for="nom" class="form-label">Nom</label>
+            <input type="text" id="nom" name="nom" class="form-control" required>
+        </div>
 
-    <a href="{{ path('app_type_demande_index') }}">back to list</a>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" id="description" name="description" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a href="{{ path('app_type_index') }}" class="btn btn-secondary ">Retour</a>
+    </form>
+
 {% endblock %}

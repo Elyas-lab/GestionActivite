@@ -2,16 +2,22 @@
 
 {% block title %}Permission index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+{% endblock %}
+
 {% block main %}
     <h1>Permission index</h1>
 
-    <table class="table">
+    <a href="{{ path('app_permission_new') }}" class="btn btn-success mt-3">Ajouter</a>
+    <table id="permissions-table" class="table display">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Nom</th>
                 <th>Description</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -21,17 +27,29 @@
                 <td>{{ permission.nom }}</td>
                 <td>{{ permission.description }}</td>
                 <td>
-                    <a href="{{ path('app_permission_show', {'id': permission.id}) }}">show</a>
-                    <a href="{{ path('app_permission_edit', {'id': permission.id}) }}">edit</a>
+                    <a href="{{ path('app_permission_show', {'id': permission.id}) }}" class="btn btn-primary btn-sm">Show</a>
+                    <a href="{{ path('app_permission_edit', {'id': permission.id}) }}" class="btn btn-secondary btn-sm">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_permission_new') }}">Create new</a>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('#permissions-table').DataTable({
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr.json" // Pour la traduction française
+                }
+            });
+        });
+    </script>
 {% endblock %}

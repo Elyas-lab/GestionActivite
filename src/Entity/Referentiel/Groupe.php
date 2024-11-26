@@ -57,12 +57,12 @@ class Groupe
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getdescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription(?string $description): static
+    public function setdescription(?string $description): static
     {
         $this->description = $description;
 

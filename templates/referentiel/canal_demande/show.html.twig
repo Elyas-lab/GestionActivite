@@ -1,35 +1,39 @@
 {% extends 'inside.html.twig' %}
 
+{% block title %}Détails CanalDemande{% endblock %}
 
-{% block title %}CanalDemande{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
 
 {% block main %}
-    <h1>CanalDemande</h1>
+    <h1>Détails CanalDemande</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ canal_demande.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ canal_demande.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ canal_demande.description }}</td>
-            </tr>
-            <tr>
-                <th>IsActive</th>
-                <td>{{ canal_demande.isActive ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
+    <table class="table table-bordered">
+        <tr>
+            <th>Numéro</th>
+            <td>{{ canal_demande.id }}</td>
+        </tr>
+        <tr>
+            <th>Nom</th>
+            <td>{{ canal_demande.nom }}</td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td>{{ canal_demande.description }}</td>
+        </tr>
+        <tr>
+            <th>IsActive</th>
+            <td>{{ canal_demande.isActive ? 'Yes' : 'No' }}</td>
+        </tr>
     </table>
 
-    <a href="{{ path('app_canal_demande_index') }}">back to list</a>
-
-    <a href="{{ path('app_canal_demande_edit', {'id': canal_demande.id}) }}">edit</a>
-
-    {{ include('referentiel/canal_demande/_delete_form.html.twig') }}
+    <div class="mt-3">
+        <a href="{{ path('app_canal_index') }}" class="btn btn-secondary">Retour</a>
+        <a href="{{ path('app_canal_demande_edit', {'id': canal_demande.id}) }}" class="btn btn-warning">Modifier</a>
+    </div>
 {% endblock %}

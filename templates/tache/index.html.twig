@@ -20,7 +20,7 @@
 {% block main %}
     <h1>Liste des Tâches</h1>
 
-    <a href="{{ path('app_tache_new') }}" class="btn btn-primary mb-3">Create new</a>
+    <a href="{{ path('app_tache_new') }}" class="btn btn-primary mb-3">Ajouter</a>
 
     <div class="datatable-form mb-3">
         <div class="row">
@@ -32,7 +32,7 @@
                 <label for="column-filter" class="form-label">Filtrer par colonne:</label>
                 <select id="column-filter" class="form-select">
                     <option value="">Toutes les colonnes</option>
-                    <option value="0">Id</option>
+                    <option value="0">Numéro</option>
                     <option value="1">Titre</option>
                     <option value="2">Description</option>
                     <option value="3">Date de début</option>
@@ -46,7 +46,7 @@
     <table id="tache-table" class="table table-striped">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Titre</th>
                 <th>Description</th>
                 <th>Date de début</th>
@@ -85,8 +85,8 @@
                 </td>
                 <td>{{ tache.statut }}</td>
                 <td>
-                    <a href="{{ path('app_tache_show', {'id': tache.id}) }}" class="btn btn-info btn-sm">Show</a>
-                    <a href="{{ path('app_tache_edit', {'id': tache.id}) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{{ path('app_tache_show', {'id': tache.id}) }}" class="btn btn-info btn-sm">Détails</a>
+                    <a href="{{ path('app_tache_edit', {'id': tache.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
                 </td>
             </tr>
         {% else %}

@@ -22,52 +22,56 @@ final class PermissionController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_permission_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_permission_new')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $permission = new Permission();
         $form = $this->createForm(PermissionType::class, $permission);
+    
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($permission);
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_permission_index', [], Response::HTTP_SEE_OTHER);
+    
+            $this->addFlash('success', 'Permission créée avec succès.');
+    
+            return $this->redirectToRoute('app_permission_index');
         }
-
+    
         return $this->render('referentiel/permission/new.html.twig', [
-            'permission' => $permission,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
-
-    #[Route('/{id}/show', name: 'app_permission_show', methods: ['GET'])]
-    public function show(Permission $permission): Response
-    {
-        return $this->render('referentiel/permission/show.html.twig', [
-            'permission' => $permission,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_permission_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Permission $permission, EntityManagerInterface $entityManager): Response
+    
+    #[Route('/edit/{id}', name: 'app_permission_edit')]
+    public function edit(Permission $permission, Request $request, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PermissionType::class, $permission);
+    
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_permission_index', [], Response::HTTP_SEE_OTHER);
+    
+            $this->addFlash('success', 'Permission modifiée avec succès.');
+    
+            return $this->redirectToRoute('app_permission_index');
         }
-
+    
         return $this->render('referentiel/permission/edit.html.twig', [
+            'form' => $form->createView(),
             'permission' => $permission,
-            'form' => $form,
         ]);
     }
-
+    
+    
+        #[Route('/{id}/show', name: 'app_permission_show', methods: ['GET'])]
+        public function show(Permission $permission): Response
+        {
+            return $this->render('referentiel/permission/show.html.twig', [
+                'permission' => $permission,
+            ]);
+        }
+    
     #[Route('/{id}', name: 'app_permission_delete', methods: ['POST'])]
     public function delete(Request $request, Permission $permission, EntityManagerInterface $entityManager): Response
     {

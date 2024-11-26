@@ -1,35 +1,29 @@
 {% extends 'inside.html.twig' %}
 
-
-{% block title %}Statut{% endblock %}
+{% block title %}Détails Statut{% endblock %}
 
 {% block main %}
-    <h1>Statut</h1>
+    <h1>Statut Details</h1>
 
     <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ statut.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ statut.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ statut.description }}</td>
-            </tr>
-            <tr>
-                <th>IsActive</th>
-                <td>{{ statut.isActive ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
+        <tr>
+            <th>Numéro</th>
+            <td>{{ statut.id }}</td>
+        </tr>
+        <tr>
+            <th>Nom</th>
+            <td>{{ statut.nom }}</td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td>{{ statut.description }}</td>
+        </tr>
+        <tr>
+            <th>Is Active</th>
+            <td>{{ statut.isActive ? 'Yes' : 'No' }}</td>
+        </tr>
     </table>
 
-    <a href="{{ path('app_statut_index') }}">back to list</a>
-
-    <a href="{{ path('app_statut_edit', {'id': statut.id}) }}">edit</a>
-
-    {{ include('referentiel/statut/_delete_form.html.twig') }}
+    <a href="{{ path('app_statut_edit', {'id': statut.id}) }}" class="btn btn-warning">Modifier</a>
+    <a href="{{ path('app_statut_index') }}" class="btn btn-secondary">Back</a>
 {% endblock %}

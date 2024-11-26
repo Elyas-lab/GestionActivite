@@ -14,7 +14,6 @@ class GroupePermissionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nom')
             ->add('permissions', EntityType::class, [
                 'class' => Permission::class,
                 'choice_label' => 'nom',

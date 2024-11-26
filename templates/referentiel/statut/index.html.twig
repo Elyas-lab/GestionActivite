@@ -1,19 +1,42 @@
 {% extends 'inside.html.twig' %}
 
+{% block title %}Statut Index{% endblock %}
 
-{% block title %}Statut index{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#statutTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                }
+            });
+        });
+    </script>
+{% endblock %}
 
 {% block main %}
-    <h1>Statut index</h1>
+    <h1 class="mb-4">Statut Index</h1>
 
-    <table class="table">
+    <div class="mb-3">
+        <a href="{{ path('app_statut_new') }}" class="btn btn-primary">Create New</a>
+    </div>
+
+    <table id="statutTable" class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Nom</th>
                 <th>Description</th>
                 <th>IsActive</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -24,17 +47,15 @@
                 <td>{{ statut.description }}</td>
                 <td>{{ statut.isActive ? 'Yes' : 'No' }}</td>
                 <td>
-                    <a href="{{ path('app_statut_show', {'id': statut.id}) }}">show</a>
-                    <a href="{{ path('app_statut_edit', {'id': statut.id}) }}">edit</a>
+                    <a href="{{ path('app_statut_show', {'id': statut.id}) }}" class="btn btn-sm btn-info">Détails</a>
+                    <a href="{{ path('app_statut_edit', {'id': statut.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="5" class="text-center">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_statut_new') }}">Create new</a>
 {% endblock %}

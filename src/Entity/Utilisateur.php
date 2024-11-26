@@ -49,19 +49,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Projet>
      */
-    #[ORM\OneToMany(targetEntity: Projet::class, mappedBy: 'ressources')]
-    private Collection $projets;
+    #[ORM\ManyToMany(targetEntity: Projet::class, inversedBy: 'ressources')]
+    private Collection $projets;   
 
     /**
      * @var Collection<int, Activite>
      */
-    #[ORM\OneToMany(targetEntity: Activite::class, mappedBy: 'ressources')]
+    #[ORM\ManyToMany(targetEntity: Activite::class, inversedBy: 'ressources')]
     private Collection $activites;
 
     /**
      * @var Collection<int, Tache>
      */
-    #[ORM\OneToMany(targetEntity: Tache::class, mappedBy: 'ressources')]
+    #[ORM\ManyToMany(targetEntity: Tache::class, inversedBy: 'ressources')]
     private Collection $taches;
 
     #[ORM\Column(length: 255)]
@@ -213,4 +213,85 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    /**
+     * @return Collection<int, Projet>
+     */
+    public function getProjets(): Collection
+    {
+        return $this->projets;
+    }
+
+    public function addProjet(Projet $projet): static
+    {
+        if (!$this->projets->contains($projet)) {
+            $this->projets->add($projet);
+            $projet->addRessource($this); // Ensure bidirectional consistency if Projet has a method
+        }
+
+        return $this;
+    }
+
+    public function removeProjet(Projet $projet): static
+    {
+        if ($this->projets->removeElement($projet)) {
+            $projet->removeRessource($this); // Ensure bidirectional consistency if Projet has a method
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activite>
+     */
+    public function getActivites(): Collection
+    {
+        return $this->activites;
+    }
+
+    public function addActivite(Activite $activite): static
+    {
+        if (!$this->activites->contains($activite)) {
+            $this->activites->add($activite);
+            $activite->addRessource($this); // Ensure bidirectional consistency if Activite has a method
+        }
+
+        return $this;
+    }
+
+    public function removeActivite(Activite $activite): static
+    {
+        if ($this->activites->removeElement($activite)) {
+            $activite->removeRessource($this); // Ensure bidirectional consistency if Activite has a method
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tache>
+     */
+    public function getTaches(): Collection
+    {
+        return $this->taches;
+    }
+
+    public function addTache(Tache $tache): static
+    {
+        if (!$this->taches->contains($tache)) {
+            $this->taches->add($tache);
+            $tache->addRessource($this); // Ensure bidirectional consistency if Tache has a method
+        }
+
+        return $this;
+    }
+
+    public function removeTache(Tache $tache): static
+    {
+        if ($this->taches->removeElement($tache)) {
+            $tache->removeRessource($this); // Ensure bidirectional consistency if Tache has a method
+        }
+
+        return $this;
+    }
+
 }

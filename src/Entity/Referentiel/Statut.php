@@ -2,7 +2,10 @@
 
 namespace App\Entity\Referentiel;
 
+use App\Entity\Activite;
+use App\Entity\Tache;
 use App\Repository\StatutRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,6 +25,13 @@ class Statut
 
     #[ORM\Column]
     private ?bool $isActive = null;
+
+    #[ORM\OneToMany(targetEntity: Activite::class, mappedBy: 'statut')]
+    private Collection $activites;
+
+    #[ORM\OneToMany(targetEntity: Tache::class, mappedBy: 'statut')]
+    private Collection $taches;
+
 
     public function getId(): ?int
     {

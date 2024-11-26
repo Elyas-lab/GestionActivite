@@ -1,38 +1,37 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Utilisateur{% endblock %}
+{% block title %}Utilisateur Détails{% endblock %}
 
 {% block main %}
-    <h1>Utilisateur</h1>
+    <h1>Utilisateur Details</h1>
 
     <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ utilisateur.id }}</td>
-            </tr>
-            <tr>
-                <th>Matricule</th>
-                <td>{{ utilisateur.matricule }}</td>
-            </tr>
-            <tr>
-                <th>Roles</th>
-                <td>{{ utilisateur.roles ? utilisateur.roles|json_encode : '' }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ utilisateur.password }}</td>
-            </tr>
-            <tr>
-                <th>nom</th>
-                <td>{{ utilisateur.nom }}</td>
-            </tr>
-        </tbody>
+        <tr>
+            <th>Numéro</th>
+            <td>{{ utilisateur.id }}</td>
+        </tr>
+        <tr>
+            <th>Matricule</th>
+            <td>{{ utilisateur.matricule }}</td>
+        </tr>
+        <tr>
+            <th>Nom</th>
+            <td>{{ utilisateur.nom }}</td>
+        </tr>
+        <tr>
+            <th>Groupes</th>
+            <td>
+                <ul>
+                    {% for groupe in utilisateur.getGroupes() %}
+                        <li>{{ groupe.titre }}</li>
+                    {% else %}
+                        <li>Aucun groupe</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
     </table>
 
-    <a href="{{ path('app_utilisateur_index') }}">back to list</a>
-
-    <a href="{{ path('app_utilisateur_edit', {'id': utilisateur.id}) }}">edit</a>
-
-    {{ include('utilisateur/_delete_form.html.twig') }}
+    <a href="{{ path('app_utilisateur_edit', {'id': utilisateur.id}) }}" class="btn btn-warning">Modifier</a>
+    <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary">Retour</a>
 {% endblock %}

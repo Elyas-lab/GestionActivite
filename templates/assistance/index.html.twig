@@ -10,7 +10,7 @@
 {% block main %}
     <h1>Liste des Assistances</h1>
 
-    <a href="{{ path('app_assistance_new') }}" class="btn btn-primary mb-3">Create new</a>
+    <a href="{{ path('app_assistance_new') }}" class="btn btn-primary mb-3">Ajouter</a>
 
     <div class="datatable-form mb-3">
         <div class="row">
@@ -22,7 +22,7 @@
                 <label for="column-filter" class="form-label">Filtrer par colonne:</label>
                 <select id="column-filter" class="form-select">
                     <option value="">Toutes les colonnes</option>
-                    <option value="0">Id</option>
+                    <option value="0">Numéro</option>
                     <option value="1">Titre</option>
                     <option value="2">Description</option>
                     <option value="3">Date d'insertion</option>
@@ -35,7 +35,7 @@
     <table id="assistance-table" class="table table-striped">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Titre</th>
                 <th>Description</th>
                 <th>Date d'insertion</th>
@@ -52,8 +52,8 @@
                 <td>{{ assistance.dateInsertion ? assistance.dateInsertion|date('Y-m-d H:i:s') : '' }}</td>
                 <td>{{ assistance.statut }}</td>
                 <td>
-                    <a href="{{ path('app_assistance_show', {'id': assistance.id}) }}" class="btn btn-info btn-sm">Show</a>
-                    <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{{ path('app_assistance_show', {'id': assistance.id}) }}" class="btn btn-info btn-sm">Détails</a>
+                    <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
                 </td>
             </tr>
         {% else %}

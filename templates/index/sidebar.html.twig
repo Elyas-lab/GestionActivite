@@ -100,6 +100,11 @@
                     <i class="bi bi-check2-square me-2"></i>Tâche
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_historique_index') }}">
+                    <i class="me-2"></i>Historique
+                </a>
+            </li>
         </ul>
 
 
@@ -143,6 +148,11 @@
                                         <i class="bi bi-person-gear me-2"></i>Utilisateur
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_permission_index') }}">
+                                        <i class="bi bi-person-gear me-2"></i>Permission
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -151,28 +161,39 @@
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        // Allow opening and closing of the accordion item
-        $('.accordion-button').on('click', function() {
-            const collapseTarget = $(this).attr('data-bs-target');
-            const isExpanded = $(collapseTarget).hasClass('show');
+document.addEventListener('DOMContentLoaded', () => {
+    // Gestion de l'ouverture et fermeture des items de l'accordéon
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    const accordionCollapseElements = document.querySelectorAll('.accordion-collapse');
+    const accordionReferentiel = document.getElementById('accordionReferentiel');
 
-            // Close all other items
-            $('.accordion-collapse').removeClass('show').collapse('hide');
-            
-            // If the clicked item was already open, don't toggle it again
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const collapseTarget = document.querySelector(button.getAttribute('data-bs-target'));
+            const isExpanded = collapseTarget.classList.contains('show');
+
+            // Fermer tous les autres items
+            accordionCollapseElements.forEach(element => {
+                element.classList.remove('show');
+            });
+
+            // Si l'élément cliqué était déjà ouvert, ne pas le rouvrir
             if (!isExpanded) {
-                $(collapseTarget).collapse('show');
+                collapseTarget.classList.add('show');
             }
         });
+    });
 
-        // Log when the accordion item is shown or hidden
-        $('#accordionReferentiel').on('shown.bs.collapse', function() {
+    // Log lorsque les items de l'accordéon sont ouverts ou fermés
+    if (accordionReferentiel) {
+        accordionReferentiel.addEventListener('shown.bs.collapse', () => {
             console.log('Accordion item expanded.');
         });
 
-        $('#accordionReferentiel').on('hidden.bs.collapse', function() {
+        accordionReferentiel.addEventListener('hidden.bs.collapse', () => {
             console.log('Accordion item collapsed.');
         });
-    });
+    }
+});
+
 </script>

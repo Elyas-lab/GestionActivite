@@ -1,12 +1,31 @@
 {% extends 'inside.html.twig' %}
 
-
-{% block title %}New Statut{% endblock %}
+{% block title %}Create Statut{% endblock %}
 
 {% block main %}
-    <h1>Create new Statut</h1>
+    <h1>Create New Statut</h1>
 
-    {{ include('referentiel/statut/_form.html.twig') }}
+    <form method="post">
+        {{ form_start(form) }}
+        
+        <div class="mb-3">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        
+        <div class="mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        </div>
 
-    <a href="{{ path('app_statut_index') }}">back to list</a>
+        <div class="mb-3">
+            {{ form_label(form.isActive) }}
+            {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
+        </div>
+
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a href="{{ path('app_statut_index') }}" class="btn btn-secondary">Back</a>
+
+        {{ form_end(form) }}
+    </form>
 {% endblock %}

@@ -2,16 +2,39 @@
 
 {% block title %}Groupe index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#groupeTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block main %}
     <h1>Groupe index</h1>
 
-    <table class="table">
+    <div class="mb-3">
+        <a href="{{ path('app_groupe_new') }}" class="btn btn-primary">Ajouter</a>
+    </div>
+
+    <table id="groupeTable" class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Nom</th>
                 <th>Description</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -21,17 +44,15 @@
                 <td>{{ groupe.nom }}</td>
                 <td>{{ groupe.description }}</td>
                 <td>
-                    <a href="{{ path('app_groupe_show', {'id': groupe.id}) }}">show</a>
-                    <a href="{{ path('app_groupe_edit', {'id': groupe.id}) }}">edit</a>
+                    <a href="{{ path('app_groupe_show', {'id': groupe.id}) }}" class="btn btn-sm btn-info">Détails</a>
+                    <a href="{{ path('app_groupe_edit', {'id': groupe.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_groupe_new') }}">Create new</a>
 {% endblock %}

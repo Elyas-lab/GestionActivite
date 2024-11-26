@@ -1,0 +1,17 @@
+{# templates/referentiel/groupe/permissions.html.twig #}
+{% extends 'inside.html.twig' %}
+
+{% block title %}Gérer les permissions - {{ groupe.nom }}{% endblock %}
+
+{% block main %}
+    <h2>Gérer les permissions - {{ groupe.nom }}</h2>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class=""> 
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        </div>
+    {{ form_end(form) }}
+
+{% endblock %}

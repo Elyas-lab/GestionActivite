@@ -6,6 +6,7 @@ use App\Entity\Historique;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\Referentiel\TypeElement;
+use App\Entity\Utilisateur;
 use DateTime;
 
 class HistoriqueService
@@ -75,5 +76,14 @@ class HistoriqueService
         return $this->entityManager
             ->getRepository(Historique::class)
             ->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    public function getUserHistorique(Utilisateur $utilisateur){
+
+        $id = $utilisateur->getId();
+
+        return $this->entityManager
+        ->getRepository(Historique::class)
+        ->findLastActionsByUser($id, 20);
     }
 }

@@ -69,21 +69,22 @@ final class GroupeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit/permission', name: 'app_groupe_permission', methods: ['GET', 'POST'])]
-    public function editpermission(Request $request, Groupe $groupe, EntityManagerInterface $entityManager): Response
+    #[Route('/groupe/{id}/permissions', name: 'app_groupe_permission')]
+    public function editPermissions(Request $request, Groupe $groupe,EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(GroupePermissionType::class, $groupe);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_groupe_index', [], Response::HTTP_SEE_OTHER);
+            
+            $this->addFlash('success', 'Les permissions du groupe ont été mises à jour.');
+            return $this->redirectToRoute('app_groupe_index');
         }
-
-        return $this->render('referentiel/groupe/edit.html.twig', [
+    
+        return $this->render('referentiel/groupe/permissions.html.twig', [
             'groupe' => $groupe,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

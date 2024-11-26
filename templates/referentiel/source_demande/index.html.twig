@@ -1,17 +1,39 @@
 {% extends 'inside.html.twig' %}
 
+{% block title %}SourceDemande Index{% endblock %}
 
-{% block title %}SourceDemande index{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#sourceDemandeTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                }
+            });
+        });
+    </script>
+{% endblock %}
 
 {% block main %}
-    <h1>SourceDemande index</h1>
+    <h1 class="mb-4">SourceDemande Index</h1>
 
-    <table class="table">
+    <div class="mb-3">
+        <a href="{{ path('app_source_new') }}" class="btn btn-primary">Create New</a>
+    </div>
+
+    <table id="sourceDemandeTable" class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Numéro</th>
                 <th>Nom</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -20,17 +42,15 @@
                 <td>{{ source_demande.id }}</td>
                 <td>{{ source_demande.nom }}</td>
                 <td>
-                    <a href="{{ path('app_source_demande_show', {'id': source_demande.id}) }}">show</a>
-                    <a href="{{ path('app_source_demande_edit', {'id': source_demande.id}) }}">edit</a>
+                    <a href="{{ path('app_source_show', {'id': source_demande.id}) }}" class="btn btn-sm btn-info">Détails</a>
+                    <a href="{{ path('app_source_edit', {'id': source_demande.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="3" class="text-center">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_source_new') }}">Create new</a>
 {% endblock %}

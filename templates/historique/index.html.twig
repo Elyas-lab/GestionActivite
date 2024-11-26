@@ -59,7 +59,7 @@
         </div>
 
         {# Filtres #}
-        <div class="filter-section">
+        <div class="filter-section p-3">
             <form method="GET" class="row g-3">
                 <div class="col-md-3">
                     <label for="type" class="form-label">Type d'élément</label>
@@ -186,6 +186,7 @@
                                                         <dt class="col-sm-4">Détails</dt>
                                                         <dd class="col-sm-8">{{ entry.detailsHistorique }}</dd>
                                                         
+                                                        
                                                         <dt class="col-sm-4">Utilisateur</dt>
                                                         <dd class="col-sm-8">
                                                             {% if entry.utilisateur %}
@@ -205,9 +206,10 @@
                     </div>
 
                     {# Pagination #}
-                    {{ knp_pagination_render(historique) }}
+                    {% include 'historique/_pagination.html.twig' %}
                 {% endif %}
             </div>
         </div>
     </div>
 {% endblock %}
+

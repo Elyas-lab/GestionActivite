@@ -3,46 +3,56 @@
 namespace App\Controller;
 
 use App\Entity\Historique;
-use App\Form\HistoriqueType;
 use App\Repository\HistoriqueRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\HistoriqueService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Entity\Referentiel\TypeElement;
 
 #[Route('/historique')]
 final class HistoriqueController extends AbstractController
 {
+    public function __construct(
+        private HistoriqueService $historiqueService,
+        private HistoriqueRepository $historiqueRepository
+    ) {}
+
     #[Route(name: 'app_historique_index', methods: ['GET'])]
-    public function index(HistoriqueRepository $historiqueRepository): Response
+    public function index(Request $request): Response
     {
+        $type = $request->query->get('type');
+        $dateDebut = $request->query->get('dateDebut');
+        $dateFin = $request->query->get('dateFin');
+        $page = $request->query->getInt('page', 1);
+        $limit = 10;
+
+        $criteria = [];
+        if ($type) {
+            $criteria['typeElement'] = $type;
+        }
+        if ($dateDebut) {
+            $criteria['dateHistorique']['$gte'] = new \DateTime($dateDebut);
+        }
+        if ($dateFin) {
+            $criteria['dateHistorique']['$lte'] = new \DateTime($dateFin);
+        }
+
+        $offset = ($page - 1) * $limit;
+        $historique = $this->historiqueService->searchHistorique($criteria, ['dateHistorique' => 'DESC'], $limit, $offset);
+        $total = $this->historiqueRepository->count($criteria);
+
         return $this->render('historique/index.html.twig', [
-            'historiques' => $historiqueRepository->findAll(),
+            'historique' => $historique,
+            'types' => TypeElement::cases(),
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
         ]);
     }
 
-    // #[Route('/new', name: 'app_historique_new', methods: ['GET', 'POST'])]
-    // public function new(Request $request, EntityManagerInterface $entityManager): Response
-    // {
-    //     $historique = new Historique();
-    //     $form = $this->createForm(HistoriqueType::class, $historique);
-    //     $form->handleRequest($request);
-
-    //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $entityManager->persist($historique);
-    //         $entityManager->flush();
-
-    //         return $this->redirectToRoute('app_historique_index', [], Response::HTTP_SEE_OTHER);
-    //     }
-
-    //     return $this->render('historique/new.html.twig', [
-    //         'historique' => $historique,
-    //         'form' => $form,
-    //     ]);
-    // }
-
-    #[Route('/{id}/show', name: 'app_historique_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_historique_show', methods: ['GET'])]
     public function show(Historique $historique): Response
     {
         return $this->render('historique/show.html.twig', [
@@ -50,32 +60,47 @@ final class HistoriqueController extends AbstractController
         ]);
     }
 
-    // #[Route('/{id}/edit', name: 'app_historique_edit', methods: ['GET', 'POST'])]
-    // public function edit(Request $request, Historique $historique, EntityManagerInterface $entityManager): Response
-    // {
-    //     $form = $this->createForm(HistoriqueType::class, $historique);
-    //     $form->handleRequest($request);
+    #[Route('/element/{typeElement}/{idElement}', name: 'app_historique_element', methods: ['GET'])]
+    public function viewElementHistorique(string $typeElement, int $idElement, Request $request): Response
+    {
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 10);
+        $offset = ($page - 1) * $limit;
 
-    //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $entityManager->flush();
+        $historique = $this->historiqueService->getHistorique($typeElement, $idElement, $limit, $offset);
+        $total = $this->historiqueRepository->count(['typeElement' => $typeElement, 'idElement' => $idElement]);
 
-    //         return $this->redirectToRoute('app_historique_index', [], Response::HTTP_SEE_OTHER);
-    //     }
+        return $this->render('historique/element.html.twig', [
+            'historique' => $historique,
+            'typeElement' => $typeElement,
+            'idElement' => $idElement,
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+        ]);
+    }
 
-    //     return $this->render('historique/edit.html.twig', [
-    //         'historique' => $historique,
-    //         'form' => $form,
-    //     ]);
-    // }
+    #[Route('/type/{typeElement}', name: 'app_historique_type', methods: ['GET'])]
+    public function viewTypeHistorique(string $typeElement, Request $request): Response
+    {
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 10);
+        $offset = ($page - 1) * $limit;
 
-    // #[Route('/{id}/delete', name: 'app_historique_delete', methods: ['POST'])]
-    // public function delete(Request $request, Historique $historique, EntityManagerInterface $entityManager): Response
-    // {
-    //     if ($this->isCsrfTokenValid('delete'.$historique->getId(), $request->getPayload()->getString('_token'))) {
-    //         $entityManager->remove($historique);
-    //         $entityManager->flush();
-    //     }
+        $criteria = ['typeElement' => $typeElement];
+        $orderBy = ['dateHistorique' => 'DESC'];
 
-    //     return $this->redirectToRoute('app_historique_index', [], Response::HTTP_SEE_OTHER);
-    // }
+        $historique = $this->historiqueService->searchHistorique($criteria, $orderBy, $limit, $offset);
+        $total = $this->historiqueRepository->count($criteria);
+
+        return $this->render('historique/type.html.twig', [
+            'historique' => $historique,
+            'typeElement' => $typeElement,
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+        ]);
+    }
+
 }
+

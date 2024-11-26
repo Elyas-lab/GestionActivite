@@ -1,14 +1,71 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Edit Activite{% endblock %}
-{% block stylesheet %} {{ parent() }} {% endblock %}
+{% block title %}Modifier l'activité{% endblock %}
 
 {% block main %}
-    <h1>Edit Activite</h1>
+    <h1>Modifier l'activité</h1>
 
-    {{ include('activite/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_activite_index') }}">back to list</a>
-
-    {{ include('activite/_delete_form.html.twig') }}
+   {{ form_start(form) }}
+        <div class="row">
+            <div class="col-md-6">   
+                <div class="mb-3">
+                    {{ form_label(form.titre, 'Titre') }}
+                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Titre de l\'activité'}}) }}
+                    {{ form_errors(form.titre) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.description, 'Description') }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description détaillée'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.date_debut_estimee, 'Date de début estimée') }}
+                        {{ form_widget(form.date_debut_estimee, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                        {{ form_errors(form.date_debut_estimee) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.date_fin_estimee, 'Date de fin estimée') }}
+                        {{ form_widget(form.date_fin_estimee, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                        {{ form_errors(form.date_fin_estimee) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.date_debut_reel, 'Date de début réelle') }}
+                        {{ form_widget(form.date_debut_reel, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                        {{ form_errors(form.date_debut_reel) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.date_fin_reel, 'Date de fin réelle') }}
+                        {{ form_widget(form.date_fin_reel, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                        {{ form_errors(form.date_fin_reel) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.projet_source, 'Projet source') }}
+                        {{ form_widget(form.projet_source, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner un projet source'}) }}
+                        {{ form_errors(form.projet_source) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.statut, 'Statut') }}
+                        {{ form_widget(form.statut, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner un statut'}) }}
+                        {{ form_errors(form.statut) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            {{ form_label(form.ressources, 'Personnels associées') }}
+            {{ form_widget(form.ressources, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner des ressources'}) }}
+            {{ form_errors(form.ressources) }}
+        </div>
+        <div class="m-4 d-flex justify-content-between">
+            <a href="{{ path('app_activite_index') }}" class="btn btn-secondary btn-lg">Retour</a>
+            <button type="submit" class="btn btn-success btn-lg">Créer</button>
+        </div>
+    {{ form_end(form) }}
 {% endblock %}
