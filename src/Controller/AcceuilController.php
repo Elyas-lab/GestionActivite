@@ -26,7 +26,7 @@ class AcceuilController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Tableau de bord',
             [
-                ['name' => 'Accueil', 'route' => null],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
             ]
         );
 

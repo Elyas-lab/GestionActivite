@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Utilisateur;
 use App\Form\UtilisateurType;
 use App\Repository\UtilisateurRepository;
+use App\Service\_navbarExtension; // Import _navbarExtension service
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,11 +15,22 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/utilisateur')]
 final class UtilisateurController extends AbstractController
 {
+    public function __construct(private _navbarExtension $navbarExtension) {}
+
     #[Route(name: 'app_utilisateur_index', methods: ['GET'])]
     public function index(UtilisateurRepository $utilisateurRepository): Response
     {
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            'Liste des utilisateurs',
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Utilisateurs', 'route' => 'app_utilisateur_index']
+            ]
+        );
+
         return $this->render('utilisateur/index.html.twig', [
             'utilisateurs' => $utilisateurRepository->findAll(),
+            'navbarData' => $navbarData,
         ]);
     }
 
@@ -36,17 +48,37 @@ final class UtilisateurController extends AbstractController
             return $this->redirectToRoute('app_utilisateur_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            'Créer un utilisateur',
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Utilisateurs', 'route' => 'app_utilisateur_index'],
+                ['name' => 'Créer', 'route' => null],
+            ]
+        );
+
         return $this->render('utilisateur/new.html.twig', [
             'utilisateur' => $utilisateur,
             'form' => $form,
+            'navbarData' => $navbarData,
         ]);
     }
 
     #[Route('/{id}/show', name: 'app_utilisateur_show', methods: ['GET'])]
     public function show(Utilisateur $utilisateur): Response
     {
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            "Détails de l'utilisateur : {$utilisateur->getNom()}",
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Utilisateurs', 'route' => 'app_utilisateur_index'],
+                ['name' => "Utilisateur : {$utilisateur->getNom()}", 'route' => null],
+            ]
+        );
+
         return $this->render('utilisateur/show.html.twig', [
             'utilisateur' => $utilisateur,
+            'navbarData' => $navbarData,
         ]);
     }
 
@@ -62,16 +94,26 @@ final class UtilisateurController extends AbstractController
             return $this->redirectToRoute('app_utilisateur_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            "Modifier l'utilisateur : {$utilisateur->getNom()}",
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Utilisateurs', 'route' => 'app_utilisateur_index'],
+                ['name' => "Modifier : {$utilisateur->getNom()}", 'route' => null],
+            ]
+        );
+
         return $this->render('utilisateur/edit.html.twig', [
             'utilisateur' => $utilisateur,
             'form' => $form,
+            'navbarData' => $navbarData,
         ]);
     }
 
     #[Route('/{id}', name: 'app_utilisateur_delete', methods: ['POST'])]
     public function delete(Request $request, Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$utilisateur->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$utilisateur->getId(), $request->get('_token'))) {
             $entityManager->remove($utilisateur);
             $entityManager->flush();
         }

@@ -34,6 +34,7 @@ class TacheType extends AbstractType
                 'class' => Utilisateur::class,
                 'choice_label' => 'id',
                 'multiple' => true,
+                'expanded' => false,
             ])
             ->add('statut', EntityType::class, [
                 'class' => Statut::class,

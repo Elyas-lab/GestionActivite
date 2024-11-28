@@ -4,19 +4,21 @@ namespace App\Controller;
 
 use App\Entity\Historique;
 use App\Repository\HistoriqueRepository;
-use App\Service\HistoriqueService;
+use App\Service\HistoriqueService;// Import NavbarExtension service
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Referentiel\TypeElement;
+use App\Service\_navbarExtension;
 
 #[Route('/historique')]
 final class HistoriqueController extends AbstractController
 {
     public function __construct(
         private HistoriqueService $historiqueService,
-        private HistoriqueRepository $historiqueRepository
+        private HistoriqueRepository $historiqueRepository,
+        private _navbarExtension $navbarExtension // Add NavbarExtension service
     ) {}
 
     #[Route(name: 'app_historique_index', methods: ['GET'])]
@@ -43,20 +45,39 @@ final class HistoriqueController extends AbstractController
         $historique = $this->historiqueService->searchHistorique($criteria, ['dateHistorique' => 'DESC'], $limit, $offset);
         $total = $this->historiqueRepository->count($criteria);
 
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            'Historique',
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Historique', 'route' => 'app_historique_index']
+            ]
+        );
+
         return $this->render('historique/index.html.twig', [
             'historique' => $historique,
             'types' => TypeElement::cases(),
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
+            'navbarData' => $navbarData,
         ]);
     }
 
     #[Route('/{id}', name: 'app_historique_show', methods: ['GET'])]
     public function show(Historique $historique): Response
     {
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            'Détail Historique',
+            [
+                
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Historique', 'route' => 'app_historique_index'],
+                ['name' => 'Détail Historique', 'route' => null],
+            ]
+        );
+
         return $this->render('historique/show.html.twig', [
             'historique' => $historique,
+            'navbarData' => $navbarData,
         ]);
     }
 
@@ -70,6 +91,15 @@ final class HistoriqueController extends AbstractController
         $historique = $this->historiqueService->getHistorique($typeElement, $idElement, $limit, $offset);
         $total = $this->historiqueRepository->count(['typeElement' => $typeElement, 'idElement' => $idElement]);
 
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            "Historique $typeElement - $idElement",
+            [
+                
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Historique', 'route' => 'app_historique_index'],
+                ['name' => "Élément: $idElement", 'route' => null],
+            ]
+        );
+
         return $this->render('historique/element.html.twig', [
             'historique' => $historique,
             'typeElement' => $typeElement,
@@ -77,6 +107,7 @@ final class HistoriqueController extends AbstractController
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
+            'navbarData' => $navbarData,
         ]);
     }
 
@@ -93,14 +124,22 @@ final class HistoriqueController extends AbstractController
         $historique = $this->historiqueService->searchHistorique($criteria, $orderBy, $limit, $offset);
         $total = $this->historiqueRepository->count($criteria);
 
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            "Historique par Type: $typeElement",
+            [
+                
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Historique', 'route' => 'app_historique_index'],
+                ['name' => "Type: $typeElement", 'route' => null],
+            ]
+        );
+
         return $this->render('historique/type.html.twig', [
             'historique' => $historique,
             'typeElement' => $typeElement,
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
+            'navbarData' => $navbarData,
         ]);
     }
-
 }
-

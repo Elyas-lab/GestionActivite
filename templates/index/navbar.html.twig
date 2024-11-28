@@ -1,6 +1,6 @@
 {% if breadcrumbs is defined and breadcrumbs %}
-    <div class="row container d-flex align-items-center mb-4 shadow bg-body rounded">
-        <div class="col-lg-6">
+    <div class="row container d-flex align-items-center mt-2 mb-4 shadow bg-body rounded h-5">
+        <div class="col">
             <ol class="breadcrumb m-0">
                 {% for breadcrumb in breadcrumbs %}
                     {% if breadcrumb.url %}
@@ -11,7 +11,7 @@
                 {% endfor %}
             </ol>
         </div>
-        <div class=" col-lg-6 text-end">
+        <div class=" col-lg-4 text-end">
             {% if app.user %}
                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
                     Déconnexion

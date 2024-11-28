@@ -3,11 +3,45 @@
 {% block title %}Modifier Demande{% endblock %}
 
 {% block main %}
-    <h1>Modifier Demande</h1>
-
-    {{ include('demande/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_demande_index') }}">back to list</a>
-
-    {{ include('demande/_delete_form.html.twig') }}
+   <div class="card">
+        <div class="card-header">
+           <h3>Modidier la Demande</h3>
+        </div>
+        <div class="card-body">
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        <div class="mt-4 row d-flex flex-column align-items-center">
+            <div class="mb-3">
+                {{ form_row(form.titre) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.description) }}
+            </div>
+            <div class="row">
+                <div class="mb-3 col">
+                    {{ form_row(form.date_creation) }}
+                </div>
+                <div class="mb-3 col">
+                    {{ form_row(form.Source) }}
+                </div>
+            </div>    
+            <div class="row">
+                <div class="mb-3 col">
+                    {{ form_row(form.type) }}
+                </div>
+                <div class="mb-3 col">
+                    {{ form_row(form.canal) }}
+                </div>
+                <div class="mb-3 col">
+                    {{ form_row(form.statut) }}
+                </div>
+            <div>
+            <div class="my-4 col-md-10 d-flex justify-content-between">
+                <a href="{{ path('app_assistance_index') }}" class="btn btn-secondary">back to list</a>
+                {{ include('demande/_delete_form.html.twig') }}
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </div>
+        {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}

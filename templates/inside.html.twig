@@ -14,13 +14,13 @@
     <div class="container-fluid flex">  
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block bg-light">
+            <nav class="container-fluid col-md-3 col-lg-2 d-md-block bg-light">
                 {% include 'index/sidebar.html.twig'  %}
             </nav>
         
             <!-- Main content area -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                {% include 'index/navbar.html.twig' %}
+            <main class="container-fluid col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                {% include 'index/navbar.html.twig' with { 'breadcrumbs': navbarData.breadcrumbs } %}
                 {% block main %}{% endblock %}
             </main>
         </div>    

@@ -3,9 +3,77 @@
 {% block title %}New Tache{% endblock %}
 
 {% block main %}
-    <h1>Ajouter Tache</h1>
+    <div class="card">
+        <div class="card-header">
+            Créer une nouvelle tache
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="mt-4 row d-flex flex-column align-items-center">
+                    <div class="col-md-10">   
+                        <div class="mb-3">
+                            {{ form_label(form.titre, 'Titre') }}
+                            {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Titre de l\'activité'}}) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+                        <div class="mb-3 ">
+                            {{ form_label(form.description, 'Description') }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control ', 'placeholder': 'Description détaillée', 'rows':'5'}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+                    </div>
 
-    {{ include('tache/_form.html.twig') }}
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.activite, 'Projet source') }}
+                                {{ form_widget(form.activite, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner un projet source'}) }}
+                                {{ form_errors(form.activite) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.statut, 'Statut') }}
+                                {{ form_widget(form.statut, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner un statut'}) }}
+                                {{ form_errors(form.statut) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.date_debut_estimee, 'Date de début estimée') }}
+                                {{ form_widget(form.date_debut_estimee, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                                {{ form_errors(form.date_debut_estimee) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.date_fin_estimee, 'Date de fin estimée') }}
+                                {{ form_widget(form.date_fin_estimee, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                                {{ form_errors(form.date_fin_estimee) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.date_debut_reel, 'Date de début réelle') }}
+                                {{ form_widget(form.date_debut_reel, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                                {{ form_errors(form.date_debut_reel) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.date_fin_reel, 'Date de fin réelle') }}
+                                {{ form_widget(form.date_fin_reel, {'attr': {'class': 'form-control', 'type': 'date'}}) }}
+                                {{ form_errors(form.date_fin_reel) }}
+                            </div>
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_tache_index') }}">back to list</a>
+                    <div class="mb-3 col-md-10">
+                        {{ form_label(form.ressources, 'Personnels associées') }}
+                        {{ form_widget(form.ressources, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner des ressources','rows':'5'}) }}
+                        {{ form_errors(form.ressources) }}
+                    </div>
+
+                    <div class="my-4 col-md-10 d-flex justify-content-between">
+                        <a href="{{ path('app_activite_index') }}" class="btn btn-secondary btn-lg">Retour</a>
+                        <button type="submit" class="btn btn-success btn-lg">Créer</button>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}
