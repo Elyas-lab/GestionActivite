@@ -3,7 +3,9 @@
 namespace App\Form\Referentiel;
 
 use App\Entity\Referentiel\Statut;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -14,7 +16,11 @@ class StatutType extends AbstractType
         $builder
             ->add('nom')
             ->add('description')
-            ->add('isActive')
+            ->add('isActive', CheckboxType::class, [
+                'label' => 'Actif',  // L'étiquette pour le champ
+                'required' => false, // Le champ est facultatif
+                'value' => true, // La valeur "true" quand la case est cochée
+            ]);
         ;
     }
 

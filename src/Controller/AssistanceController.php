@@ -6,6 +6,7 @@ use App\Entity\Assistance;
 use App\Form\AssistanceType;
 use App\Repository\AssistanceRepository;
 use App\Service\_navbarExtension; // Import the NavbarExtension service
+use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,11 +17,17 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AssistanceController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
+    private OracleService $oracleService; // Add this property
 
-    public function __construct(_navbarExtension $navbarExtension)
-    {
+    // Update the constructor to include OracleService
+    public function __construct(
+        _navbarExtension $navbarExtension, 
+        OracleService $oracleService
+    ) {
         $this->navbarExtension = $navbarExtension;
+        $this->oracleService = $oracleService; // Store the OracleService
     }
+
 
     #[Route(name: 'app_assistance_index', methods: ['GET'])]
     public function index(AssistanceRepository $assistanceRepository): Response
@@ -42,6 +49,7 @@ final class AssistanceController extends AbstractController
     #[Route('/new', name: 'app_assistance_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $assistance = new Assistance();
         $form = $this->createForm(AssistanceType::class, $assistance);
         $form->handleRequest($request);
@@ -90,6 +98,7 @@ final class AssistanceController extends AbstractController
     #[Route('/{id}/edit', name: 'app_assistance_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Assistance $assistance, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $form = $this->createForm(AssistanceType::class, $assistance);
         $form->handleRequest($request);
 

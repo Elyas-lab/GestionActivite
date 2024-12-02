@@ -18,10 +18,6 @@
             <th>Description</th>
             <td>{{ source_demande.description }}</td>
         </tr>
-        <tr>
-            <th>Is Active</th>
-            <td>{{ source_demande.isActive ? 'Yes' : 'No' }}</td>
-        </tr>
     </table>
 
     <a href="{{ path('app_source_edit', {'id': source_demande.id}) }}" class="btn btn-warning">Modifier</a>

@@ -10,6 +10,7 @@ use App\Entity\Referentiel\TypeDemande;
 use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -20,8 +21,9 @@ class AssistanceType extends AbstractType
         $builder
             ->add('titre')
             ->add('description')
-            ->add('date_creation', null, [
-                'widget' => 'single_text',
+            ->add('date_creation', DateTimeType::class, [
+                'widget' => 'single_text', // This renders the field as a single input box
+                'attr' => ['class' => 'datepicker'], // Add custom class for JavaScript styling
             ])
             ->add('Source', EntityType::class, [
                 'class' => SourceDemande::class,

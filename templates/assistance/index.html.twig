@@ -5,6 +5,8 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap5.min.css">
 {% endblock %}
 
 {% block main %}
@@ -32,7 +34,7 @@
         </div>
     </div>
 
-    <table id="assistance-table" class="table table-striped">
+    <table id="assistance-table" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
         <thead>
             <tr>
                 <th>Numéro</th>
@@ -43,35 +45,55 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-        {% for assistance in assistances %}
-            <tr>
-                <td>{{ assistance.id }}</td>
-                <td>{{ assistance.titre }}</td>
-                <td>{{ assistance.description }}</td>
-                <td>{{ assistance.dateInsertion ? assistance.dateInsertion|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ assistance.statut }}</td>
-                <td>
-                    <a href="{{ path('app_assistance_show', {'id': assistance.id}) }}" class="btn btn-info btn-sm">Détails</a>
-                    <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">No records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
     </table>
 
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap5.min.js"></script>
     <script>
     $(document).ready(function() {
         var table = $('#assistance-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+            "ajax": {
+                "url": "{{ path('app_assistance_data') }}",
+                "type": "POST",
+                "data": function(d) {
+                    d.customSearch = $('#custom-search').val();
+                    d.columnFilter = $('#column-filter').val();
+                }
+            },
+            "columns": [
+                {"data": "id"},
+                {"data": "titre"},
+                {"data": "description"},
+                {"data": "dateInsertion"},
+                {"data": "statut"},
+                {"data": "actions", "orderable": false, "searchable": false}
+            ],
+            "order": [[0, "desc"]],
             "pageLength": 10,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
+            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'tr>>" +
+                   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print', 'colvis'
+            ],
             "language": {
                 "lengthMenu": "Afficher _MENU_ entrées par page",
                 "zeroRecords": "Aucun résultat trouvé",
@@ -84,25 +106,32 @@
                     "last": "Dernier",
                     "next": "Suivant",
                     "previous": "Précédent"
+                },
+                "buttons": {
+                    "copy": "Copier",
+                    "print": "Imprimer",
+                    "colvis": "Colonnes visibles"
                 }
             }
         });
 
         // Custom search
         $('#custom-search').on('keyup', function() {
-            table.search(this.value).draw();
+            table.ajax.reload();
         });
 
         // Column-specific filter
         $('#column-filter').on('change', function() {
-            var columnIndex = $(this).val();
-            if (columnIndex !== '') {
-                table.column(columnIndex).search($('#custom-search').val()).draw();
-            } else {
-                table.search($('#custom-search').val()).draw();
-            }
+            table.ajax.reload();
         });
+
+        // Add export buttons to the DOM
+        new $.fn.dataTable.Buttons(table, {
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'print', 'colvis']
+        });
+
+        table.buttons().container()
+            .appendTo('#assistance-table_wrapper .col-md-6:eq(0)');
     });
     </script>
 {% endblock %}
-

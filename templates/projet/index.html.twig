@@ -5,69 +5,79 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap5.min.css">
 {% endblock %}
 
 {% block main %}
-    <h1>Liste des Projets</h1>
-
-    <a href="{{ path('app_projet_new') }}" class="btn btn-primary mb-3">Créer un nouveau projet</a>
-
-    <form action="{{ path('app_projet_index') }}" method="get" class="mb-3">
-        <div class="input-group">
-            <input 
-                type="text" 
-                name="search" 
-                class="form-control" 
-                placeholder="Rechercher un projet..." 
-                value="{{ app.request.query.get('search') }}">
-            <button type="submit" class="btn btn-outline-secondary">Rechercher</button>
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-0">Liste des Projets</h1>
+            </div>
         </div>
-    </form>
 
-    <table id="projet-table" class="table table-striped">
-        <thead>
-            <tr>
-                <th>Numéro</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for projet in projets %}
-            <tr>
-                <td>{{ projet.id }}</td>
-                <td>{{ projet.nom }}</td>
-                <td>{{ projet.description }}</td>
-                <td>
-                    <a href="{{ path('app_projet_show', {'id': projet.id}) }}" class="btn btn-info btn-sm">Voir</a>
-                    <a href="{{ path('app_projet_edit', {'id': projet.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">Aucun projet trouvé</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <div class="mb-3">
+            <a href="{{ path('app_projet_new') }}" class="btn btn-primary">Créer un nouveau projet</a>
+        </div>
 
-    <div class="navigation">
+        <div class="card">
+            <div class="card-body">
+                <table id="projet-table" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Numéro</th>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap5.min.js"></script>
     <script>
     $(document).ready(function() {
-        // Activation de DataTables pour améliorer l'affichage si besoin
-        $('#projet-table').DataTable({
-            "paging": true, // Pas de pagination car KNP Paginator est utilisé
-            "info": false, // Pas d'informations additionnelles
-            "searching": true, // La recherche se fait par le formulaire en haut
+        var table = $('#projet-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+            "ajax": {
+                "url": "{{ path('app_projet_data') }}",
+                "type": "POST"
+            },
+            "columns": [
+                {"data": "id"},
+                {"data": "nom"},
+                {"data": "description"},
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return '<a href="/projet/' + row.id + '" class="btn btn-info btn-sm">Voir</a> ' +
+                               '<a href="/projet/' + row.id + '/edit" class="btn btn-warning btn-sm">Modifier</a>';
+                    }
+                }
+            ],
+            "order": [[0, "desc"]],
+            "pageLength": 10,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
             "language": {
-                "zeroRecords": "Aucun projet trouvé",
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
             }
+        });
+
+        // Ajout d'un champ de recherche personnalisé
+        $('#projet-table_filter').prepend('<input type="text" id="global_filter" class="form-control" placeholder="Rechercher un projet...">');
+        
+        $('#global_filter').on('keyup', function() {
+            table.search(this.value).draw();
         });
     });
     </script>

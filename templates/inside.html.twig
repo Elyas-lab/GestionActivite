@@ -4,26 +4,30 @@
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {{ importmap('app') }}
         {% block stylesheet %}
         {% endblock %} 
 
     </head>
 <body>
+    {% block javascripts %}
+        {{ importmap('app') }}
+    {% endblock %}
+    {% block body %}
     <!-- Conteneur principal -->
     <div class="container-fluid flex">  
         <div class="row">
             <!-- Sidebar -->
-            <nav class="container-fluid col-md-3 col-lg-2 d-md-block bg-light">
+            <nav class="container-fluid col-md-3 col-sm-3  col-lg-2 d-md-block bg-light">
                 {% include 'index/sidebar.html.twig'  %}
             </nav>
         
             <!-- Main content area -->
-            <main class="container-fluid col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="container-fluid col-md-9 col-sm-6 ms-sm-auto col-lg-10 px-md-4 ">
                 {% include 'index/navbar.html.twig' with { 'breadcrumbs': navbarData.breadcrumbs } %}
                 {% block main %}{% endblock %}
             </main>
         </div>    
     </div>
+    {% endblock %}
 </body>
 </html>

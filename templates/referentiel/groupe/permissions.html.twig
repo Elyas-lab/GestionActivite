@@ -1,17 +1,129 @@
-{# templates/referentiel/groupe/permissions.html.twig #}
 {% extends 'inside.html.twig' %}
 
 {% block title %}Gérer les permissions - {{ groupe.nom }}{% endblock %}
 
-{% block main %}
-    <h2>Gérer les permissions - {{ groupe.nom }}</h2>
-
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <div class=""> 
-            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-            <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        </div>
-    {{ form_end(form) }}
-
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .permission-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('permission-search');
+            const categoryContainers = document.querySelectorAll('.category-container');
+            const permissionItems = document.querySelectorAll('.permission-item');
+            const selectAllCheckboxes = document.querySelectorAll('.select-all-category');
+
+            function filterPermissions() {
+                const searchTerm = searchInput.value.toLowerCase();
+
+                categoryContainers.forEach(container => {
+                    let hasVisiblePermissions = false;
+                    const permissions = container.querySelectorAll('.permission-item');
+
+                    permissions.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        const isVisible = text.includes(searchTerm);
+                        item.classList.toggle('hidden', !isVisible);
+                        if (isVisible) hasVisiblePermissions = true;
+                    });
+
+                    container.classList.toggle('hidden', !hasVisiblePermissions);
+                });
+
+                updateSelectAllCheckboxes();
+            }
+
+            function updateSelectAllCheckboxes() {
+                selectAllCheckboxes.forEach(checkbox => {
+                    const category = checkbox.closest('.category-container');
+                    const visiblePermissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]');
+                    const checkedPermissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]:checked');
+                    
+                    checkbox.checked = visiblePermissions.length > 0 && visiblePermissions.length === checkedPermissions.length;
+                    checkbox.indeterminate = checkedPermissions.length > 0 && checkedPermissions.length < visiblePermissions.length;
+                });
+            }
+
+            function toggleCategory(checkbox) {
+                const category = checkbox.closest('.category-container');
+                const permissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]');
+                permissions.forEach(permission => permission.checked = checkbox.checked);
+            }
+
+            searchInput.addEventListener('input', filterPermissions);
+
+            selectAllCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => toggleCategory(checkbox));
+            });
+
+            permissionItems.forEach(item => {
+                item.querySelector('input[type="checkbox"]').addEventListener('change', updateSelectAllCheckboxes);
+            });
+
+            updateSelectAllCheckboxes();
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">Gérer les permissions du groupe : {{ groupe.nom }}</h2>
+
+        {{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+
+        <div class="space-y-6">
+            <div class="category-grid row g-0 d-flex justify-content-center ">
+                {% for categoryName, choiceGroup in form.permissions.vars.choices %}
+                    <div class="category-container bg-white shadow-md rounded-lg p-3 m-2 col-5 card ">
+                        <div class="flex items-center justify-between mb-3 card-header">
+                            <h3 class="text-lg font-semibold text-gray-800">{{ categoryName }}</h3>
+                        </div>
+                        <div class="permission-list space-y-2 card ">
+                            {% for choice in choiceGroup.choices %}
+                                <div class="permission-item flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50">
+                                    {{ form_widget(form.permissions[choice.value], {
+                                        'attr': {
+                                            'class': 'rounded border-gray-300 text-indigo-600 focus:ring-indigo-500',
+                                            'id': 'permission_' ~ choice.value
+                                        }
+                                    }) }}
+                                    {{ form_label(form.permissions[choice.value], null, {
+                                        'label_attr': {
+                                            'class': 'text-sm text-gray-700',
+                                            'for': 'permission_' ~ choice.value
+                                        }
+                                    }) }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {{ form_errors(form.permissions, {'attr': {'class': 'text-red-600 text-sm mt-1'}}) }}
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary mt-3">
+                Retour à la liste
+            </a>
+            <button type="submit" class="btn btn-primary mt-3">
+                Confirmer
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+

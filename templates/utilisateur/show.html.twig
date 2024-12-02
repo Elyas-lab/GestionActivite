@@ -22,7 +22,7 @@
             <th>Groupes</th>
             <td>
                 <ul>
-                    {% for groupe in utilisateur.getGroupes() %}
+                    {% for groupe in utilisateur.getGroupe() %}
                         <li>{{ groupe.titre }}</li>
                     {% else %}
                         <li>Aucun groupe</li>

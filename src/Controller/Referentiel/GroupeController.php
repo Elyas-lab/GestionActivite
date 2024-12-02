@@ -94,7 +94,6 @@ final class GroupeController extends AbstractController
             "Modifier le groupe : {$groupe->getNom()}",
             [
                 ['name' => 'Groupes', 'route' => 'app_groupe_index'],
-                ['name' => "Groupe : {$groupe->getNom()}", 'route' => 'app_groupe_show'],
                 ['name' => "Modifier : {$groupe->getNom()}", 'route' => null],
             ]
         );
@@ -122,8 +121,7 @@ final class GroupeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Permissions du groupe : {$groupe->getNom()}",
             [
-                ['name' => 'Groupes', 'route' => 'app_groupe_index'],
-                ['name' => "Groupe : {$groupe->getNom()}", 'route' => 'app_groupe_show'],
+                ['name' => 'Groupes', 'route' => 'app_groupe_index'], 
                 ['name' => "Permissions : {$groupe->getNom()}", 'route' => null],
             ]
         );

@@ -25,7 +25,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private array $roles = [];
 
     /**
@@ -159,7 +159,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function addGroupe(Groupe $groupe): static
     {
         if (!$this->groupe->contains($groupe)) {
-            $this->groupe->add($groupe);
+
+            $groupe->addUtilisateur( $this);
+
         }
 
         return $this;

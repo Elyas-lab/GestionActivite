@@ -61,7 +61,7 @@ final class TypeDemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/show', name: 'app_type_demande_show', methods: ['GET'])]
+    #[Route('/{id}/show', name: 'app_type_show', methods: ['GET'])]
     public function show(TypeDemande $typeDemande): Response
     {
         $navbarData = $this->navbarExtension->generateNavbarData(

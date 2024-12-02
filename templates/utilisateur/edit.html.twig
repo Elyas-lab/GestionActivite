@@ -5,20 +5,25 @@
 {% block main %}
     <h1>Modifier Utilisateur</h1>
 
-    <form method="post">
-        <div class="mb-3">
-            <label for="matricule" class="form-label">Matricule</label>
-            <input type="text" id="matricule" name="matricule" value="{{ utilisateur.matricule }}" class="form-control" required>
-        </div>
+      {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_label(form.nom, 'Nom') }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+            </div>
 
-        <div class="mb-3">
-            <label for="nom" class="form-label">Nom</label>
-            <input type="text" id="nom" name="nom" value="{{ utilisateur.nom }}" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                {{ form_label(form.matricule, 'Matricule') }}
+                {{ form_widget(form.matricule, {'attr': {'class': 'form-control'}}) }}
+            </div>
 
+            <div class="mb-3">
+                {{ form_label(form.password, 'Password') }}
+                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+            </div>
 
-        <button type="submit" class="btn btn-primary">Save changes</button>
-        <a href="{{ path('app_utilisateur_show', {'id': utilisateur.id}) }}" class="btn btn-secondary ">Back to details</a>
-    </form>
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary">Back to List</a>
+        {{ form_end(form) }}
+         {{ form_end(form) }}
 
 {% endblock %}

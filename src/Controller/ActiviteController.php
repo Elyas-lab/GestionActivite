@@ -6,6 +6,7 @@ use App\Entity\Activite;
 use App\Form\ActiviteType;
 use App\Repository\ActiviteRepository;
 use App\Service\_navbarExtension;// Import the NavbarExtension service
+use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,10 +18,15 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ActiviteController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
+    private OracleService $oracleService; // Add this property
 
-    public function __construct(_navbarExtension $navbarExtension)
-    {
+    // Update the constructor to include OracleService
+    public function __construct(
+        _navbarExtension $navbarExtension, 
+        OracleService $oracleService
+    ) {
         $this->navbarExtension = $navbarExtension;
+        $this->oracleService = $oracleService; // Store the OracleService
     }
 
     #[Route(name: 'app_activite_index', methods: ['GET'])]
@@ -103,6 +109,7 @@ final class ActiviteController extends AbstractController
     #[Route('/new', name: 'app_activite_new', methods: ['GET','POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $activite = new Activite();
         $form = $this->createForm(ActiviteType::class, $activite);
         $form->handleRequest($request);
@@ -151,6 +158,7 @@ final class ActiviteController extends AbstractController
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $form = $this->createForm(ActiviteType::class, $activite);
         $form->handleRequest($request);
 

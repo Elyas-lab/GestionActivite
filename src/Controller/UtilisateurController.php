@@ -11,6 +11,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 
 #[Route('/utilisateur')]
 final class UtilisateurController extends AbstractController
@@ -81,6 +83,61 @@ final class UtilisateurController extends AbstractController
             'navbarData' => $navbarData,
         ]);
     }
+
+    #[Route('/utilisateurs/list', name: 'app_utilisateur_list', methods: ['GET'])]
+    public function list(Request $request, UtilisateurRepository $utilisateurRepository): JsonResponse
+    {
+        try {
+            $queryBuilder = $utilisateurRepository->createQueryBuilder('u');
+            
+            // Total records without filtering
+            $totalRecords = (clone $queryBuilder)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
+            
+            // Apply search filtering
+            $filteredRecords = $totalRecords;
+            if ($search = $request->get('search')['value'] ?? null) {
+                $queryBuilder->andWhere('u.nom LIKE :search OR u.matricule LIKE :search')
+                             ->setParameter('search', '%' . $search . '%');
+                // Get filtered records count
+                $filteredRecords = (clone $queryBuilder)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
+            }
+            
+            // Pagination
+            $start = $request->get('start', 0);
+            $length = $request->get('length', 10);
+            $queryBuilder->setFirstResult($start)->setMaxResults($length);
+            
+            // Fetch users
+            $utilisateurs = $queryBuilder->getQuery()->getResult();
+            
+            $data = [];
+            foreach ($utilisateurs as $utilisateur) {
+                // Convert the collection to an array before applying array_map
+                $groupes = $utilisateur->getGroupe()->toArray(); // Convert to array
+                $data[] = [
+                    'id' => $utilisateur->getId(),
+                    'matricule' => $utilisateur->getMatricule(),
+                    'groupes' => $groupes ? array_map(fn($g) => $g->getTitre(), $groupes) : [],
+                    'nom' => $utilisateur->getNom(),
+                    'detailUrl' => $this->generateUrl('app_utilisateur_show', ['id' => $utilisateur->getId()]),
+                    'editUrl' => $this->generateUrl('app_utilisateur_edit', ['id' => $utilisateur->getId()])
+                ];
+            }
+    
+            return new JsonResponse([
+                'draw' => $request->get('draw'),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $filteredRecords,
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            // Log the error (you can use Symfony's logger here)
+            return new JsonResponse([
+                'error' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     #[Route('/{id}/edit', name: 'app_utilisateur_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response

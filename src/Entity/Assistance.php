@@ -24,8 +24,8 @@ class Assistance
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $date_creation = null;
+    #[ORM\Column(type: 'oracle_date',)]
+    private ?\DateTime $date_creation = null;
 
     #[ORM\ManyToOne(inversedBy: 'assistances')]
     #[ORM\JoinColumn(nullable: false)]
@@ -52,7 +52,7 @@ class Assistance
         return $this->id;
     }
 
-    public function getSource():?Demande{
+    public function getSource():?Demande {
         return $this->Source;
     }
     public function getType():?TypeDemande{
@@ -96,10 +96,10 @@ class Assistance
         $this->description = $description;
         return $this;
     }
-    public function getDateCreation():?\DateTimeImmutable{
+    public function getDateCreation():?\DateTime{
         return $this->date_creation;
     }
-    public function setDateCreation(?\DateTimeImmutable $date_creation): self{
+    public function setDateCreation(?\DateTime $date_creation): self{
         $this->date_creation = $date_creation;
         return $this;
     }

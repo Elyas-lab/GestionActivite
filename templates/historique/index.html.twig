@@ -4,50 +4,8 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        .historique-badge {
-            font-size: 0.875rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-        }
-        .historique-badge.utilisateur {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-        .historique-badge.document {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .filter-section {
-            background-color: #f8fafc;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .element-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #2563eb;
-            text-decoration: none;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.2s;
-        }
-        .element-link:hover {
-            background-color: #eff6ff;
-            color: #1e40af;
-        }
-        .element-link i {
-            font-size: 0.875rem;
-        }
-        .action-preview {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap5.min.css">
 {% endblock %}
 
 {% block main %}
@@ -59,8 +17,8 @@
         </div>
 
         {# Filtres #}
-        <div class="filter-section p-3">
-            <form method="GET" class="row g-3">
+        <div class="filter-section p-3 mb-4">
+            <form id="filter-form" method="GET" class="row g-3">
                 <div class="col-md-3">
                     <label for="type" class="form-label">Type d'élément</label>
                     <select name="type" id="type" class="form-select">
@@ -96,120 +54,111 @@
         {# Tableau des résultats #}
         <div class="card">
             <div class="card-body">
-                {% if historique is empty %}
-                    <div class="alert alert-info">
-                        Aucune entrée dans l'historique n'a été trouvée.
-                    </div>
-                {% else %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Type</th>
-                                    <th>Élément</th>
-                                    <th>Action</th>
-                                    <th>Utilisateur</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for entry in historique %}
-                                    <tr>
-                                        <td>
-                                            <span title="{{ entry.dateHistorique|date('d/m/Y H:i:s') }}">
-                                                {{ entry.dateHistorique|date('d/m/Y H:i') }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="historique-badge {{ entry.typeElement|lower }}">
-                                                {{ entry.typeElement }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% set elementLink = element_link(entry.typeElement, entry.idElement) %}
-                                            {% if elementLink %}
-                                                <a href="{{ elementLink.url }}" class="element-link" title="Voir {{ elementLink.label }}">
-                                                    <i class="{{ elementLink.icon }}"></i>
-                                                    {{ elementLink.label }}
-                                                </a>
-                                            {% else %}
-                                                #{{ entry.idElement }}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="action-preview" title="{{ entry.detailsHistorique }}">
-                                                {{ entry.detailsHistorique }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {% if entry.utilisateur %}
-                                                <a href="{{ path('app_utilisateur_show', {id: entry.utilisateur.id}) }}" class="element-link">
-                                                    <i class="fas fa-user"></i>
-                                                    {{ entry.utilisateur.prenom }} {{ entry.utilisateur.nom }}
-                                                </a>
-                                            {% else %}
-                                                <em>Système</em>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-outline-secondary" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#detailsModal{{ entry.id }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                <table id="historique-table" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Élément</th>
+                            <th>Action</th>
+                            <th>Utilisateur</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 
-                                    {# Modal pour les détails #}
-                                    <div class="modal fade" id="detailsModal{{ entry.id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Détails de l'action</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <dl class="row">
-                                                        <dt class="col-sm-4">Date</dt>
-                                                        <dd class="col-sm-8">{{ entry.dateHistorique|date('d/m/Y H:i:s') }}</dd>
-                                                        
-                                                        <dt class="col-sm-4">Type</dt>
-                                                        <dd class="col-sm-8">{{ entry.typeElement }}</dd>
-                                                        
-                                                        <dt class="col-sm-4">ID Élément</dt>
-                                                        <dd class="col-sm-8">{{ entry.idElement }}</dd>
-                                                        
-                                                        <dt class="col-sm-4">Détails</dt>
-                                                        <dd class="col-sm-8">{{ entry.detailsHistorique }}</dd>
-                                                        
-                                                        
-                                                        <dt class="col-sm-4">Utilisateur</dt>
-                                                        <dd class="col-sm-8">
-                                                            {% if entry.utilisateur %}
-                                                                {{ entry.utilisateur.prenom }} {{ entry.utilisateur.nom }}
-                                                            {% else %}
-                                                                <em>Système</em>
-                                                            {% endif %}
-                                                        </dd>
-                                                    </dl>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {# Pagination #}
-                    {% include 'historique/_pagination.html.twig' %}
-                {% endif %}
+    {# Modal pour les détails #}
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails de l'action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Date</dt>
+                        <dd class="col-sm-8" id="modal-date"></dd>
+                        
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8" id="modal-type"></dd>
+                        
+                        <dt class="col-sm-4">ID Élément</dt>
+                        <dd class="col-sm-8" id="modal-id"></dd>
+                        
+                        <dt class="col-sm-4">Détails</dt>
+                        <dd class="col-sm-8" id="modal-details"></dd>
+                        
+                        <dt class="col-sm-4">Utilisateur</dt>
+                        <dd class="col-sm-8" id="modal-user"></dd>
+                    </dl>
+                </div>
             </div>
         </div>
     </div>
 {% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap5.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        var table = $('#historique-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+            "ajax": {
+                "url": "{{ path('app_historique_data') }}",
+                "type": "POST",
+                "data": function(d) {
+                    d.type = $('#type').val();
+                    d.dateDebut = $('#dateDebut').val();
+                    d.dateFin = $('#dateFin').val();
+                }
+            },
+            "columns": [
+                {"data": "dateHistorique"},
+                {"data": "typeElement"},
+                {"data": "element"},
+                {"data": "detailsHistorique"},
+                {"data": "utilisateur"},
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return '<button type="button" class="btn btn-sm btn-outline-secondary view-details" data-id="' + row.id + '"><i class="fas fa-eye"></i></button>';
+                    }
+                }
+            ],
+            "order": [[0, "desc"]],
+            "pageLength": 25,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+
+        // Appliquer les filtres
+        $('#filter-form').on('submit', function(e) {
+            e.preventDefault();
+            table.ajax.reload();
+        });
+
+        // Gérer l'affichage des détails dans la modal
+        $('#historique-table').on('click', '.view-details', function() {
+            var data = table.row($(this).parents('tr')).data();
+            $('#modal-date').text(data.dateHistorique);
+            $('#modal-type').text(data.typeElement);
+            $('#modal-id').text(data.idElement);
+            $('#modal-details').text(data.detailsHistorique);
+            $('#modal-user').text(data.utilisateur);
+            $('#detailsModal').modal('show');
+        });
+    });
+    </script>
+{% endblock %}

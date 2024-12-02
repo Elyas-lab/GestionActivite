@@ -6,6 +6,7 @@ use App\Entity\Tache;
 use App\Form\TacheType;
 use App\Repository\TacheRepository;
 use App\Service\_navbarExtension; // Import _navbarExtension service
+use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,18 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/tache')]
 final class TacheController extends AbstractController
 {
-    public function __construct(private _navbarExtension $navbarExtension) {}
+    private _navbarExtension $navbarExtension;
+    private OracleService $oracleService; // Add this property
+
+    // Update the constructor to include OracleService
+    public function __construct(
+        _navbarExtension $navbarExtension, 
+        OracleService $oracleService
+    ) {
+        $this->navbarExtension = $navbarExtension;
+        $this->oracleService = $oracleService; // Store the OracleService
+    }
+
 
     #[Route(name: 'app_tache_index', methods: ['GET'])]
     public function index(TacheRepository $tacheRepository): Response
@@ -37,6 +49,7 @@ final class TacheController extends AbstractController
     #[Route('/new', name: 'app_tache_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $tache = new Tache();
         $form = $this->createForm(TacheType::class, $tache);
         $form->handleRequest($request);
@@ -85,6 +98,7 @@ final class TacheController extends AbstractController
     #[Route('/{id}/edit', name: 'app_tache_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Tache $tache, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $form = $this->createForm(TacheType::class, $tache);
         $form->handleRequest($request);
 

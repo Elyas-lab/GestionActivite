@@ -3,10 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Demande;
+use App\Entity\Referentiel\TypeElement;
 use App\Form\DemandeType;
 use App\Repository\DemandeRepository;
 use App\Service\_navbarExtension; // Import the _navbarExtension service
+use App\Service\HistoriqueService;
+use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,11 +20,18 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DemandeController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
+    private OracleService $oracleService; // Add this property
 
-    public function __construct(_navbarExtension $navbarExtension)
-    {
+    // Update the constructor to include OracleService
+    public function __construct(
+        _navbarExtension $navbarExtension, 
+        OracleService $oracleService,
+        private HistoriqueService $historiqueService
+    ) {
         $this->navbarExtension = $navbarExtension;
+        $this->oracleService = $oracleService; // Store the OracleService
     }
+
 
     #[Route(name: 'app_demande_index', methods: ['GET'])]
     public function index(DemandeRepository $demandeRepository): Response
@@ -40,16 +51,26 @@ final class DemandeController extends AbstractController
     }
 
     #[Route('/new', name: 'app_demande_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager ): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $demande = new Demande();
         $form = $this->createForm(DemandeType::class, $demande);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($demande);
-            $entityManager->flush();
-
+            try{
+                $entityManager->persist($demande);
+                $entityManager->flush();
+            }catch(Exception $e){
+                
+            }
+            
+            $this->historiqueService->addHistorique(
+                TypeElement::Activite,
+                $demande->getId(),
+                'Création d\'une nouvelle demande'
+            );
             return $this->redirectToRoute('app_demande_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -90,6 +111,7 @@ final class DemandeController extends AbstractController
     #[Route('/{id}/edit', name: 'app_demande_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Demande $demande, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         $form = $this->createForm(DemandeType::class, $demande);
         $form->handleRequest($request);
 

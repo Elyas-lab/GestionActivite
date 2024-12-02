@@ -1,9 +1,9 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Modifier SourceDemande{% endblock %}
+{% block title %}Create SourceDemande{% endblock %}
 
 {% block main %}
-    <h1>Modifier SourceDemande</h1>
+    <h1>Create New SourceDemande</h1>
 
     <form method="post">
         {{ form_start(form) }}
@@ -18,12 +18,7 @@
             {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
         </div>
 
-        <div class="mb-3">
-            {{ form_label(form.isActive) }}
-            {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
-        </div>
-
-        <button class="btn btn-warning" type="submit">Update</button>
+        <button class="btn btn-primary" type="submit">Save</button>
         <a href="{{ path('app_source_index') }}" class="btn btn-secondary">Back</a>
 
         {{ form_end(form) }}

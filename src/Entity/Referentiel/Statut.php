@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Entity\Referentiel;
 
 use App\Entity\Activite;
@@ -32,7 +31,6 @@ class Statut
     #[ORM\OneToMany(targetEntity: Tache::class, mappedBy: 'statut')]
     private Collection $taches;
 
-
     public function getId(): ?int
     {
         return $this->id;
@@ -62,12 +60,14 @@ class Statut
         return $this;
     }
 
+    // Le getter 'isActive' est correct pour un champ booléen
     public function isActive(): ?bool
     {
         return $this->isActive;
     }
 
-    public function setActive(bool $isActive): static
+    // Renommer 'setIsActive' en 'setIsActive' pour correspondre à la convention de nommage
+    public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
 

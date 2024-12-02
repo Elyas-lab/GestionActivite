@@ -4,108 +4,96 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
     <style>
-        .table th, .table td {
-            text-align: center;
-        }
-        .table th {
-            background-color: #f8f9fa;
-        }
-        .table thead tr {
-            background-color: #007bff;
-            color: white;
-        }
-        .table tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .table tbody tr:hover {
-            background-color: #e9ecef;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        .btn-info {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-        }
-        .btn-info:hover {
-            background-color: #138496;
-            border-color: #117a8b;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-        }
-        .btn-warning:hover {
-            background-color: #e0a800;
-            border-color: #d39e00;
-        }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+        .table thead tr { background-color: #007bff; color: white; }
+        .dataTables_wrapper .dataTables_filter { float: right; margin-bottom: 10px; }
+        .dataTables_wrapper .dataTables_length { float: left; }
     </style>
+{% endblock %}
+
+{% block main %}
+    <div class="container-fluid">
+        <h1 class="mb-4">Liste des Utilisateurs</h1>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <a href="{{ path('app_utilisateur_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Créer un utilisateur
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <table id="utilisateurTable" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Matricule</th>
+                            <th>Groupes</th>
+                            <th>Nom</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
-    <script>
+    <script type="module">
+        import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
+
         $(document).ready(function() {
-            $('#utilisateurTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
-                }
-            });
+            console.log('Document prêt');
+            
+            try {
+                $('#utilisateurTable').DataTable({
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "{{ path('app_utilisateur_list') }}",
+                        "type": "GET",
+                        "dataSrc": function (json) {
+                            return json.data;  // Ensure this matches your server response structure
+                        }
+                    },  // <-- Added a comma here
+                    "columns": [
+                        { "data": "id" },
+                        { "data": "matricule" },
+                        { 
+                            "data": "groupes",
+                            "render": function(data, type, row) {
+                                if (data.length === 0) {
+                                    return "<span>Aucun groupe</span>";
+                                }
+                                return "<ul>" + data.map(g => `<li>${g}</li>`).join('') + "</ul>";
+                            }
+                        },
+                        { "data": "nom" },
+                        {
+                            "data": null,
+                            "render": function(data, type, row) {
+                                return `
+                                    <a href="${row.detailUrl}" class="btn btn-info btn-sm">Détails</a>
+                                    <a href="${row.editUrl}" class="btn btn-warning btn-sm">Modifier</a>
+                                `;
+                            }
+                        }
+                    ],
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation de DataTables:', error);
+            }
         });
     </script>
-{% endblock %}
-
-{% block main %}
-    <h1 class="mb-4">Utilisateur Index</h1>
-
-    <div class="mb-3">
-        <a href="{{ path('app_utilisateur_new') }}" class="btn btn-primary">Create New</a>
-    </div>
-
-    <table id="utilisateurTable" class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Numéro</th>
-                <th>Matricule</th>
-                <th>Groupes</th>
-                <th>Nom</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for utilisateur in utilisateurs %}
-            <tr>
-                <td>{{ utilisateur.id }}</td>
-                <td>{{ utilisateur.matricule }}</td>
-                <td>
-                    <ul>
-                        {% for groupe in utilisateur.getGroupes() %}
-                            <li>{{ groupe.titre }}</li>
-                        {% else %}
-                            <li>Aucun groupe</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-                <td>{{ utilisateur.nom }}</td>
-                <td>
-                    <a href="{{ path('app_utilisateur_show', {'id': utilisateur.id}) }}" class="btn btn-info btn-sm">Détails</a>
-                    <a href="{{ path('app_utilisateur_edit', {'id': utilisateur.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5" class="text-center">No records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 {% endblock %}

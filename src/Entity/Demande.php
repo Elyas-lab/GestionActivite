@@ -10,6 +10,7 @@ use App\Repository\DemandeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use App\Type\OracleDateType;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DemandeRepository::class)]
@@ -26,8 +27,8 @@ class Demande
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $date_creation = null;
+    #[ORM\Column(type: 'oracle_date',)]
+    private ?\DateTime $date_creation = null;
 
     #[ORM\ManyToOne(inversedBy: 'demandes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -85,12 +86,12 @@ class Demande
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeImmutable
+    public function getDateCreation(): ?\DateTime
     {
         return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTimeImmutable $date_creation): static
+    public function setDateCreation(\DateTime $date_creation): static
     {
         $this->date_creation = $date_creation;
 

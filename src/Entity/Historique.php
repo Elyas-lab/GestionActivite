@@ -17,8 +17,8 @@ class Historique
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $dateHistorique = null;
+    #[ORM\Column(type: 'oracle_date')]
+    private ?\DateTime $dateHistorique = null;
 
     #[ORM\Column(type: 'string', length: 1000, nullable: true)]
     private ?string $detailsHistorique = null;

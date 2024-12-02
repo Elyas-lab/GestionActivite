@@ -39,6 +39,7 @@ class SourceDemande
     public function __construct()
     {
         $this->demandes = new ArrayCollection();
+        $this->assistances = new ArrayCollection();
     }
 
     public function getId(): ?int

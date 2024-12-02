@@ -19,8 +19,9 @@ class GroupeType extends AbstractType
             ->add('description')
             ->add('utilisateurs', EntityType::class, [
                 'class' => Utilisateur::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
                 'multiple' => true,
+                'expanded' => true,
                 'required' => false
             ])
         ;
