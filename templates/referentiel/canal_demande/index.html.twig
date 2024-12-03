@@ -4,12 +4,15 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
+        <script type="module">
+        // import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
         $(document).ready(function() {
             $('#canalDemandeTable').DataTable({
                 "language": {

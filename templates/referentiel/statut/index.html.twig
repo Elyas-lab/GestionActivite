@@ -4,14 +4,15 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
-    <script>
+        <script type="module">
+        // import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
         $(document).ready(function() {
             $('#statutTable').DataTable({
                 "language": {

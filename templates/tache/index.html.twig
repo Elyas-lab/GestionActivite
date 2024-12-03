@@ -101,7 +101,11 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
+        <script type="module">
+        // import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
     $(document).ready(function() {
         var table = $('#tache-table').DataTable({
             "pageLength": 10,

@@ -5,10 +5,28 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .table th, .table td { text-align: center; vertical-align: middle; }
-        .table thead tr { background-color: #007bff; color: white; }
-        .dataTables_wrapper .dataTables_filter { float: right; margin-bottom: 10px; }
-        .dataTables_wrapper .dataTables_length { float: left; }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table thead tr {
+            background-color: #007bff;
+            color: white;
+        }
+        .dataTables_wrapper .dataTables_filter {
+            float: right;
+            margin-bottom: 10px;
+        }
+        .dataTables_wrapper .dataTables_length {
+            float: left;
+        }
+        .btn-sm {
+            margin-right: 5px;
+        }
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 {% endblock %}
 
@@ -45,14 +63,14 @@
 {% block javascripts %}
     {{ parent() }}
     <script type="module">
-        import $ from 'jquery';
-        if (typeof window.jQuery === 'undefined') {
-            window.$ = window.jQuery = $;
-        }
+        // import $ from 'jquery';
+        // if (typeof window.jQuery === 'undefined') {
+        //     window.$ = window.jQuery = $;
+        // }
 
         $(document).ready(function() {
             console.log('Document prêt');
-            
+
             try {
                 $('#utilisateurTable').DataTable({
                     "processing": true,
@@ -60,29 +78,33 @@
                     "ajax": {
                         "url": "{{ path('app_utilisateur_list') }}",
                         "type": "GET",
-                        "dataSrc": function (json) {
-                            return json.data;  // Ensure this matches your server response structure
-                        }
-                    },  // <-- Added a comma here
+                        "dataSrc": "data"
+                    },
                     "columns": [
                         { "data": "id" },
                         { "data": "matricule" },
                         { 
                             "data": "groupes",
-                            "render": function(data, type, row) {
+                            "render": function(data) {
                                 if (data.length === 0) {
                                     return "<span>Aucun groupe</span>";
                                 }
-                                return "<ul>" + data.map(g => `<li>${g}</li>`).join('') + "</ul>";
+                                return "<ul class='list-unstyled mb-0'>" +
+                                       data.map(g => `<li>${g}</li>`).join('') +
+                                       "</ul>";
                             }
                         },
                         { "data": "nom" },
                         {
                             "data": null,
-                            "render": function(data, type, row) {
+                            "render": function(row) {
                                 return `
-                                    <a href="${row.detailUrl}" class="btn btn-info btn-sm">Détails</a>
-                                    <a href="${row.editUrl}" class="btn btn-warning btn-sm">Modifier</a>
+                                    <a href="${row.detailUrl}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> Détails
+                                    </a>
+                                    <a href="${row.editUrl}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
                                 `;
                             }
                         }

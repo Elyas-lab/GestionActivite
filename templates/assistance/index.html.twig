@@ -63,7 +63,11 @@
     <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap5.min.js"></script>
-    <script>
+        <script type="module">
+        // import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
     $(document).ready(function() {
         var table = $('#assistance-table').DataTable({
             "processing": true,

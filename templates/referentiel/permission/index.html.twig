@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
 {% endblock %}
 
 {% block main %}
@@ -43,13 +43,21 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
+    <script type="module">
+        // import $ from 'jquery';
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
+
         $(document).ready(function() {
+            console.log('Document prêt');
+       
             $('#permissions-table').DataTable({
                 "language": {
-                    "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr.json" // Pour la traduction française
+                    "url": "" // Pour la traduction française
                 }
             });
+            // $('#permissions-table').DataTable();
         });
     </script>
 {% endblock %}

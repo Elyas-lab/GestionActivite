@@ -31,25 +31,32 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.colVis.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap5.min.js"></script>
-    <script>
+    <script type="module">
+        import $ from 'jquery';
+
+        // Ensure jQuery is available if not already loaded
+        if (typeof window.jQuery === 'undefined') {
+            window.$ = window.jQuery = $;
+        }
+
         $(document).ready(function() {
             $('#activite-table').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "responsive": true,
-                "ajax": "{{ path('app_activite_data') }}",
+                "ajax": {
+                    "url": "{{ path('app_activite_data') }}",
+                    "type": "GET",  // You can adjust to POST if needed
+                    "data": function(d) {
+                        // Optionally, modify the request payload here
+                        // For example, you can add extra parameters:
+                        // d.customParam = 'value';
+                    },
+                    "dataSrc": function(json) {
+                        // Optionally modify the response data here if needed
+                        return json.data; // Ensure the data is in the correct format
+                    }
+                },
                 "columns": [
                     {"data": "id"},
                     {"data": "titre"},
@@ -65,9 +72,6 @@
                 "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                "buttons": [
-                    'copy', 'csv', 'excel', 'pdf', 'print', 'colvis'
-                ],
                 "language": {
                     "emptyTable": "Aucun résultat trouvé",
                     "lengthMenu": "Afficher _MENU_ activités par page",
@@ -82,11 +86,6 @@
                         "next": "Suivant",
                         "previous": "Précédent"
                     },
-                    "buttons": {
-                        "copy": "Copier",
-                        "print": "Imprimer",
-                        "colvis": "Colonnes visibles"
-                    }
                 }
             });
         });
