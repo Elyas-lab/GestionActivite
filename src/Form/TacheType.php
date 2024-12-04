@@ -37,17 +37,17 @@ class TacheType extends AbstractType
             ])
             ->add('ressources', EntityType::class, [
                 'class' => Utilisateur::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
                 'multiple' => true,
                 'expanded' => false,
             ])
             ->add('statut', EntityType::class, [
                 'class' => Statut::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('activite', EntityType::class, [
                 'class' => Activite::class,
-                'choice_label' => 'id',
+                'choice_label' => 'titre',
             ])
         ;
     }

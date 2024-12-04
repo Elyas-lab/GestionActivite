@@ -26,7 +26,7 @@
             </a>
         </div>
         <div class="card-body">
-            <table id="tacheTable" class="table table-striped table-bordered dt-responsive" style="width:100%">
+            <table id="tacheTable" class="table nowrap table-striped table-bordered dt-responsive" style="width:100%">
                 <thead>
                     <tr>
                         <th>Numéro</th>
@@ -94,20 +94,22 @@
 {% block javascripts %}
 {{ parent() }}
 <script type="module">
+    import '@fortawesome/fontawesome-free';
     import $ from 'jquery';
     window.$ = window.jQuery = $;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        $('#tacheTable').DataTable({
+    $(document).ready(function () {
+        const table = new DataTable('#tacheTable', {
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
+                url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/fr-FR.json"
             },
             columnDefs: [
                 { targets: [0, 1, 3, 4, 5], orderable: true },
                 { targets: [2, 6], orderable: false }
-            ],
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]]
+            ]
         });
 
         // Gestion de la suppression des tâches

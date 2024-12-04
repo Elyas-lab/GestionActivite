@@ -29,7 +29,7 @@ class Projet
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'projets')]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
     private Collection $ressources;
 
     #[ORM\ManyToOne]

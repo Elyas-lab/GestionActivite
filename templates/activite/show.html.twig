@@ -1,37 +1,154 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Détails de l'activité{% endblock %}
+{% block title %}Détails complets de l'activité{% endblock %}
 
 {% block main %}
-    <h1>Détails de l'activité</h1>
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-project-diagram me-2"></i>Détails de l'activité
+            </h2>
+            <span class="badge bg-light text-primary">ID: {{ activite.id }}</span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Titre</span>
+                                <span>{{ activite.titre }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="fw-bold mb-2">Description</div>
+                                <p class="text-muted">{{ activite.description ?: 'Aucune description' }}</p>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Statut</span>
+                                <span class="badge {% if activite.statut.nom == 'Terminé' %}bg-success{% elseif activite.statut.nom == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ activite.statut.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
-    <table class="table">
-        <tr>
-            <th>Numéro</th>
-            <td>{{ activite.id }}</td>
-        </tr>
-        <tr>
-            <th>Titre</th>
-            <td>{{ activite.titre }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ activite.description }}</td>
-        </tr>
-        <tr>
-            <th>Date de début</th>
-            <td>{{ activite.dateDebut ? activite.dateDebut|date('Y-m-d H:i') : 'N/A' }}</td>
-        </tr>
-        <tr>
-            <th>Date de fin</th>
-            <td>{{ activite.dateFin ? activite.dateFin|date('Y-m-d H:i') : 'N/A' }}</td>
-        </tr>
-        <tr>
-            <th>Statut</th>
-            <td>{{ activite.statut.nom }}</td>
-        </tr>
-    </table>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="fas fa-calendar-alt me-2"></i>Dates et Délais
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début estimée</span>
+                                <span class="badge bg-info">
+                                    {{ activite.dateDebutEstimee ? activite.formatDate(activite.dateDebutEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin estimée</span>
+                                <span class="badge bg-info">
+                                    {{ activite.dateFinEstimee ? activite.formatDate(activite.dateFinEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début réelle</span>
+                                <span class="badge {% if activite.dateDebutReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ activite.dateDebutReel ? activite.formatDate(activite.dateDebutReel) : 'Non démarrée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin réelle</span>
+                                <span class="badge {% if activite.dateFinReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ activite.dateFinReel ? activite.formatDate(activite.dateFinReel) : 'Non terminée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée estimée</span>
+                                <span class="badge bg-primary">
+                                    {{ activite.dureeEstimee ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée réelle</span>
+                                <span class="badge bg-primary">
+                                    {{ activite.dureeReelle ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Retard</span>
+                                <span class="badge {% if activite.retard > 0 %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ activite.retard ?: 0 }} jours
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_activite_edit', {'id': activite.id}) }}" class="btn btn-warning">Modifier</a>
-    <a href="{{ path('app_activite_index') }}" class="btn btn-secondary">Retour</a>
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-users me-2"></i>Ressources
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for ressource in activite.ressources %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ ressource.Matricule }}
+                                    <span class="badge bg-secondary">{{ ressource.nom }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucune ressource assignée</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-tasks me-2"></i>Tâches
+                            </div>
+                            <a href="{{ path('app_tache_new', {'activite_id': activite.id}) }}" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-plus me-1"></i>Ajouter
+                            </a>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for tache in activite.taches %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ tache.titre }}
+                                    <span class="badge bg-primary">{{ tache.statut.nom }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucune tâche</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="fas fa-project-diagram me-2"></i>Projet Source
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ activite.projetSource.titre }}</h5>
+                            <p class="card-text text-muted">{{ activite.projetSource.description ?: 'Aucune description' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_activite_edit', {'id': activite.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Modifier
+                </a>
+                <a href="{{ path('app_activite_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

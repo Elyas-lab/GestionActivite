@@ -31,28 +31,24 @@
                     <tbody>
                         {% for action in historiques %}
                             <tr>
-                                <td>{{ action.date|date('d/m/Y H:i') }}</td>
-                                <td>{{ action.type }}</td>
-                                <td>{{ action.element }}</td>
-                                <td>{{ action.details }}</td>
-                                <td>{{ action.utilisateur }}</td>
+                                <td>{{ action.dateHistorique|date('d/m/Y H:i') }}</td>
+                                <td>{{ action.getTypeElementTitre() }}</td>
+                                <td>{{ action.getIdElement() }}</td>
+                                <td>{{ action.detailsHistorique }}</td>
+                                <td>{{ action.utilisateur.Matricule }}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-outline-secondary view-details" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#detailsModal" 
                                             data-id="{{ action.id }}" 
-                                            data-date="{{ action.date|date('d/m/Y H:i') }}" 
-                                            data-type="{{ action.type }}" 
-                                            data-element="{{ action.element }}" 
-                                            data-details="{{ action.details }}" 
-                                            data-user="{{ action.utilisateur }}">
+                                            data-date="{{ action.dateHistorique|date('d/m/Y H:i') }}" 
+                                            data-type="{{ action.getTypeElementTitre() }}" 
+                                            data-element="{{ action.getIdElement() }}" 
+                                            data-details="{{ action.detailsHistorique }}" 
+                                            data-user="{{ action.utilisateur.Matricule }}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center">Aucune action trouvée.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -95,10 +91,10 @@
 {% block javascripts %}
     {{ parent() }}
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function () {
+        $(document).ready(function () {
             const table = new DataTable('#historique-table', {
                 responsive: true,
-                pageLength: 25,
+                pageLength: 10,
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/fr-FR.json"

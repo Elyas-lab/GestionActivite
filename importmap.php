@@ -44,4 +44,17 @@ return [
     'sweetalert2' => [
         'version' => '11.14.5',
     ],
+    '@fortawesome/fontawesome-free' => [
+        'version' => '6.7.1',
+    ],
+    '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
+        'version' => '6.7.1',
+        'type' => 'css',
+    ],
+    '@fortawesome/fontawesome-free/js/solid.min.js' => [
+        'version' => '6.7.1',
+    ],
+    '@fortawesome/fontawesome-free/js/brands.min.js' => [
+        'version' => '6.7.1',
+    ],
 ];

@@ -43,7 +43,8 @@ class AssistanceType extends AbstractType
             ])
             ->add('responsable', EntityType::class, [
                 'class' => Utilisateur::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
+                
             ])
         ;
     }

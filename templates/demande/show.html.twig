@@ -1,32 +1,110 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Demande{% endblock %}
+{% block title %}Détails de la demande{% endblock %}
 
 {% block main %}
-    <h1>Demande</h1>
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-ticket-alt me-2"></i>Détails de la Demande
+            </h2>
+            <span class="badge bg-light text-primary">Réf: {{ demande.id }}</span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Titre</span>
+                                <span>{{ demande.titre }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="fw-bold mb-2">Description</div>
+                                <p class="text-muted">{{ demande.description ?: 'Aucune description' }}</p>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date de Création</span>
+                                <span class="badge bg-secondary">
+                                    {{ demande.dateCreation ? demande.dateCreation|date('d/m/Y H:i') : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Statut</span>
+                                <span class="badge {% if demande.statut.nom == 'Terminé' %}bg-success{% elseif demande.statut.nom == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ demande.statut.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Numéro</th>
-                <td>{{ demande.id }}</td>
-            </tr>
-            <tr>
-                <th>Titre</th>
-                <td>{{ demande.titre }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ demande.description }}</td>
-            </tr>
-            <tr>
-                <th>Date_insertion</th>
-                <td>{{ demande.getDateCreation()|date('d/M/Y ') }}</td>
-            </tr>
-        </tbody>
-    </table>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="fas fa-tags me-2"></i>Caractéristiques de la Demande
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Type de Demande</span>
+                                <span class="badge bg-info">
+                                    {{ demande.type.nom }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Source de la Demande</span>
+                                <span class="badge bg-primary">
+                                    {{ demande.source.nom }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Canal de la Demande</span>
+                                <span class="badge bg-secondary">
+                                    {{ demande.canal.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_demande_index') }}">back to list</a>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-project-diagram me-2"></i>Projets Générés
+                            </div>
+                            <a href="{{ path('app_projet_new', {'demande_id': demande.id}) }}" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-plus me-1"></i>Ajouter
+                            </a>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for projet in demande.projets %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ projet.titre }}
+                                    <span class="badge bg-primary">{{ projet.statut.nom }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucun projet généré</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Modifier
+                </a>
+                <a href="{{ path('app_demande_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
-

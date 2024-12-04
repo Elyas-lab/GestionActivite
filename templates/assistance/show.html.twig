@@ -1,34 +1,122 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Assistance{% endblock %}
+{% block title %}Détails de l'Assistance{% endblock %}
 
 {% block main %}
-    <h1>Assistance</h1>
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-life-ring me-2"></i>Détails de l'Assistance
+            </h2>
+            <span class="badge bg-light text-primary">Réf: {{ assistance.id }}</span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Titre</span>
+                                <span>{{ assistance.titre }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="fw-bold mb-2">Description</div>
+                                <p class="text-muted">{{ assistance.description ?: 'Aucune description' }}</p>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date de Création</span>
+                                <span class="badge bg-secondary">
+                                    {{ assistance.dateCreation ? assistance.dateCreation|date('d/m/Y H:i') : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Statut</span>
+                                <span class="badge {% if assistance.statut.nom == 'Terminé' %}bg-success{% elseif assistance.statut.nom == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ assistance.statut.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Numéro</th>
-                <td>{{ assistance.id }}</td>
-            </tr>
-            <tr>
-                <th>Titre</th>
-                <td>{{ assistance.titre }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ assistance.description }}</td>
-            </tr>
-            <tr>
-                <th>Date_insertion</th>
-                <td>{{ assistance.dateInsertion ? assistance.dateInsertion|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="fas fa-tags me-2"></i>Caractéristiques de l'Assistance
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Type de Demande</span>
+                                <span class="badge bg-info">
+                                    {{ assistance.type.nom }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Source de la Demande</span>
+                                <span class="badge bg-primary">
+                                    {{ assistance.source.nom }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Canal de la Demande</span>
+                                <span class="badge bg-secondary">
+                                    {{ assistance.canal.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_assistance_index') }}">back to list</a>
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-user-tie me-2"></i>Responsable
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ assistance.responsable.nom }}</h5>
+                            <p class="card-text text-muted">
+                                <i class="fas fa-envelope me-2"></i>{{ assistance.responsable.Matricule }}
+                            </p>
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}">edit</a>
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <i class="fas fa-chart-line me-2"></i>Actions à Prendre
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% if assistance.statut.nom == 'En cours' %}
+                                <li class="list-group-item text-muted">
+                                    <i class="fas fa-hourglass-half me-2"></i>Suivi en cours
+                                </li>
+                            {% elseif assistance.statut.nom == 'Nouveau' %}
+                                <li class="list-group-item text-muted">
+                                    <i class="fas fa-exclamation-circle me-2"></i>Nécessite une action immédiate
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">
+                                    <i class="fas fa-check-circle me-2"></i>Aucune action requise
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    {{ include('assistance/_delete_form.html.twig') }}
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Modifier
+                </a>
+                <a href="{{ path('app_assistance_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -47,8 +47,8 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
          // Log method
         // dd($request->attributes->get('_route')); // Log route
     
-        if ( $request->isMethod('POST')){ 
-            $request->attributes->get('_route') === 'app_login';
+        if ( $request->isMethod('POST') && $request->attributes->get('_route') === 'app_login'){ 
+            
             // dd($request->getMethod());
             return true;}
 

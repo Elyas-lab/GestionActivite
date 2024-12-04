@@ -72,6 +72,11 @@ class Historique
         return $this->typeElement;
     }
 
+    public function getTypeElementTitre(): ?string
+    {
+        return $this->typeElement?->titre(); // Utilisation de l'opérateur `?->` pour gérer les valeurs nulles
+    }
+
     public function setTypeElement(TypeElement $typeElement): static
     {
         $this->typeElement = $typeElement;

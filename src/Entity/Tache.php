@@ -29,7 +29,7 @@ class Tache
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'taches')]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
     private Collection $ressources;
 
     #[ORM\ManyToOne(inversedBy: 'taches')]

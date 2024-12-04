@@ -64,6 +64,7 @@
 {% block javascripts %}
 {{ parent() }}
 <script type="module">
+    import '@fortawesome/fontawesome-free';
     import $ from 'jquery';
 
     // Ensure jQuery is available if not already loaded
@@ -71,20 +72,17 @@
         window.$ = window.jQuery = $;
     }
     $(document).ready(function() {
-        $('#demandeTable').DataTable({
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
-            },
-            columns: [
-                { orderable: true },
-                { orderable: true },
-                { orderable: false },
-                { orderable: true },
-                { orderable: true },
-                { orderable: false }
-            ],
+       const table = new DataTable('#demandeTable', {
+            responsive: true,
             pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]]
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/fr-FR.json"
+            },
+            columnDefs: [
+                { targets: [0, 1, 3, 4], orderable: true },
+                { targets: [2, 5], orderable: false }
+            ]
         });
 
         // Delete Demande Handler

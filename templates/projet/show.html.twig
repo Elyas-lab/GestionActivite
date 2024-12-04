@@ -1,46 +1,102 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Projet{% endblock %}
+{% block title %}Détails du Projet{% endblock %}
 
 {% block main %}
-    <h1>Projet</h1>
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-project-diagram me-2"></i>Détails du Projet
+            </h2>
+            <span class="badge bg-light text-primary">Réf: {{ projet.id }}</span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Titre</span>
+                                <span>{{ projet.titre }}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="fw-bold mb-2">Description</div>
+                                <p class="text-muted">{{ projet.description ?: 'Aucune description' }}</p>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Statut</span>
+                                <span class="badge {% if projet.statut.nom == 'Terminé' %}bg-success{% elseif projet.statut.nom == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ projet.statut.nom }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Numéro</th>
-                <td>{{ projet.id }}</td>
-            </tr>
-            <tr>
-                <th>Titre</th>
-                <td>{{ projet.titre }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ projet.description }}</td>
-            </tr>
-            <tr>
-                <th>Date_debut_estimee</th>
-                <td>{{ projet.dateDebutEstimmee ? projet.dateDebutEstimmee|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Date_fin_estimee</th>
-                <td>{{ projet.dateFinEstimmee ? projet.dateFinEstimmee|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Date_debut_reel</th>
-                <td>{{ projet.dateDebutReel ? projet.dateDebutReel|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Date_fin_reel</th>
-                <td>{{ projet.dateFinReel ? projet.dateFinReel|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-tasks me-2"></i>Activités
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for activite in projet.activites %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ activite.titre }}
+                                    <span class="badge bg-primary">{{ activite.statut.nom }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucune activité</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_projet_index') }}">back to list</a>
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="fas fa-users me-2"></i>Ressources
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for ressource in projet.ressources %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ ressource.nom }}
+                                    <span class="badge bg-secondary">{{ ressource.Matricule }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucune ressource assignée</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
-    <a href="{{ path('app_projet_edit', {'id': projet.id}) }}">edit</a>
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="fas fa-file-alt me-2"></i>Demande Source
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ projet.demandeSource.titre }}</h5>
+                            <p class="card-text text-muted">{{ projet.demandeSource.description ?: 'Aucune description' }}</p>
+                            <span class="badge bg-info">
+                                <i class="fas fa-tag me-1"></i>{{ projet.demandeSource.type.nom }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    {{ include('projet/_delete_form.html.twig') }}
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_projet_edit', {'id': projet.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Modifier
+                </a>
+                <a href="{{ path('app_projet_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

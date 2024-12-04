@@ -45,7 +45,7 @@ class HistoriqueRepository extends ServiceEntityRepository
     public function findUniqueTypes(): array
     {
         return $this->createQueryBuilder('h')
-            ->select('DISTINCT h.typeElement')
+            ->select('DISTINCT h.typeElement AND h.')
             ->getQuery()
             ->getResult();
     }

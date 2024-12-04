@@ -26,27 +26,32 @@ class ProjetType extends AbstractType
             ->add('date_fin_estimee', TypeDateTimeType::class, [
                 'widget' => 'single_text', // This renders the field as a single input box
                 'attr' => ['class' => 'datepicker'], // Add custom class for JavaScript styling
+                
             ])
             ->add('date_debut_reel',  TypeDateTimeType::class, [
                 'widget' => 'single_text', // This renders the field as a single input box
                 'attr' => ['class' => 'datepicker'], // Add custom class for JavaScript styling
+                'required' => false,
             ])
             ->add('date_fin_reel',  TypeDateTimeType::class, [
                 'widget' => 'single_text', // This renders the field as a single input box
                 'attr' => ['class' => 'datepicker'], // Add custom class for JavaScript styling
+                'required' => false,
             ])
             ->add('ressources', EntityType::class, [
                 'class' => Utilisateur::class,
-                'choice_label' => 'id',
-                'multiple' => true,
+                'choice_label' => 'nom',
+                'multiple' => true,              
+                'expanded' => true
+
             ])
             ->add('statut', EntityType::class, [
                 'class' => Statut::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('demande_source', EntityType::class, [
                 'class' => Demande::class,
-                'choice_label' => 'id',
+                'choice_label' => 'titre',
             ])
         ;
     }

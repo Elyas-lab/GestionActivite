@@ -29,7 +29,7 @@ class Activite
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'activites')]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
     private Collection $ressources;
 
 

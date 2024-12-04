@@ -2,36 +2,105 @@
 
 {% block title %}Détails Groupe{% endblock %}
 
-{% block stylesheet %}
-    {{ parent() }}
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-{% endblock %}
-
 {% block main %}
-    <h1>Détails Groupe</h1>
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-users me-2"></i>Détails Groupe
+            </h2>
+            <span class="badge bg-light text-primary">ID: {{ groupe.id }}</span>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle me-2"></i>Informations du Groupe
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Numéro</span>
+                                <span>{{ groupe.id }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Nom</span>
+                                <span>{{ groupe.nom }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Description</span>
+                                <span>{{ groupe.description }}</span>
+                            </li>
+                        </ul>
+                    </div>
 
-    <table class="table table-bordered">
-        <tr>
-            <th>Numéro</th>
-            <td>{{ groupe.id }}</td>
-        </tr>
-        <tr>
-            <th>Nom</th>
-            <td>{{ groupe.nom }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ groupe.description }}</td>
-        </tr>
-    </table>
+                    <div class="card">
+                        <div class="card-header bg-warning text-white">
+                            <i class="fas fa-user-friends me-2"></i>Utilisateurs du Groupe
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for utilisateur in groupe.utilisateurs %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ utilisateur.nom }}</strong>
+                                        <small class="text-muted ms-2">{{ utilisateur.matricule }}</small>
+                                    </div>
+                                    <div>
+                                        {% for role in utilisateur.roles %}
+                                            <span class="badge bg-secondary me-1">{{ role }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-muted text-center">
+                                    Aucun utilisateur dans ce groupe
+                                </li>
+                            {% endfor %}
+                            {% if groupe.utilisateurs|length > 5 %}
+                                <li class="list-group-item text-center">
+                                    <small class="text-muted">
+                                        + {{ groupe.utilisateurs|length - 5 }} autres utilisateurs
+                                    </small>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
 
-    <div class="mt-3">
-        <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">Retour</a>
-        <a href="{{ path('app_groupe_edit', {'id': groupe.id}) }}" class="btn btn-warning">Modifier</a>
-        <a href="{{ path('app_groupe_permission', {'id': groupe.id}) }}" class="btn btn-warning">Gerer les permissions</a>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-chart-pie me-2"></i>Statistiques
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Nombre d'utilisateurs</span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ groupe.utilisateurs|length }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{{ path('app_groupe_edit', {'id': groupe.id}) }}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <a href="{{ path('app_groupe_permission', {'id': groupe.id}) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-lock me-2"></i>Gérer les permissions
+                    </a>
+                </div>
+                <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}
-

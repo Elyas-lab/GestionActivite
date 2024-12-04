@@ -25,7 +25,7 @@ class Groupe
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'groupes')]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
     private Collection $utilisateurs;
 
     /**

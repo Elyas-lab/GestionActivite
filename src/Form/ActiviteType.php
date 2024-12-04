@@ -40,7 +40,7 @@ class ActiviteType extends AbstractType
             ])
             ->add('ressources', EntityType::class, [
                 'class' => Utilisateur::class,
-                'choice_label' => 'nom', 
+                'choice_label' => 'nom',
                 'multiple' => true,
                 'expanded' => true, // Set to true if you want checkboxes instead of a select list
                 'attr' => ['class' => 'form-select'],

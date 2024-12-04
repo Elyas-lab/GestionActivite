@@ -27,8 +27,8 @@
                     <div class="col-md-10">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{ form_label(form.demande_source, 'Projet source') }}
-                                {{ form_widget(form.demande_source, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner un projet source'}) }}
+                                {{ form_label(form.demande_source, 'Demande source') }}
+                                {{ form_widget(form.demande_source, {'attr': {'class': 'form-select'}, 'placeholder': 'Sélectionner une demande source'}) }}
                                 {{ form_errors(form.demande_source) }}
                             </div>
                             <div class="col-md-6 mb-3">
@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="my-4 col-md-10 d-flex justify-content-between">
-                        <a href="{{ path('app_activite_index') }}" class="btn btn-secondary btn-lg">Retour</a>
+                        <a href="{{ path('app_projet_index') }}" class="btn btn-secondary btn-lg">Retour</a>
                         <button type="submit" class="btn btn-success btn-lg">Créer</button>
                     </div>
                 </div>

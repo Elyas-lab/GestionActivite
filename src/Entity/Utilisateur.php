@@ -36,7 +36,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Groupe>
      */
-    #[ORM\ManyToMany(targetEntity: Groupe::class, inversedBy: 'utilisateurs')]
+    #[ORM\ManyToMany(targetEntity: Groupe::class)]
     private Collection $groupes;
 
     /**
@@ -48,19 +48,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Projet>
      */
-    #[ORM\ManyToMany(targetEntity: Projet::class, inversedBy: 'ressources')]
+    #[ORM\ManyToMany(targetEntity: Projet::class)]
     private Collection $projets;   
 
     /**
      * @var Collection<int, Activite>
      */
-    #[ORM\ManyToMany(targetEntity: Activite::class, inversedBy: 'ressources')]
+    #[ORM\ManyToMany(targetEntity: Activite::class)]
     private Collection $activites;
 
     /**
      * @var Collection<int, Tache>
      */
-    #[ORM\ManyToMany(targetEntity: Tache::class, inversedBy: 'ressources')]
+    #[ORM\ManyToMany(targetEntity: Tache::class)]
     private Collection $taches;
 
     #[ORM\Column(length: 255)]

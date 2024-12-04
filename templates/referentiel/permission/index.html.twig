@@ -49,10 +49,10 @@
                         <td>
                             <div class="table-actions">
                                 <a href="{{ path('app_permission_show', {'id': permission.id}) }}" class="btn btn-sm btn-info" title="Détails">
-                                    <i class="fas fa-eye">Details</i>
+                                    <i class="fas fa-eye"></i>Details
                                 </a>
                                 <a href="{{ path('app_permission_edit', {'id': permission.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
-                                    <i class="fas fa-edit">Modifier</i>
+                                    <i class="fas fa-edit"></i>Modifier
                                 </a>
                             </div>
                         </td>
@@ -75,17 +75,18 @@
         import $ from 'jquery';
         
         $(document).ready(function() {
-            $('#permissions-table').DataTable({
+           const table = new DataTable('#permissions-table', {
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
                 language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                    url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/fr-FR.json"
                 },
                 columnDefs: [
                     { orderable: false, targets: [-1] },
                     { width: '10%', targets: [0] }
-                ],
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]]
+                ]
             });
-        });
+        })
     </script>
 {% endblock %}
