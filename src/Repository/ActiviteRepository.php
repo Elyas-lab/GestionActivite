@@ -15,6 +15,12 @@ class ActiviteRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Activite::class);
     }
+    public function findAllActivites(): array
+    {
+        return $this->createQueryBuilder('a')
+                    ->getQuery()
+                    ->getResult();
+    }
 
     //    /**
     //     * @return Activite[] Returns an array of Activite objects

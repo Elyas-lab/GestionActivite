@@ -9,25 +9,25 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 trait DateManagementTrait
 {
-    #[ORM\Column(type: 'oracle_date', nullable: true)]
-    private ?DateTime $date_debut_estimee = null;
+    #[ORM\Column(type: 'oracle_date')]
+    private ?DateTime $date_debut_estimee;
 
-    #[ORM\Column(type: 'oracle_date', nullable: true)]
+    #[ORM\Column(type: 'oracle_date')]
     #[Assert\Expression(
-        "this.getDateDebutEstimee() === null || this.getDateFinEstimee() === null || this.getDateDebutEstimee() <= this.getDateFinEstimee()",
+        " this.getDateDebutEstimee() <= this.getDateFinEstimee()",
         message: "La date de fin estimée doit être postérieure à la date de début estimée"
     )]
-    private ?DateTime $date_fin_estimee = null;
+    private ?DateTime $date_fin_estimee;
 
     #[ORM\Column(type: 'oracle_date', nullable: true)]
-    private ?DateTime $date_debut_reel = null;
+    private ?DateTime $date_debut_reel ;
 
     #[ORM\Column(type: 'oracle_date', nullable: true)]
     #[Assert\Expression(
         "this.getDateDebutReel() === null || this.getDateFinReel() === null || this.getDateDebutReel() <= this.getDateFinReel()",
         message: "La date de fin réelle doit être postérieure à la date de début réelle"
     )]
-    private ?DateTime $date_fin_reel = null;
+    private ?DateTime $date_fin_reel;
 
     public function getDateDebutEstimee(): ?DateTime
     {

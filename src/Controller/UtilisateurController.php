@@ -6,6 +6,7 @@ use App\Entity\Utilisateur;
 use App\Form\UtilisateurType;
 use App\Repository\UtilisateurRepository;
 use App\Service\_navbarExtension; // Import _navbarExtension service
+use App\Service\UtilisateurService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,19 +38,24 @@ final class UtilisateurController extends AbstractController
     }
 
     #[Route('/new', name: 'app_utilisateur_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, UtilisateurService $utilisateurService): Response
     {
         $utilisateur = new Utilisateur();
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($utilisateur);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_utilisateur_index', [], Response::HTTP_SEE_OTHER);
+            try {
+                // Utilise le service pour créer un utilisateur
+                $utilisateurService->createUser($utilisateur);
+                $this->addFlash('success', 'Utilisateur créé avec succès.');
+    
+                return $this->redirectToRoute('app_utilisateur_index', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la création de l’utilisateur : ' . $e->getMessage());
+            }
         }
-
+    
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer un utilisateur',
             [
@@ -58,13 +64,14 @@ final class UtilisateurController extends AbstractController
                 ['name' => 'Créer', 'route' => null],
             ]
         );
-
+    
         return $this->render('utilisateur/new.html.twig', [
             'utilisateur' => $utilisateur,
-            'form' => $form,
+            'form' => $form->createView(),
             'navbarData' => $navbarData,
         ]);
     }
+    
 
     #[Route('/{id}/show', name: 'app_utilisateur_show', methods: ['GET'])]
     public function show(Utilisateur $utilisateur): Response
@@ -84,7 +91,7 @@ final class UtilisateurController extends AbstractController
         ]);
     }
 
-    #[Route('/utilisateurs/list', name: 'app_utilisateur_list', methods: ['GET'])]
+    #[Route('/list', name: 'app_utilisateur_list', methods: ['GET'])]
     public function list(Request $request, UtilisateurRepository $utilisateurRepository): JsonResponse
     {
         try {
@@ -113,7 +120,7 @@ final class UtilisateurController extends AbstractController
             $data = [];
             foreach ($utilisateurs as $utilisateur) {
                 // Convert the collection to an array before applying array_map
-                $groupes = $utilisateur->getGroupe()->toArray(); // Convert to array
+                $groupes = $utilisateur->getGroupes()->toArray(); // Convert to array
                 $data[] = [
                     'id' => $utilisateur->getId(),
                     'matricule' => $utilisateur->getMatricule(),
@@ -123,6 +130,7 @@ final class UtilisateurController extends AbstractController
                     'editUrl' => $this->generateUrl('app_utilisateur_edit', ['id' => $utilisateur->getId()])
                 ];
             }
+        
     
             return new JsonResponse([
                 'draw' => $request->get('draw'),
@@ -177,4 +185,5 @@ final class UtilisateurController extends AbstractController
 
         return $this->redirectToRoute('app_utilisateur_index', [], Response::HTTP_SEE_OTHER);
     }
+    
 }

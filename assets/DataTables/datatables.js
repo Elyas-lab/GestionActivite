@@ -4,10 +4,10 @@
  *
  * To rebuild or modify this file with the latest versions of the included
  * software please visit:
- *   https://datatables.net/download/#bs5/jq-3.7.0/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/cr-2.0.4/date-1.5.4/r-3.0.3/sc-2.4.3/sp-2.3.3/sl-2.1.0/sr-1.4.1
+ *   https://datatables.net/download/#bs5-5.3.0/jq-3.7.0/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/b-print-3.2.0/cr-2.0.4/date-1.5.4/fc-5.0.4/fh-4.0.1/kt-2.12.1/r-3.0.3/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.1/sp-2.3.3/sl-2.1.0/sr-1.4.1
  *
  * Included libraries:
- *   jQuery 3 3.7.0, DataTables 2.1.8, AutoFill 2.7.0, Buttons 3.2.0, Column visibility 3.2.0, HTML5 export 3.2.0, ColReorder 2.0.4, DateTime 1.5.4, Responsive 3.0.3, Scroller 2.4.3, SearchPanes 2.3.3, Select 2.1.0, StateRestore 1.4.1
+ *   Bootstrap 5 5.3.0, jQuery 3 3.7.0, DataTables 2.1.8, AutoFill 2.7.0, Buttons 3.2.0, Column visibility 3.2.0, HTML5 export 3.2.0, Print view 3.2.0, ColReorder 2.0.4, DateTime 1.5.4, FixedColumns 5.0.4, FixedHeader 4.0.1, KeyTable 2.12.1, Responsive 3.0.3, RowGroup 1.5.1, RowReorder 1.5.0, Scroller 2.4.3, SearchBuilder 1.8.1, SearchPanes 2.3.3, Select 2.1.0, StateRestore 1.4.1
  */
 
 /*!
@@ -10716,6 +10716,6314 @@ return jQuery;
 } );
 
 
+/*!
+  * Bootstrap v5.3.0 (https://getbootstrap.com/)
+  * Copyright 2011-2023 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+  */
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.bootstrap = factory());
+})(this, (function () { 'use strict';
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap dom/data.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  /**
+   * Constants
+   */
+
+  const elementMap = new Map();
+  const Data = {
+    set(element, key, instance) {
+      if (!elementMap.has(element)) {
+        elementMap.set(element, new Map());
+      }
+      const instanceMap = elementMap.get(element);
+
+      // make it clear we only want one instance per element
+      // can be removed later when multiple key/instances are fine to be used
+      if (!instanceMap.has(key) && instanceMap.size !== 0) {
+        // eslint-disable-next-line no-console
+        console.error(`Bootstrap doesn't allow more than one instance per element. Bound instance: ${Array.from(instanceMap.keys())[0]}.`);
+        return;
+      }
+      instanceMap.set(key, instance);
+    },
+    get(element, key) {
+      if (elementMap.has(element)) {
+        return elementMap.get(element).get(key) || null;
+      }
+      return null;
+    },
+    remove(element, key) {
+      if (!elementMap.has(element)) {
+        return;
+      }
+      const instanceMap = elementMap.get(element);
+      instanceMap.delete(key);
+
+      // free up element references if there are no instances left for an element
+      if (instanceMap.size === 0) {
+        elementMap.delete(element);
+      }
+    }
+  };
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/index.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  const MAX_UID = 1000000;
+  const MILLISECONDS_MULTIPLIER = 1000;
+  const TRANSITION_END = 'transitionend';
+
+  /**
+   * Properly escape IDs selectors to handle weird IDs
+   * @param {string} selector
+   * @returns {string}
+   */
+  const parseSelector = selector => {
+    if (selector && window.CSS && window.CSS.escape) {
+      // document.querySelector needs escaping to handle IDs (html5+) containing for instance /
+      selector = selector.replace(/#([^\s"#']+)/g, (match, id) => `#${CSS.escape(id)}`);
+    }
+    return selector;
+  };
+
+  // Shout-out Angus Croll (https://goo.gl/pxwQGp)
+  const toType = object => {
+    if (object === null || object === undefined) {
+      return `${object}`;
+    }
+    return Object.prototype.toString.call(object).match(/\s([a-z]+)/i)[1].toLowerCase();
+  };
+
+  /**
+   * Public Util API
+   */
+
+  const getUID = prefix => {
+    do {
+      prefix += Math.floor(Math.random() * MAX_UID);
+    } while (document.getElementById(prefix));
+    return prefix;
+  };
+  const getTransitionDurationFromElement = element => {
+    if (!element) {
+      return 0;
+    }
+
+    // Get transition-duration of the element
+    let {
+      transitionDuration,
+      transitionDelay
+    } = window.getComputedStyle(element);
+    const floatTransitionDuration = Number.parseFloat(transitionDuration);
+    const floatTransitionDelay = Number.parseFloat(transitionDelay);
+
+    // Return 0 if element or transition duration is not found
+    if (!floatTransitionDuration && !floatTransitionDelay) {
+      return 0;
+    }
+
+    // If multiple durations are defined, take the first
+    transitionDuration = transitionDuration.split(',')[0];
+    transitionDelay = transitionDelay.split(',')[0];
+    return (Number.parseFloat(transitionDuration) + Number.parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
+  };
+  const triggerTransitionEnd = element => {
+    element.dispatchEvent(new Event(TRANSITION_END));
+  };
+  const isElement$1 = object => {
+    if (!object || typeof object !== 'object') {
+      return false;
+    }
+    if (typeof object.jquery !== 'undefined') {
+      object = object[0];
+    }
+    return typeof object.nodeType !== 'undefined';
+  };
+  const getElement = object => {
+    // it's a jQuery object or a node element
+    if (isElement$1(object)) {
+      return object.jquery ? object[0] : object;
+    }
+    if (typeof object === 'string' && object.length > 0) {
+      return document.querySelector(parseSelector(object));
+    }
+    return null;
+  };
+  const isVisible = element => {
+    if (!isElement$1(element) || element.getClientRects().length === 0) {
+      return false;
+    }
+    const elementIsVisible = getComputedStyle(element).getPropertyValue('visibility') === 'visible';
+    // Handle `details` element as its content may falsie appear visible when it is closed
+    const closedDetails = element.closest('details:not([open])');
+    if (!closedDetails) {
+      return elementIsVisible;
+    }
+    if (closedDetails !== element) {
+      const summary = element.closest('summary');
+      if (summary && summary.parentNode !== closedDetails) {
+        return false;
+      }
+      if (summary === null) {
+        return false;
+      }
+    }
+    return elementIsVisible;
+  };
+  const isDisabled = element => {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+      return true;
+    }
+    if (element.classList.contains('disabled')) {
+      return true;
+    }
+    if (typeof element.disabled !== 'undefined') {
+      return element.disabled;
+    }
+    return element.hasAttribute('disabled') && element.getAttribute('disabled') !== 'false';
+  };
+  const findShadowRoot = element => {
+    if (!document.documentElement.attachShadow) {
+      return null;
+    }
+
+    // Can find the shadow root otherwise it'll return the document
+    if (typeof element.getRootNode === 'function') {
+      const root = element.getRootNode();
+      return root instanceof ShadowRoot ? root : null;
+    }
+    if (element instanceof ShadowRoot) {
+      return element;
+    }
+
+    // when we don't find a shadow root
+    if (!element.parentNode) {
+      return null;
+    }
+    return findShadowRoot(element.parentNode);
+  };
+  const noop = () => {};
+
+  /**
+   * Trick to restart an element's animation
+   *
+   * @param {HTMLElement} element
+   * @return void
+   *
+   * @see https://www.charistheo.io/blog/2021/02/restart-a-css-animation-with-javascript/#restarting-a-css-animation
+   */
+  const reflow = element => {
+    element.offsetHeight; // eslint-disable-line no-unused-expressions
+  };
+
+  const getjQuery = () => {
+    if (window.jQuery && !document.body.hasAttribute('data-bs-no-jquery')) {
+      return window.jQuery;
+    }
+    return null;
+  };
+  const DOMContentLoadedCallbacks = [];
+  const onDOMContentLoaded = callback => {
+    if (document.readyState === 'loading') {
+      // add listener on the first call when the document is in loading state
+      if (!DOMContentLoadedCallbacks.length) {
+        document.addEventListener('DOMContentLoaded', () => {
+          for (const callback of DOMContentLoadedCallbacks) {
+            callback();
+          }
+        });
+      }
+      DOMContentLoadedCallbacks.push(callback);
+    } else {
+      callback();
+    }
+  };
+  const isRTL = () => document.documentElement.dir === 'rtl';
+  const defineJQueryPlugin = plugin => {
+    onDOMContentLoaded(() => {
+      const $ = getjQuery();
+      /* istanbul ignore if */
+      if ($) {
+        const name = plugin.NAME;
+        const JQUERY_NO_CONFLICT = $.fn[name];
+        $.fn[name] = plugin.jQueryInterface;
+        $.fn[name].Constructor = plugin;
+        $.fn[name].noConflict = () => {
+          $.fn[name] = JQUERY_NO_CONFLICT;
+          return plugin.jQueryInterface;
+        };
+      }
+    });
+  };
+  const execute = (possibleCallback, args = [], defaultValue = possibleCallback) => {
+    return typeof possibleCallback === 'function' ? possibleCallback(...args) : defaultValue;
+  };
+  const executeAfterTransition = (callback, transitionElement, waitForTransition = true) => {
+    if (!waitForTransition) {
+      execute(callback);
+      return;
+    }
+    const durationPadding = 5;
+    const emulatedDuration = getTransitionDurationFromElement(transitionElement) + durationPadding;
+    let called = false;
+    const handler = ({
+      target
+    }) => {
+      if (target !== transitionElement) {
+        return;
+      }
+      called = true;
+      transitionElement.removeEventListener(TRANSITION_END, handler);
+      execute(callback);
+    };
+    transitionElement.addEventListener(TRANSITION_END, handler);
+    setTimeout(() => {
+      if (!called) {
+        triggerTransitionEnd(transitionElement);
+      }
+    }, emulatedDuration);
+  };
+
+  /**
+   * Return the previous/next element of a list.
+   *
+   * @param {array} list    The list of elements
+   * @param activeElement   The active element
+   * @param shouldGetNext   Choose to get next or previous element
+   * @param isCycleAllowed
+   * @return {Element|elem} The proper element
+   */
+  const getNextActiveElement = (list, activeElement, shouldGetNext, isCycleAllowed) => {
+    const listLength = list.length;
+    let index = list.indexOf(activeElement);
+
+    // if the element does not exist in the list return an element
+    // depending on the direction and if cycle is allowed
+    if (index === -1) {
+      return !shouldGetNext && isCycleAllowed ? list[listLength - 1] : list[0];
+    }
+    index += shouldGetNext ? 1 : -1;
+    if (isCycleAllowed) {
+      index = (index + listLength) % listLength;
+    }
+    return list[Math.max(0, Math.min(index, listLength - 1))];
+  };
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap dom/event-handler.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const namespaceRegex = /[^.]*(?=\..*)\.|.*/;
+  const stripNameRegex = /\..*/;
+  const stripUidRegex = /::\d+$/;
+  const eventRegistry = {}; // Events storage
+  let uidEvent = 1;
+  const customEvents = {
+    mouseenter: 'mouseover',
+    mouseleave: 'mouseout'
+  };
+  const nativeEvents = new Set(['click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu', 'mousewheel', 'DOMMouseScroll', 'mouseover', 'mouseout', 'mousemove', 'selectstart', 'selectend', 'keydown', 'keypress', 'keyup', 'orientationchange', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup', 'pointerleave', 'pointercancel', 'gesturestart', 'gesturechange', 'gestureend', 'focus', 'blur', 'change', 'reset', 'select', 'submit', 'focusin', 'focusout', 'load', 'unload', 'beforeunload', 'resize', 'move', 'DOMContentLoaded', 'readystatechange', 'error', 'abort', 'scroll']);
+
+  /**
+   * Private methods
+   */
+
+  function makeEventUid(element, uid) {
+    return uid && `${uid}::${uidEvent++}` || element.uidEvent || uidEvent++;
+  }
+  function getElementEvents(element) {
+    const uid = makeEventUid(element);
+    element.uidEvent = uid;
+    eventRegistry[uid] = eventRegistry[uid] || {};
+    return eventRegistry[uid];
+  }
+  function bootstrapHandler(element, fn) {
+    return function handler(event) {
+      hydrateObj(event, {
+        delegateTarget: element
+      });
+      if (handler.oneOff) {
+        EventHandler.off(element, event.type, fn);
+      }
+      return fn.apply(element, [event]);
+    };
+  }
+  function bootstrapDelegationHandler(element, selector, fn) {
+    return function handler(event) {
+      const domElements = element.querySelectorAll(selector);
+      for (let {
+        target
+      } = event; target && target !== this; target = target.parentNode) {
+        for (const domElement of domElements) {
+          if (domElement !== target) {
+            continue;
+          }
+          hydrateObj(event, {
+            delegateTarget: target
+          });
+          if (handler.oneOff) {
+            EventHandler.off(element, event.type, selector, fn);
+          }
+          return fn.apply(target, [event]);
+        }
+      }
+    };
+  }
+  function findHandler(events, callable, delegationSelector = null) {
+    return Object.values(events).find(event => event.callable === callable && event.delegationSelector === delegationSelector);
+  }
+  function normalizeParameters(originalTypeEvent, handler, delegationFunction) {
+    const isDelegated = typeof handler === 'string';
+    // TODO: tooltip passes `false` instead of selector, so we need to check
+    const callable = isDelegated ? delegationFunction : handler || delegationFunction;
+    let typeEvent = getTypeEvent(originalTypeEvent);
+    if (!nativeEvents.has(typeEvent)) {
+      typeEvent = originalTypeEvent;
+    }
+    return [isDelegated, callable, typeEvent];
+  }
+  function addHandler(element, originalTypeEvent, handler, delegationFunction, oneOff) {
+    if (typeof originalTypeEvent !== 'string' || !element) {
+      return;
+    }
+    let [isDelegated, callable, typeEvent] = normalizeParameters(originalTypeEvent, handler, delegationFunction);
+
+    // in case of mouseenter or mouseleave wrap the handler within a function that checks for its DOM position
+    // this prevents the handler from being dispatched the same way as mouseover or mouseout does
+    if (originalTypeEvent in customEvents) {
+      const wrapFunction = fn => {
+        return function (event) {
+          if (!event.relatedTarget || event.relatedTarget !== event.delegateTarget && !event.delegateTarget.contains(event.relatedTarget)) {
+            return fn.call(this, event);
+          }
+        };
+      };
+      callable = wrapFunction(callable);
+    }
+    const events = getElementEvents(element);
+    const handlers = events[typeEvent] || (events[typeEvent] = {});
+    const previousFunction = findHandler(handlers, callable, isDelegated ? handler : null);
+    if (previousFunction) {
+      previousFunction.oneOff = previousFunction.oneOff && oneOff;
+      return;
+    }
+    const uid = makeEventUid(callable, originalTypeEvent.replace(namespaceRegex, ''));
+    const fn = isDelegated ? bootstrapDelegationHandler(element, handler, callable) : bootstrapHandler(element, callable);
+    fn.delegationSelector = isDelegated ? handler : null;
+    fn.callable = callable;
+    fn.oneOff = oneOff;
+    fn.uidEvent = uid;
+    handlers[uid] = fn;
+    element.addEventListener(typeEvent, fn, isDelegated);
+  }
+  function removeHandler(element, events, typeEvent, handler, delegationSelector) {
+    const fn = findHandler(events[typeEvent], handler, delegationSelector);
+    if (!fn) {
+      return;
+    }
+    element.removeEventListener(typeEvent, fn, Boolean(delegationSelector));
+    delete events[typeEvent][fn.uidEvent];
+  }
+  function removeNamespacedHandlers(element, events, typeEvent, namespace) {
+    const storeElementEvent = events[typeEvent] || {};
+    for (const [handlerKey, event] of Object.entries(storeElementEvent)) {
+      if (handlerKey.includes(namespace)) {
+        removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+      }
+    }
+  }
+  function getTypeEvent(event) {
+    // allow to get the native events from namespaced events ('click.bs.button' --> 'click')
+    event = event.replace(stripNameRegex, '');
+    return customEvents[event] || event;
+  }
+  const EventHandler = {
+    on(element, event, handler, delegationFunction) {
+      addHandler(element, event, handler, delegationFunction, false);
+    },
+    one(element, event, handler, delegationFunction) {
+      addHandler(element, event, handler, delegationFunction, true);
+    },
+    off(element, originalTypeEvent, handler, delegationFunction) {
+      if (typeof originalTypeEvent !== 'string' || !element) {
+        return;
+      }
+      const [isDelegated, callable, typeEvent] = normalizeParameters(originalTypeEvent, handler, delegationFunction);
+      const inNamespace = typeEvent !== originalTypeEvent;
+      const events = getElementEvents(element);
+      const storeElementEvent = events[typeEvent] || {};
+      const isNamespace = originalTypeEvent.startsWith('.');
+      if (typeof callable !== 'undefined') {
+        // Simplest case: handler is passed, remove that listener ONLY.
+        if (!Object.keys(storeElementEvent).length) {
+          return;
+        }
+        removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null);
+        return;
+      }
+      if (isNamespace) {
+        for (const elementEvent of Object.keys(events)) {
+          removeNamespacedHandlers(element, events, elementEvent, originalTypeEvent.slice(1));
+        }
+      }
+      for (const [keyHandlers, event] of Object.entries(storeElementEvent)) {
+        const handlerKey = keyHandlers.replace(stripUidRegex, '');
+        if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
+          removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+        }
+      }
+    },
+    trigger(element, event, args) {
+      if (typeof event !== 'string' || !element) {
+        return null;
+      }
+      const $ = getjQuery();
+      const typeEvent = getTypeEvent(event);
+      const inNamespace = event !== typeEvent;
+      let jQueryEvent = null;
+      let bubbles = true;
+      let nativeDispatch = true;
+      let defaultPrevented = false;
+      if (inNamespace && $) {
+        jQueryEvent = $.Event(event, args);
+        $(element).trigger(jQueryEvent);
+        bubbles = !jQueryEvent.isPropagationStopped();
+        nativeDispatch = !jQueryEvent.isImmediatePropagationStopped();
+        defaultPrevented = jQueryEvent.isDefaultPrevented();
+      }
+      const evt = hydrateObj(new Event(event, {
+        bubbles,
+        cancelable: true
+      }), args);
+      if (defaultPrevented) {
+        evt.preventDefault();
+      }
+      if (nativeDispatch) {
+        element.dispatchEvent(evt);
+      }
+      if (evt.defaultPrevented && jQueryEvent) {
+        jQueryEvent.preventDefault();
+      }
+      return evt;
+    }
+  };
+  function hydrateObj(obj, meta = {}) {
+    for (const [key, value] of Object.entries(meta)) {
+      try {
+        obj[key] = value;
+      } catch (_unused) {
+        Object.defineProperty(obj, key, {
+          configurable: true,
+          get() {
+            return value;
+          }
+        });
+      }
+    }
+    return obj;
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap dom/manipulator.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  function normalizeData(value) {
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+    if (value === Number(value).toString()) {
+      return Number(value);
+    }
+    if (value === '' || value === 'null') {
+      return null;
+    }
+    if (typeof value !== 'string') {
+      return value;
+    }
+    try {
+      return JSON.parse(decodeURIComponent(value));
+    } catch (_unused) {
+      return value;
+    }
+  }
+  function normalizeDataKey(key) {
+    return key.replace(/[A-Z]/g, chr => `-${chr.toLowerCase()}`);
+  }
+  const Manipulator = {
+    setDataAttribute(element, key, value) {
+      element.setAttribute(`data-bs-${normalizeDataKey(key)}`, value);
+    },
+    removeDataAttribute(element, key) {
+      element.removeAttribute(`data-bs-${normalizeDataKey(key)}`);
+    },
+    getDataAttributes(element) {
+      if (!element) {
+        return {};
+      }
+      const attributes = {};
+      const bsKeys = Object.keys(element.dataset).filter(key => key.startsWith('bs') && !key.startsWith('bsConfig'));
+      for (const key of bsKeys) {
+        let pureKey = key.replace(/^bs/, '');
+        pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1, pureKey.length);
+        attributes[pureKey] = normalizeData(element.dataset[key]);
+      }
+      return attributes;
+    },
+    getDataAttribute(element, key) {
+      return normalizeData(element.getAttribute(`data-bs-${normalizeDataKey(key)}`));
+    }
+  };
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/config.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Class definition
+   */
+
+  class Config {
+    // Getters
+    static get Default() {
+      return {};
+    }
+    static get DefaultType() {
+      return {};
+    }
+    static get NAME() {
+      throw new Error('You have to implement the static method "NAME", for each component!');
+    }
+    _getConfig(config) {
+      config = this._mergeConfigObj(config);
+      config = this._configAfterMerge(config);
+      this._typeCheckConfig(config);
+      return config;
+    }
+    _configAfterMerge(config) {
+      return config;
+    }
+    _mergeConfigObj(config, element) {
+      const jsonConfig = isElement$1(element) ? Manipulator.getDataAttribute(element, 'config') : {}; // try to parse
+
+      return {
+        ...this.constructor.Default,
+        ...(typeof jsonConfig === 'object' ? jsonConfig : {}),
+        ...(isElement$1(element) ? Manipulator.getDataAttributes(element) : {}),
+        ...(typeof config === 'object' ? config : {})
+      };
+    }
+    _typeCheckConfig(config, configTypes = this.constructor.DefaultType) {
+      for (const [property, expectedTypes] of Object.entries(configTypes)) {
+        const value = config[property];
+        const valueType = isElement$1(value) ? 'element' : toType(value);
+        if (!new RegExp(expectedTypes).test(valueType)) {
+          throw new TypeError(`${this.constructor.NAME.toUpperCase()}: Option "${property}" provided type "${valueType}" but expected type "${expectedTypes}".`);
+        }
+      }
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap base-component.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const VERSION = '5.3.0';
+
+  /**
+   * Class definition
+   */
+
+  class BaseComponent extends Config {
+    constructor(element, config) {
+      super();
+      element = getElement(element);
+      if (!element) {
+        return;
+      }
+      this._element = element;
+      this._config = this._getConfig(config);
+      Data.set(this._element, this.constructor.DATA_KEY, this);
+    }
+
+    // Public
+    dispose() {
+      Data.remove(this._element, this.constructor.DATA_KEY);
+      EventHandler.off(this._element, this.constructor.EVENT_KEY);
+      for (const propertyName of Object.getOwnPropertyNames(this)) {
+        this[propertyName] = null;
+      }
+    }
+    _queueCallback(callback, element, isAnimated = true) {
+      executeAfterTransition(callback, element, isAnimated);
+    }
+    _getConfig(config) {
+      config = this._mergeConfigObj(config, this._element);
+      config = this._configAfterMerge(config);
+      this._typeCheckConfig(config);
+      return config;
+    }
+
+    // Static
+    static getInstance(element) {
+      return Data.get(getElement(element), this.DATA_KEY);
+    }
+    static getOrCreateInstance(element, config = {}) {
+      return this.getInstance(element) || new this(element, typeof config === 'object' ? config : null);
+    }
+    static get VERSION() {
+      return VERSION;
+    }
+    static get DATA_KEY() {
+      return `bs.${this.NAME}`;
+    }
+    static get EVENT_KEY() {
+      return `.${this.DATA_KEY}`;
+    }
+    static eventName(name) {
+      return `${name}${this.EVENT_KEY}`;
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap dom/selector-engine.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  const getSelector = element => {
+    let selector = element.getAttribute('data-bs-target');
+    if (!selector || selector === '#') {
+      let hrefAttribute = element.getAttribute('href');
+
+      // The only valid content that could double as a selector are IDs or classes,
+      // so everything starting with `#` or `.`. If a "real" URL is used as the selector,
+      // `document.querySelector` will rightfully complain it is invalid.
+      // See https://github.com/twbs/bootstrap/issues/32273
+      if (!hrefAttribute || !hrefAttribute.includes('#') && !hrefAttribute.startsWith('.')) {
+        return null;
+      }
+
+      // Just in case some CMS puts out a full URL with the anchor appended
+      if (hrefAttribute.includes('#') && !hrefAttribute.startsWith('#')) {
+        hrefAttribute = `#${hrefAttribute.split('#')[1]}`;
+      }
+      selector = hrefAttribute && hrefAttribute !== '#' ? hrefAttribute.trim() : null;
+    }
+    return parseSelector(selector);
+  };
+  const SelectorEngine = {
+    find(selector, element = document.documentElement) {
+      return [].concat(...Element.prototype.querySelectorAll.call(element, selector));
+    },
+    findOne(selector, element = document.documentElement) {
+      return Element.prototype.querySelector.call(element, selector);
+    },
+    children(element, selector) {
+      return [].concat(...element.children).filter(child => child.matches(selector));
+    },
+    parents(element, selector) {
+      const parents = [];
+      let ancestor = element.parentNode.closest(selector);
+      while (ancestor) {
+        parents.push(ancestor);
+        ancestor = ancestor.parentNode.closest(selector);
+      }
+      return parents;
+    },
+    prev(element, selector) {
+      let previous = element.previousElementSibling;
+      while (previous) {
+        if (previous.matches(selector)) {
+          return [previous];
+        }
+        previous = previous.previousElementSibling;
+      }
+      return [];
+    },
+    // TODO: this is now unused; remove later along with prev()
+    next(element, selector) {
+      let next = element.nextElementSibling;
+      while (next) {
+        if (next.matches(selector)) {
+          return [next];
+        }
+        next = next.nextElementSibling;
+      }
+      return [];
+    },
+    focusableChildren(element) {
+      const focusables = ['a', 'button', 'input', 'textarea', 'select', 'details', '[tabindex]', '[contenteditable="true"]'].map(selector => `${selector}:not([tabindex^="-"])`).join(',');
+      return this.find(focusables, element).filter(el => !isDisabled(el) && isVisible(el));
+    },
+    getSelectorFromElement(element) {
+      const selector = getSelector(element);
+      if (selector) {
+        return SelectorEngine.findOne(selector) ? selector : null;
+      }
+      return null;
+    },
+    getElementFromSelector(element) {
+      const selector = getSelector(element);
+      return selector ? SelectorEngine.findOne(selector) : null;
+    },
+    getMultipleElementsFromSelector(element) {
+      const selector = getSelector(element);
+      return selector ? SelectorEngine.find(selector) : [];
+    }
+  };
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/component-functions.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  const enableDismissTrigger = (component, method = 'hide') => {
+    const clickEvent = `click.dismiss${component.EVENT_KEY}`;
+    const name = component.NAME;
+    EventHandler.on(document, clickEvent, `[data-bs-dismiss="${name}"]`, function (event) {
+      if (['A', 'AREA'].includes(this.tagName)) {
+        event.preventDefault();
+      }
+      if (isDisabled(this)) {
+        return;
+      }
+      const target = SelectorEngine.getElementFromSelector(this) || this.closest(`.${name}`);
+      const instance = component.getOrCreateInstance(target);
+
+      // Method argument is left, for Alert and only, as it doesn't implement the 'hide' method
+      instance[method]();
+    });
+  };
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap alert.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$f = 'alert';
+  const DATA_KEY$a = 'bs.alert';
+  const EVENT_KEY$b = `.${DATA_KEY$a}`;
+  const EVENT_CLOSE = `close${EVENT_KEY$b}`;
+  const EVENT_CLOSED = `closed${EVENT_KEY$b}`;
+  const CLASS_NAME_FADE$5 = 'fade';
+  const CLASS_NAME_SHOW$8 = 'show';
+
+  /**
+   * Class definition
+   */
+
+  class Alert extends BaseComponent {
+    // Getters
+    static get NAME() {
+      return NAME$f;
+    }
+
+    // Public
+    close() {
+      const closeEvent = EventHandler.trigger(this._element, EVENT_CLOSE);
+      if (closeEvent.defaultPrevented) {
+        return;
+      }
+      this._element.classList.remove(CLASS_NAME_SHOW$8);
+      const isAnimated = this._element.classList.contains(CLASS_NAME_FADE$5);
+      this._queueCallback(() => this._destroyElement(), this._element, isAnimated);
+    }
+
+    // Private
+    _destroyElement() {
+      this._element.remove();
+      EventHandler.trigger(this._element, EVENT_CLOSED);
+      this.dispose();
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Alert.getOrCreateInstance(this);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config](this);
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  enableDismissTrigger(Alert, 'close');
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Alert);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap button.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$e = 'button';
+  const DATA_KEY$9 = 'bs.button';
+  const EVENT_KEY$a = `.${DATA_KEY$9}`;
+  const DATA_API_KEY$6 = '.data-api';
+  const CLASS_NAME_ACTIVE$3 = 'active';
+  const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle="button"]';
+  const EVENT_CLICK_DATA_API$6 = `click${EVENT_KEY$a}${DATA_API_KEY$6}`;
+
+  /**
+   * Class definition
+   */
+
+  class Button extends BaseComponent {
+    // Getters
+    static get NAME() {
+      return NAME$e;
+    }
+
+    // Public
+    toggle() {
+      // Toggle class and sync the `aria-pressed` attribute with the return value of the `.toggle()` method
+      this._element.setAttribute('aria-pressed', this._element.classList.toggle(CLASS_NAME_ACTIVE$3));
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Button.getOrCreateInstance(this);
+        if (config === 'toggle') {
+          data[config]();
+        }
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API$6, SELECTOR_DATA_TOGGLE$5, event => {
+    event.preventDefault();
+    const button = event.target.closest(SELECTOR_DATA_TOGGLE$5);
+    const data = Button.getOrCreateInstance(button);
+    data.toggle();
+  });
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Button);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/swipe.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$d = 'swipe';
+  const EVENT_KEY$9 = '.bs.swipe';
+  const EVENT_TOUCHSTART = `touchstart${EVENT_KEY$9}`;
+  const EVENT_TOUCHMOVE = `touchmove${EVENT_KEY$9}`;
+  const EVENT_TOUCHEND = `touchend${EVENT_KEY$9}`;
+  const EVENT_POINTERDOWN = `pointerdown${EVENT_KEY$9}`;
+  const EVENT_POINTERUP = `pointerup${EVENT_KEY$9}`;
+  const POINTER_TYPE_TOUCH = 'touch';
+  const POINTER_TYPE_PEN = 'pen';
+  const CLASS_NAME_POINTER_EVENT = 'pointer-event';
+  const SWIPE_THRESHOLD = 40;
+  const Default$c = {
+    endCallback: null,
+    leftCallback: null,
+    rightCallback: null
+  };
+  const DefaultType$c = {
+    endCallback: '(function|null)',
+    leftCallback: '(function|null)',
+    rightCallback: '(function|null)'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Swipe extends Config {
+    constructor(element, config) {
+      super();
+      this._element = element;
+      if (!element || !Swipe.isSupported()) {
+        return;
+      }
+      this._config = this._getConfig(config);
+      this._deltaX = 0;
+      this._supportPointerEvents = Boolean(window.PointerEvent);
+      this._initEvents();
+    }
+
+    // Getters
+    static get Default() {
+      return Default$c;
+    }
+    static get DefaultType() {
+      return DefaultType$c;
+    }
+    static get NAME() {
+      return NAME$d;
+    }
+
+    // Public
+    dispose() {
+      EventHandler.off(this._element, EVENT_KEY$9);
+    }
+
+    // Private
+    _start(event) {
+      if (!this._supportPointerEvents) {
+        this._deltaX = event.touches[0].clientX;
+        return;
+      }
+      if (this._eventIsPointerPenTouch(event)) {
+        this._deltaX = event.clientX;
+      }
+    }
+    _end(event) {
+      if (this._eventIsPointerPenTouch(event)) {
+        this._deltaX = event.clientX - this._deltaX;
+      }
+      this._handleSwipe();
+      execute(this._config.endCallback);
+    }
+    _move(event) {
+      this._deltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].clientX - this._deltaX;
+    }
+    _handleSwipe() {
+      const absDeltaX = Math.abs(this._deltaX);
+      if (absDeltaX <= SWIPE_THRESHOLD) {
+        return;
+      }
+      const direction = absDeltaX / this._deltaX;
+      this._deltaX = 0;
+      if (!direction) {
+        return;
+      }
+      execute(direction > 0 ? this._config.rightCallback : this._config.leftCallback);
+    }
+    _initEvents() {
+      if (this._supportPointerEvents) {
+        EventHandler.on(this._element, EVENT_POINTERDOWN, event => this._start(event));
+        EventHandler.on(this._element, EVENT_POINTERUP, event => this._end(event));
+        this._element.classList.add(CLASS_NAME_POINTER_EVENT);
+      } else {
+        EventHandler.on(this._element, EVENT_TOUCHSTART, event => this._start(event));
+        EventHandler.on(this._element, EVENT_TOUCHMOVE, event => this._move(event));
+        EventHandler.on(this._element, EVENT_TOUCHEND, event => this._end(event));
+      }
+    }
+    _eventIsPointerPenTouch(event) {
+      return this._supportPointerEvents && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH);
+    }
+
+    // Static
+    static isSupported() {
+      return 'ontouchstart' in document.documentElement || navigator.maxTouchPoints > 0;
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap carousel.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$c = 'carousel';
+  const DATA_KEY$8 = 'bs.carousel';
+  const EVENT_KEY$8 = `.${DATA_KEY$8}`;
+  const DATA_API_KEY$5 = '.data-api';
+  const ARROW_LEFT_KEY$1 = 'ArrowLeft';
+  const ARROW_RIGHT_KEY$1 = 'ArrowRight';
+  const TOUCHEVENT_COMPAT_WAIT = 500; // Time for mouse compat events to fire after touch
+
+  const ORDER_NEXT = 'next';
+  const ORDER_PREV = 'prev';
+  const DIRECTION_LEFT = 'left';
+  const DIRECTION_RIGHT = 'right';
+  const EVENT_SLIDE = `slide${EVENT_KEY$8}`;
+  const EVENT_SLID = `slid${EVENT_KEY$8}`;
+  const EVENT_KEYDOWN$1 = `keydown${EVENT_KEY$8}`;
+  const EVENT_MOUSEENTER$1 = `mouseenter${EVENT_KEY$8}`;
+  const EVENT_MOUSELEAVE$1 = `mouseleave${EVENT_KEY$8}`;
+  const EVENT_DRAG_START = `dragstart${EVENT_KEY$8}`;
+  const EVENT_LOAD_DATA_API$3 = `load${EVENT_KEY$8}${DATA_API_KEY$5}`;
+  const EVENT_CLICK_DATA_API$5 = `click${EVENT_KEY$8}${DATA_API_KEY$5}`;
+  const CLASS_NAME_CAROUSEL = 'carousel';
+  const CLASS_NAME_ACTIVE$2 = 'active';
+  const CLASS_NAME_SLIDE = 'slide';
+  const CLASS_NAME_END = 'carousel-item-end';
+  const CLASS_NAME_START = 'carousel-item-start';
+  const CLASS_NAME_NEXT = 'carousel-item-next';
+  const CLASS_NAME_PREV = 'carousel-item-prev';
+  const SELECTOR_ACTIVE = '.active';
+  const SELECTOR_ITEM = '.carousel-item';
+  const SELECTOR_ACTIVE_ITEM = SELECTOR_ACTIVE + SELECTOR_ITEM;
+  const SELECTOR_ITEM_IMG = '.carousel-item img';
+  const SELECTOR_INDICATORS = '.carousel-indicators';
+  const SELECTOR_DATA_SLIDE = '[data-bs-slide], [data-bs-slide-to]';
+  const SELECTOR_DATA_RIDE = '[data-bs-ride="carousel"]';
+  const KEY_TO_DIRECTION = {
+    [ARROW_LEFT_KEY$1]: DIRECTION_RIGHT,
+    [ARROW_RIGHT_KEY$1]: DIRECTION_LEFT
+  };
+  const Default$b = {
+    interval: 5000,
+    keyboard: true,
+    pause: 'hover',
+    ride: false,
+    touch: true,
+    wrap: true
+  };
+  const DefaultType$b = {
+    interval: '(number|boolean)',
+    // TODO:v6 remove boolean support
+    keyboard: 'boolean',
+    pause: '(string|boolean)',
+    ride: '(boolean|string)',
+    touch: 'boolean',
+    wrap: 'boolean'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Carousel extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._interval = null;
+      this._activeElement = null;
+      this._isSliding = false;
+      this.touchTimeout = null;
+      this._swipeHelper = null;
+      this._indicatorsElement = SelectorEngine.findOne(SELECTOR_INDICATORS, this._element);
+      this._addEventListeners();
+      if (this._config.ride === CLASS_NAME_CAROUSEL) {
+        this.cycle();
+      }
+    }
+
+    // Getters
+    static get Default() {
+      return Default$b;
+    }
+    static get DefaultType() {
+      return DefaultType$b;
+    }
+    static get NAME() {
+      return NAME$c;
+    }
+
+    // Public
+    next() {
+      this._slide(ORDER_NEXT);
+    }
+    nextWhenVisible() {
+      // FIXME TODO use `document.visibilityState`
+      // Don't call next when the page isn't visible
+      // or the carousel or its parent isn't visible
+      if (!document.hidden && isVisible(this._element)) {
+        this.next();
+      }
+    }
+    prev() {
+      this._slide(ORDER_PREV);
+    }
+    pause() {
+      if (this._isSliding) {
+        triggerTransitionEnd(this._element);
+      }
+      this._clearInterval();
+    }
+    cycle() {
+      this._clearInterval();
+      this._updateInterval();
+      this._interval = setInterval(() => this.nextWhenVisible(), this._config.interval);
+    }
+    _maybeEnableCycle() {
+      if (!this._config.ride) {
+        return;
+      }
+      if (this._isSliding) {
+        EventHandler.one(this._element, EVENT_SLID, () => this.cycle());
+        return;
+      }
+      this.cycle();
+    }
+    to(index) {
+      const items = this._getItems();
+      if (index > items.length - 1 || index < 0) {
+        return;
+      }
+      if (this._isSliding) {
+        EventHandler.one(this._element, EVENT_SLID, () => this.to(index));
+        return;
+      }
+      const activeIndex = this._getItemIndex(this._getActive());
+      if (activeIndex === index) {
+        return;
+      }
+      const order = index > activeIndex ? ORDER_NEXT : ORDER_PREV;
+      this._slide(order, items[index]);
+    }
+    dispose() {
+      if (this._swipeHelper) {
+        this._swipeHelper.dispose();
+      }
+      super.dispose();
+    }
+
+    // Private
+    _configAfterMerge(config) {
+      config.defaultInterval = config.interval;
+      return config;
+    }
+    _addEventListeners() {
+      if (this._config.keyboard) {
+        EventHandler.on(this._element, EVENT_KEYDOWN$1, event => this._keydown(event));
+      }
+      if (this._config.pause === 'hover') {
+        EventHandler.on(this._element, EVENT_MOUSEENTER$1, () => this.pause());
+        EventHandler.on(this._element, EVENT_MOUSELEAVE$1, () => this._maybeEnableCycle());
+      }
+      if (this._config.touch && Swipe.isSupported()) {
+        this._addTouchEventListeners();
+      }
+    }
+    _addTouchEventListeners() {
+      for (const img of SelectorEngine.find(SELECTOR_ITEM_IMG, this._element)) {
+        EventHandler.on(img, EVENT_DRAG_START, event => event.preventDefault());
+      }
+      const endCallBack = () => {
+        if (this._config.pause !== 'hover') {
+          return;
+        }
+
+        // If it's a touch-enabled device, mouseenter/leave are fired as
+        // part of the mouse compatibility events on first tap - the carousel
+        // would stop cycling until user tapped out of it;
+        // here, we listen for touchend, explicitly pause the carousel
+        // (as if it's the second time we tap on it, mouseenter compat event
+        // is NOT fired) and after a timeout (to allow for mouse compatibility
+        // events to fire) we explicitly restart cycling
+
+        this.pause();
+        if (this.touchTimeout) {
+          clearTimeout(this.touchTimeout);
+        }
+        this.touchTimeout = setTimeout(() => this._maybeEnableCycle(), TOUCHEVENT_COMPAT_WAIT + this._config.interval);
+      };
+      const swipeConfig = {
+        leftCallback: () => this._slide(this._directionToOrder(DIRECTION_LEFT)),
+        rightCallback: () => this._slide(this._directionToOrder(DIRECTION_RIGHT)),
+        endCallback: endCallBack
+      };
+      this._swipeHelper = new Swipe(this._element, swipeConfig);
+    }
+    _keydown(event) {
+      if (/input|textarea/i.test(event.target.tagName)) {
+        return;
+      }
+      const direction = KEY_TO_DIRECTION[event.key];
+      if (direction) {
+        event.preventDefault();
+        this._slide(this._directionToOrder(direction));
+      }
+    }
+    _getItemIndex(element) {
+      return this._getItems().indexOf(element);
+    }
+    _setActiveIndicatorElement(index) {
+      if (!this._indicatorsElement) {
+        return;
+      }
+      const activeIndicator = SelectorEngine.findOne(SELECTOR_ACTIVE, this._indicatorsElement);
+      activeIndicator.classList.remove(CLASS_NAME_ACTIVE$2);
+      activeIndicator.removeAttribute('aria-current');
+      const newActiveIndicator = SelectorEngine.findOne(`[data-bs-slide-to="${index}"]`, this._indicatorsElement);
+      if (newActiveIndicator) {
+        newActiveIndicator.classList.add(CLASS_NAME_ACTIVE$2);
+        newActiveIndicator.setAttribute('aria-current', 'true');
+      }
+    }
+    _updateInterval() {
+      const element = this._activeElement || this._getActive();
+      if (!element) {
+        return;
+      }
+      const elementInterval = Number.parseInt(element.getAttribute('data-bs-interval'), 10);
+      this._config.interval = elementInterval || this._config.defaultInterval;
+    }
+    _slide(order, element = null) {
+      if (this._isSliding) {
+        return;
+      }
+      const activeElement = this._getActive();
+      const isNext = order === ORDER_NEXT;
+      const nextElement = element || getNextActiveElement(this._getItems(), activeElement, isNext, this._config.wrap);
+      if (nextElement === activeElement) {
+        return;
+      }
+      const nextElementIndex = this._getItemIndex(nextElement);
+      const triggerEvent = eventName => {
+        return EventHandler.trigger(this._element, eventName, {
+          relatedTarget: nextElement,
+          direction: this._orderToDirection(order),
+          from: this._getItemIndex(activeElement),
+          to: nextElementIndex
+        });
+      };
+      const slideEvent = triggerEvent(EVENT_SLIDE);
+      if (slideEvent.defaultPrevented) {
+        return;
+      }
+      if (!activeElement || !nextElement) {
+        // Some weirdness is happening, so we bail
+        // TODO: change tests that use empty divs to avoid this check
+        return;
+      }
+      const isCycling = Boolean(this._interval);
+      this.pause();
+      this._isSliding = true;
+      this._setActiveIndicatorElement(nextElementIndex);
+      this._activeElement = nextElement;
+      const directionalClassName = isNext ? CLASS_NAME_START : CLASS_NAME_END;
+      const orderClassName = isNext ? CLASS_NAME_NEXT : CLASS_NAME_PREV;
+      nextElement.classList.add(orderClassName);
+      reflow(nextElement);
+      activeElement.classList.add(directionalClassName);
+      nextElement.classList.add(directionalClassName);
+      const completeCallBack = () => {
+        nextElement.classList.remove(directionalClassName, orderClassName);
+        nextElement.classList.add(CLASS_NAME_ACTIVE$2);
+        activeElement.classList.remove(CLASS_NAME_ACTIVE$2, orderClassName, directionalClassName);
+        this._isSliding = false;
+        triggerEvent(EVENT_SLID);
+      };
+      this._queueCallback(completeCallBack, activeElement, this._isAnimated());
+      if (isCycling) {
+        this.cycle();
+      }
+    }
+    _isAnimated() {
+      return this._element.classList.contains(CLASS_NAME_SLIDE);
+    }
+    _getActive() {
+      return SelectorEngine.findOne(SELECTOR_ACTIVE_ITEM, this._element);
+    }
+    _getItems() {
+      return SelectorEngine.find(SELECTOR_ITEM, this._element);
+    }
+    _clearInterval() {
+      if (this._interval) {
+        clearInterval(this._interval);
+        this._interval = null;
+      }
+    }
+    _directionToOrder(direction) {
+      if (isRTL()) {
+        return direction === DIRECTION_LEFT ? ORDER_PREV : ORDER_NEXT;
+      }
+      return direction === DIRECTION_LEFT ? ORDER_NEXT : ORDER_PREV;
+    }
+    _orderToDirection(order) {
+      if (isRTL()) {
+        return order === ORDER_PREV ? DIRECTION_LEFT : DIRECTION_RIGHT;
+      }
+      return order === ORDER_PREV ? DIRECTION_RIGHT : DIRECTION_LEFT;
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Carousel.getOrCreateInstance(this, config);
+        if (typeof config === 'number') {
+          data.to(config);
+          return;
+        }
+        if (typeof config === 'string') {
+          if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+            throw new TypeError(`No method named "${config}"`);
+          }
+          data[config]();
+        }
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API$5, SELECTOR_DATA_SLIDE, function (event) {
+    const target = SelectorEngine.getElementFromSelector(this);
+    if (!target || !target.classList.contains(CLASS_NAME_CAROUSEL)) {
+      return;
+    }
+    event.preventDefault();
+    const carousel = Carousel.getOrCreateInstance(target);
+    const slideIndex = this.getAttribute('data-bs-slide-to');
+    if (slideIndex) {
+      carousel.to(slideIndex);
+      carousel._maybeEnableCycle();
+      return;
+    }
+    if (Manipulator.getDataAttribute(this, 'slide') === 'next') {
+      carousel.next();
+      carousel._maybeEnableCycle();
+      return;
+    }
+    carousel.prev();
+    carousel._maybeEnableCycle();
+  });
+  EventHandler.on(window, EVENT_LOAD_DATA_API$3, () => {
+    const carousels = SelectorEngine.find(SELECTOR_DATA_RIDE);
+    for (const carousel of carousels) {
+      Carousel.getOrCreateInstance(carousel);
+    }
+  });
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Carousel);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap collapse.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$b = 'collapse';
+  const DATA_KEY$7 = 'bs.collapse';
+  const EVENT_KEY$7 = `.${DATA_KEY$7}`;
+  const DATA_API_KEY$4 = '.data-api';
+  const EVENT_SHOW$6 = `show${EVENT_KEY$7}`;
+  const EVENT_SHOWN$6 = `shown${EVENT_KEY$7}`;
+  const EVENT_HIDE$6 = `hide${EVENT_KEY$7}`;
+  const EVENT_HIDDEN$6 = `hidden${EVENT_KEY$7}`;
+  const EVENT_CLICK_DATA_API$4 = `click${EVENT_KEY$7}${DATA_API_KEY$4}`;
+  const CLASS_NAME_SHOW$7 = 'show';
+  const CLASS_NAME_COLLAPSE = 'collapse';
+  const CLASS_NAME_COLLAPSING = 'collapsing';
+  const CLASS_NAME_COLLAPSED = 'collapsed';
+  const CLASS_NAME_DEEPER_CHILDREN = `:scope .${CLASS_NAME_COLLAPSE} .${CLASS_NAME_COLLAPSE}`;
+  const CLASS_NAME_HORIZONTAL = 'collapse-horizontal';
+  const WIDTH = 'width';
+  const HEIGHT = 'height';
+  const SELECTOR_ACTIVES = '.collapse.show, .collapse.collapsing';
+  const SELECTOR_DATA_TOGGLE$4 = '[data-bs-toggle="collapse"]';
+  const Default$a = {
+    parent: null,
+    toggle: true
+  };
+  const DefaultType$a = {
+    parent: '(null|element)',
+    toggle: 'boolean'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Collapse extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._isTransitioning = false;
+      this._triggerArray = [];
+      const toggleList = SelectorEngine.find(SELECTOR_DATA_TOGGLE$4);
+      for (const elem of toggleList) {
+        const selector = SelectorEngine.getSelectorFromElement(elem);
+        const filterElement = SelectorEngine.find(selector).filter(foundElement => foundElement === this._element);
+        if (selector !== null && filterElement.length) {
+          this._triggerArray.push(elem);
+        }
+      }
+      this._initializeChildren();
+      if (!this._config.parent) {
+        this._addAriaAndCollapsedClass(this._triggerArray, this._isShown());
+      }
+      if (this._config.toggle) {
+        this.toggle();
+      }
+    }
+
+    // Getters
+    static get Default() {
+      return Default$a;
+    }
+    static get DefaultType() {
+      return DefaultType$a;
+    }
+    static get NAME() {
+      return NAME$b;
+    }
+
+    // Public
+    toggle() {
+      if (this._isShown()) {
+        this.hide();
+      } else {
+        this.show();
+      }
+    }
+    show() {
+      if (this._isTransitioning || this._isShown()) {
+        return;
+      }
+      let activeChildren = [];
+
+      // find active children
+      if (this._config.parent) {
+        activeChildren = this._getFirstLevelChildren(SELECTOR_ACTIVES).filter(element => element !== this._element).map(element => Collapse.getOrCreateInstance(element, {
+          toggle: false
+        }));
+      }
+      if (activeChildren.length && activeChildren[0]._isTransitioning) {
+        return;
+      }
+      const startEvent = EventHandler.trigger(this._element, EVENT_SHOW$6);
+      if (startEvent.defaultPrevented) {
+        return;
+      }
+      for (const activeInstance of activeChildren) {
+        activeInstance.hide();
+      }
+      const dimension = this._getDimension();
+      this._element.classList.remove(CLASS_NAME_COLLAPSE);
+      this._element.classList.add(CLASS_NAME_COLLAPSING);
+      this._element.style[dimension] = 0;
+      this._addAriaAndCollapsedClass(this._triggerArray, true);
+      this._isTransitioning = true;
+      const complete = () => {
+        this._isTransitioning = false;
+        this._element.classList.remove(CLASS_NAME_COLLAPSING);
+        this._element.classList.add(CLASS_NAME_COLLAPSE, CLASS_NAME_SHOW$7);
+        this._element.style[dimension] = '';
+        EventHandler.trigger(this._element, EVENT_SHOWN$6);
+      };
+      const capitalizedDimension = dimension[0].toUpperCase() + dimension.slice(1);
+      const scrollSize = `scroll${capitalizedDimension}`;
+      this._queueCallback(complete, this._element, true);
+      this._element.style[dimension] = `${this._element[scrollSize]}px`;
+    }
+    hide() {
+      if (this._isTransitioning || !this._isShown()) {
+        return;
+      }
+      const startEvent = EventHandler.trigger(this._element, EVENT_HIDE$6);
+      if (startEvent.defaultPrevented) {
+        return;
+      }
+      const dimension = this._getDimension();
+      this._element.style[dimension] = `${this._element.getBoundingClientRect()[dimension]}px`;
+      reflow(this._element);
+      this._element.classList.add(CLASS_NAME_COLLAPSING);
+      this._element.classList.remove(CLASS_NAME_COLLAPSE, CLASS_NAME_SHOW$7);
+      for (const trigger of this._triggerArray) {
+        const element = SelectorEngine.getElementFromSelector(trigger);
+        if (element && !this._isShown(element)) {
+          this._addAriaAndCollapsedClass([trigger], false);
+        }
+      }
+      this._isTransitioning = true;
+      const complete = () => {
+        this._isTransitioning = false;
+        this._element.classList.remove(CLASS_NAME_COLLAPSING);
+        this._element.classList.add(CLASS_NAME_COLLAPSE);
+        EventHandler.trigger(this._element, EVENT_HIDDEN$6);
+      };
+      this._element.style[dimension] = '';
+      this._queueCallback(complete, this._element, true);
+    }
+    _isShown(element = this._element) {
+      return element.classList.contains(CLASS_NAME_SHOW$7);
+    }
+
+    // Private
+    _configAfterMerge(config) {
+      config.toggle = Boolean(config.toggle); // Coerce string values
+      config.parent = getElement(config.parent);
+      return config;
+    }
+    _getDimension() {
+      return this._element.classList.contains(CLASS_NAME_HORIZONTAL) ? WIDTH : HEIGHT;
+    }
+    _initializeChildren() {
+      if (!this._config.parent) {
+        return;
+      }
+      const children = this._getFirstLevelChildren(SELECTOR_DATA_TOGGLE$4);
+      for (const element of children) {
+        const selected = SelectorEngine.getElementFromSelector(element);
+        if (selected) {
+          this._addAriaAndCollapsedClass([element], this._isShown(selected));
+        }
+      }
+    }
+    _getFirstLevelChildren(selector) {
+      const children = SelectorEngine.find(CLASS_NAME_DEEPER_CHILDREN, this._config.parent);
+      // remove children if greater depth
+      return SelectorEngine.find(selector, this._config.parent).filter(element => !children.includes(element));
+    }
+    _addAriaAndCollapsedClass(triggerArray, isOpen) {
+      if (!triggerArray.length) {
+        return;
+      }
+      for (const element of triggerArray) {
+        element.classList.toggle(CLASS_NAME_COLLAPSED, !isOpen);
+        element.setAttribute('aria-expanded', isOpen);
+      }
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      const _config = {};
+      if (typeof config === 'string' && /show|hide/.test(config)) {
+        _config.toggle = false;
+      }
+      return this.each(function () {
+        const data = Collapse.getOrCreateInstance(this, _config);
+        if (typeof config === 'string') {
+          if (typeof data[config] === 'undefined') {
+            throw new TypeError(`No method named "${config}"`);
+          }
+          data[config]();
+        }
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API$4, SELECTOR_DATA_TOGGLE$4, function (event) {
+    // preventDefault only for <a> elements (which change the URL) not inside the collapsible element
+    if (event.target.tagName === 'A' || event.delegateTarget && event.delegateTarget.tagName === 'A') {
+      event.preventDefault();
+    }
+    for (const element of SelectorEngine.getMultipleElementsFromSelector(this)) {
+      Collapse.getOrCreateInstance(element, {
+        toggle: false
+      }).toggle();
+    }
+  });
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Collapse);
+
+  var top = 'top';
+  var bottom = 'bottom';
+  var right = 'right';
+  var left = 'left';
+  var auto = 'auto';
+  var basePlacements = [top, bottom, right, left];
+  var start = 'start';
+  var end = 'end';
+  var clippingParents = 'clippingParents';
+  var viewport = 'viewport';
+  var popper = 'popper';
+  var reference = 'reference';
+  var variationPlacements = /*#__PURE__*/basePlacements.reduce(function (acc, placement) {
+    return acc.concat([placement + "-" + start, placement + "-" + end]);
+  }, []);
+  var placements = /*#__PURE__*/[].concat(basePlacements, [auto]).reduce(function (acc, placement) {
+    return acc.concat([placement, placement + "-" + start, placement + "-" + end]);
+  }, []); // modifiers that need to read the DOM
+
+  var beforeRead = 'beforeRead';
+  var read = 'read';
+  var afterRead = 'afterRead'; // pure-logic modifiers
+
+  var beforeMain = 'beforeMain';
+  var main = 'main';
+  var afterMain = 'afterMain'; // modifier with the purpose to write to the DOM (or write into a framework state)
+
+  var beforeWrite = 'beforeWrite';
+  var write = 'write';
+  var afterWrite = 'afterWrite';
+  var modifierPhases = [beforeRead, read, afterRead, beforeMain, main, afterMain, beforeWrite, write, afterWrite];
+
+  function getNodeName(element) {
+    return element ? (element.nodeName || '').toLowerCase() : null;
+  }
+
+  function getWindow(node) {
+    if (node == null) {
+      return window;
+    }
+
+    if (node.toString() !== '[object Window]') {
+      var ownerDocument = node.ownerDocument;
+      return ownerDocument ? ownerDocument.defaultView || window : window;
+    }
+
+    return node;
+  }
+
+  function isElement(node) {
+    var OwnElement = getWindow(node).Element;
+    return node instanceof OwnElement || node instanceof Element;
+  }
+
+  function isHTMLElement(node) {
+    var OwnElement = getWindow(node).HTMLElement;
+    return node instanceof OwnElement || node instanceof HTMLElement;
+  }
+
+  function isShadowRoot(node) {
+    // IE 11 has no ShadowRoot
+    if (typeof ShadowRoot === 'undefined') {
+      return false;
+    }
+
+    var OwnElement = getWindow(node).ShadowRoot;
+    return node instanceof OwnElement || node instanceof ShadowRoot;
+  }
+
+  // and applies them to the HTMLElements such as popper and arrow
+
+  function applyStyles(_ref) {
+    var state = _ref.state;
+    Object.keys(state.elements).forEach(function (name) {
+      var style = state.styles[name] || {};
+      var attributes = state.attributes[name] || {};
+      var element = state.elements[name]; // arrow is optional + virtual elements
+
+      if (!isHTMLElement(element) || !getNodeName(element)) {
+        return;
+      } // Flow doesn't support to extend this property, but it's the most
+      // effective way to apply styles to an HTMLElement
+      // $FlowFixMe[cannot-write]
+
+
+      Object.assign(element.style, style);
+      Object.keys(attributes).forEach(function (name) {
+        var value = attributes[name];
+
+        if (value === false) {
+          element.removeAttribute(name);
+        } else {
+          element.setAttribute(name, value === true ? '' : value);
+        }
+      });
+    });
+  }
+
+  function effect$2(_ref2) {
+    var state = _ref2.state;
+    var initialStyles = {
+      popper: {
+        position: state.options.strategy,
+        left: '0',
+        top: '0',
+        margin: '0'
+      },
+      arrow: {
+        position: 'absolute'
+      },
+      reference: {}
+    };
+    Object.assign(state.elements.popper.style, initialStyles.popper);
+    state.styles = initialStyles;
+
+    if (state.elements.arrow) {
+      Object.assign(state.elements.arrow.style, initialStyles.arrow);
+    }
+
+    return function () {
+      Object.keys(state.elements).forEach(function (name) {
+        var element = state.elements[name];
+        var attributes = state.attributes[name] || {};
+        var styleProperties = Object.keys(state.styles.hasOwnProperty(name) ? state.styles[name] : initialStyles[name]); // Set all values to an empty string to unset them
+
+        var style = styleProperties.reduce(function (style, property) {
+          style[property] = '';
+          return style;
+        }, {}); // arrow is optional + virtual elements
+
+        if (!isHTMLElement(element) || !getNodeName(element)) {
+          return;
+        }
+
+        Object.assign(element.style, style);
+        Object.keys(attributes).forEach(function (attribute) {
+          element.removeAttribute(attribute);
+        });
+      });
+    };
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const applyStyles$1 = {
+    name: 'applyStyles',
+    enabled: true,
+    phase: 'write',
+    fn: applyStyles,
+    effect: effect$2,
+    requires: ['computeStyles']
+  };
+
+  function getBasePlacement(placement) {
+    return placement.split('-')[0];
+  }
+
+  var max = Math.max;
+  var min = Math.min;
+  var round = Math.round;
+
+  function getUAString() {
+    var uaData = navigator.userAgentData;
+
+    if (uaData != null && uaData.brands && Array.isArray(uaData.brands)) {
+      return uaData.brands.map(function (item) {
+        return item.brand + "/" + item.version;
+      }).join(' ');
+    }
+
+    return navigator.userAgent;
+  }
+
+  function isLayoutViewport() {
+    return !/^((?!chrome|android).)*safari/i.test(getUAString());
+  }
+
+  function getBoundingClientRect(element, includeScale, isFixedStrategy) {
+    if (includeScale === void 0) {
+      includeScale = false;
+    }
+
+    if (isFixedStrategy === void 0) {
+      isFixedStrategy = false;
+    }
+
+    var clientRect = element.getBoundingClientRect();
+    var scaleX = 1;
+    var scaleY = 1;
+
+    if (includeScale && isHTMLElement(element)) {
+      scaleX = element.offsetWidth > 0 ? round(clientRect.width) / element.offsetWidth || 1 : 1;
+      scaleY = element.offsetHeight > 0 ? round(clientRect.height) / element.offsetHeight || 1 : 1;
+    }
+
+    var _ref = isElement(element) ? getWindow(element) : window,
+        visualViewport = _ref.visualViewport;
+
+    var addVisualOffsets = !isLayoutViewport() && isFixedStrategy;
+    var x = (clientRect.left + (addVisualOffsets && visualViewport ? visualViewport.offsetLeft : 0)) / scaleX;
+    var y = (clientRect.top + (addVisualOffsets && visualViewport ? visualViewport.offsetTop : 0)) / scaleY;
+    var width = clientRect.width / scaleX;
+    var height = clientRect.height / scaleY;
+    return {
+      width: width,
+      height: height,
+      top: y,
+      right: x + width,
+      bottom: y + height,
+      left: x,
+      x: x,
+      y: y
+    };
+  }
+
+  // means it doesn't take into account transforms.
+
+  function getLayoutRect(element) {
+    var clientRect = getBoundingClientRect(element); // Use the clientRect sizes if it's not been transformed.
+    // Fixes https://github.com/popperjs/popper-core/issues/1223
+
+    var width = element.offsetWidth;
+    var height = element.offsetHeight;
+
+    if (Math.abs(clientRect.width - width) <= 1) {
+      width = clientRect.width;
+    }
+
+    if (Math.abs(clientRect.height - height) <= 1) {
+      height = clientRect.height;
+    }
+
+    return {
+      x: element.offsetLeft,
+      y: element.offsetTop,
+      width: width,
+      height: height
+    };
+  }
+
+  function contains(parent, child) {
+    var rootNode = child.getRootNode && child.getRootNode(); // First, attempt with faster native method
+
+    if (parent.contains(child)) {
+      return true;
+    } // then fallback to custom implementation with Shadow DOM support
+    else if (rootNode && isShadowRoot(rootNode)) {
+        var next = child;
+
+        do {
+          if (next && parent.isSameNode(next)) {
+            return true;
+          } // $FlowFixMe[prop-missing]: need a better way to handle this...
+
+
+          next = next.parentNode || next.host;
+        } while (next);
+      } // Give up, the result is false
+
+
+    return false;
+  }
+
+  function getComputedStyle$1(element) {
+    return getWindow(element).getComputedStyle(element);
+  }
+
+  function isTableElement(element) {
+    return ['table', 'td', 'th'].indexOf(getNodeName(element)) >= 0;
+  }
+
+  function getDocumentElement(element) {
+    // $FlowFixMe[incompatible-return]: assume body is always available
+    return ((isElement(element) ? element.ownerDocument : // $FlowFixMe[prop-missing]
+    element.document) || window.document).documentElement;
+  }
+
+  function getParentNode(element) {
+    if (getNodeName(element) === 'html') {
+      return element;
+    }
+
+    return (// this is a quicker (but less type safe) way to save quite some bytes from the bundle
+      // $FlowFixMe[incompatible-return]
+      // $FlowFixMe[prop-missing]
+      element.assignedSlot || // step into the shadow DOM of the parent of a slotted node
+      element.parentNode || ( // DOM Element detected
+      isShadowRoot(element) ? element.host : null) || // ShadowRoot detected
+      // $FlowFixMe[incompatible-call]: HTMLElement is a Node
+      getDocumentElement(element) // fallback
+
+    );
+  }
+
+  function getTrueOffsetParent(element) {
+    if (!isHTMLElement(element) || // https://github.com/popperjs/popper-core/issues/837
+    getComputedStyle$1(element).position === 'fixed') {
+      return null;
+    }
+
+    return element.offsetParent;
+  } // `.offsetParent` reports `null` for fixed elements, while absolute elements
+  // return the containing block
+
+
+  function getContainingBlock(element) {
+    var isFirefox = /firefox/i.test(getUAString());
+    var isIE = /Trident/i.test(getUAString());
+
+    if (isIE && isHTMLElement(element)) {
+      // In IE 9, 10 and 11 fixed elements containing block is always established by the viewport
+      var elementCss = getComputedStyle$1(element);
+
+      if (elementCss.position === 'fixed') {
+        return null;
+      }
+    }
+
+    var currentNode = getParentNode(element);
+
+    if (isShadowRoot(currentNode)) {
+      currentNode = currentNode.host;
+    }
+
+    while (isHTMLElement(currentNode) && ['html', 'body'].indexOf(getNodeName(currentNode)) < 0) {
+      var css = getComputedStyle$1(currentNode); // This is non-exhaustive but covers the most common CSS properties that
+      // create a containing block.
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+
+      if (css.transform !== 'none' || css.perspective !== 'none' || css.contain === 'paint' || ['transform', 'perspective'].indexOf(css.willChange) !== -1 || isFirefox && css.willChange === 'filter' || isFirefox && css.filter && css.filter !== 'none') {
+        return currentNode;
+      } else {
+        currentNode = currentNode.parentNode;
+      }
+    }
+
+    return null;
+  } // Gets the closest ancestor positioned element. Handles some edge cases,
+  // such as table ancestors and cross browser bugs.
+
+
+  function getOffsetParent(element) {
+    var window = getWindow(element);
+    var offsetParent = getTrueOffsetParent(element);
+
+    while (offsetParent && isTableElement(offsetParent) && getComputedStyle$1(offsetParent).position === 'static') {
+      offsetParent = getTrueOffsetParent(offsetParent);
+    }
+
+    if (offsetParent && (getNodeName(offsetParent) === 'html' || getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'static')) {
+      return window;
+    }
+
+    return offsetParent || getContainingBlock(element) || window;
+  }
+
+  function getMainAxisFromPlacement(placement) {
+    return ['top', 'bottom'].indexOf(placement) >= 0 ? 'x' : 'y';
+  }
+
+  function within(min$1, value, max$1) {
+    return max(min$1, min(value, max$1));
+  }
+  function withinMaxClamp(min, value, max) {
+    var v = within(min, value, max);
+    return v > max ? max : v;
+  }
+
+  function getFreshSideObject() {
+    return {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    };
+  }
+
+  function mergePaddingObject(paddingObject) {
+    return Object.assign({}, getFreshSideObject(), paddingObject);
+  }
+
+  function expandToHashMap(value, keys) {
+    return keys.reduce(function (hashMap, key) {
+      hashMap[key] = value;
+      return hashMap;
+    }, {});
+  }
+
+  var toPaddingObject = function toPaddingObject(padding, state) {
+    padding = typeof padding === 'function' ? padding(Object.assign({}, state.rects, {
+      placement: state.placement
+    })) : padding;
+    return mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
+  };
+
+  function arrow(_ref) {
+    var _state$modifiersData$;
+
+    var state = _ref.state,
+        name = _ref.name,
+        options = _ref.options;
+    var arrowElement = state.elements.arrow;
+    var popperOffsets = state.modifiersData.popperOffsets;
+    var basePlacement = getBasePlacement(state.placement);
+    var axis = getMainAxisFromPlacement(basePlacement);
+    var isVertical = [left, right].indexOf(basePlacement) >= 0;
+    var len = isVertical ? 'height' : 'width';
+
+    if (!arrowElement || !popperOffsets) {
+      return;
+    }
+
+    var paddingObject = toPaddingObject(options.padding, state);
+    var arrowRect = getLayoutRect(arrowElement);
+    var minProp = axis === 'y' ? top : left;
+    var maxProp = axis === 'y' ? bottom : right;
+    var endDiff = state.rects.reference[len] + state.rects.reference[axis] - popperOffsets[axis] - state.rects.popper[len];
+    var startDiff = popperOffsets[axis] - state.rects.reference[axis];
+    var arrowOffsetParent = getOffsetParent(arrowElement);
+    var clientSize = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.clientHeight || 0 : arrowOffsetParent.clientWidth || 0 : 0;
+    var centerToReference = endDiff / 2 - startDiff / 2; // Make sure the arrow doesn't overflow the popper if the center point is
+    // outside of the popper bounds
+
+    var min = paddingObject[minProp];
+    var max = clientSize - arrowRect[len] - paddingObject[maxProp];
+    var center = clientSize / 2 - arrowRect[len] / 2 + centerToReference;
+    var offset = within(min, center, max); // Prevents breaking syntax highlighting...
+
+    var axisProp = axis;
+    state.modifiersData[name] = (_state$modifiersData$ = {}, _state$modifiersData$[axisProp] = offset, _state$modifiersData$.centerOffset = offset - center, _state$modifiersData$);
+  }
+
+  function effect$1(_ref2) {
+    var state = _ref2.state,
+        options = _ref2.options;
+    var _options$element = options.element,
+        arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element;
+
+    if (arrowElement == null) {
+      return;
+    } // CSS selector
+
+
+    if (typeof arrowElement === 'string') {
+      arrowElement = state.elements.popper.querySelector(arrowElement);
+
+      if (!arrowElement) {
+        return;
+      }
+    }
+
+    if (!contains(state.elements.popper, arrowElement)) {
+      return;
+    }
+
+    state.elements.arrow = arrowElement;
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const arrow$1 = {
+    name: 'arrow',
+    enabled: true,
+    phase: 'main',
+    fn: arrow,
+    effect: effect$1,
+    requires: ['popperOffsets'],
+    requiresIfExists: ['preventOverflow']
+  };
+
+  function getVariation(placement) {
+    return placement.split('-')[1];
+  }
+
+  var unsetSides = {
+    top: 'auto',
+    right: 'auto',
+    bottom: 'auto',
+    left: 'auto'
+  }; // Round the offsets to the nearest suitable subpixel based on the DPR.
+  // Zooming can change the DPR, but it seems to report a value that will
+  // cleanly divide the values into the appropriate subpixels.
+
+  function roundOffsetsByDPR(_ref, win) {
+    var x = _ref.x,
+        y = _ref.y;
+    var dpr = win.devicePixelRatio || 1;
+    return {
+      x: round(x * dpr) / dpr || 0,
+      y: round(y * dpr) / dpr || 0
+    };
+  }
+
+  function mapToStyles(_ref2) {
+    var _Object$assign2;
+
+    var popper = _ref2.popper,
+        popperRect = _ref2.popperRect,
+        placement = _ref2.placement,
+        variation = _ref2.variation,
+        offsets = _ref2.offsets,
+        position = _ref2.position,
+        gpuAcceleration = _ref2.gpuAcceleration,
+        adaptive = _ref2.adaptive,
+        roundOffsets = _ref2.roundOffsets,
+        isFixed = _ref2.isFixed;
+    var _offsets$x = offsets.x,
+        x = _offsets$x === void 0 ? 0 : _offsets$x,
+        _offsets$y = offsets.y,
+        y = _offsets$y === void 0 ? 0 : _offsets$y;
+
+    var _ref3 = typeof roundOffsets === 'function' ? roundOffsets({
+      x: x,
+      y: y
+    }) : {
+      x: x,
+      y: y
+    };
+
+    x = _ref3.x;
+    y = _ref3.y;
+    var hasX = offsets.hasOwnProperty('x');
+    var hasY = offsets.hasOwnProperty('y');
+    var sideX = left;
+    var sideY = top;
+    var win = window;
+
+    if (adaptive) {
+      var offsetParent = getOffsetParent(popper);
+      var heightProp = 'clientHeight';
+      var widthProp = 'clientWidth';
+
+      if (offsetParent === getWindow(popper)) {
+        offsetParent = getDocumentElement(popper);
+
+        if (getComputedStyle$1(offsetParent).position !== 'static' && position === 'absolute') {
+          heightProp = 'scrollHeight';
+          widthProp = 'scrollWidth';
+        }
+      } // $FlowFixMe[incompatible-cast]: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
+
+
+      offsetParent = offsetParent;
+
+      if (placement === top || (placement === left || placement === right) && variation === end) {
+        sideY = bottom;
+        var offsetY = isFixed && offsetParent === win && win.visualViewport ? win.visualViewport.height : // $FlowFixMe[prop-missing]
+        offsetParent[heightProp];
+        y -= offsetY - popperRect.height;
+        y *= gpuAcceleration ? 1 : -1;
+      }
+
+      if (placement === left || (placement === top || placement === bottom) && variation === end) {
+        sideX = right;
+        var offsetX = isFixed && offsetParent === win && win.visualViewport ? win.visualViewport.width : // $FlowFixMe[prop-missing]
+        offsetParent[widthProp];
+        x -= offsetX - popperRect.width;
+        x *= gpuAcceleration ? 1 : -1;
+      }
+    }
+
+    var commonStyles = Object.assign({
+      position: position
+    }, adaptive && unsetSides);
+
+    var _ref4 = roundOffsets === true ? roundOffsetsByDPR({
+      x: x,
+      y: y
+    }, getWindow(popper)) : {
+      x: x,
+      y: y
+    };
+
+    x = _ref4.x;
+    y = _ref4.y;
+
+    if (gpuAcceleration) {
+      var _Object$assign;
+
+      return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+    }
+
+    return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
+  }
+
+  function computeStyles(_ref5) {
+    var state = _ref5.state,
+        options = _ref5.options;
+    var _options$gpuAccelerat = options.gpuAcceleration,
+        gpuAcceleration = _options$gpuAccelerat === void 0 ? true : _options$gpuAccelerat,
+        _options$adaptive = options.adaptive,
+        adaptive = _options$adaptive === void 0 ? true : _options$adaptive,
+        _options$roundOffsets = options.roundOffsets,
+        roundOffsets = _options$roundOffsets === void 0 ? true : _options$roundOffsets;
+    var commonStyles = {
+      placement: getBasePlacement(state.placement),
+      variation: getVariation(state.placement),
+      popper: state.elements.popper,
+      popperRect: state.rects.popper,
+      gpuAcceleration: gpuAcceleration,
+      isFixed: state.options.strategy === 'fixed'
+    };
+
+    if (state.modifiersData.popperOffsets != null) {
+      state.styles.popper = Object.assign({}, state.styles.popper, mapToStyles(Object.assign({}, commonStyles, {
+        offsets: state.modifiersData.popperOffsets,
+        position: state.options.strategy,
+        adaptive: adaptive,
+        roundOffsets: roundOffsets
+      })));
+    }
+
+    if (state.modifiersData.arrow != null) {
+      state.styles.arrow = Object.assign({}, state.styles.arrow, mapToStyles(Object.assign({}, commonStyles, {
+        offsets: state.modifiersData.arrow,
+        position: 'absolute',
+        adaptive: false,
+        roundOffsets: roundOffsets
+      })));
+    }
+
+    state.attributes.popper = Object.assign({}, state.attributes.popper, {
+      'data-popper-placement': state.placement
+    });
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const computeStyles$1 = {
+    name: 'computeStyles',
+    enabled: true,
+    phase: 'beforeWrite',
+    fn: computeStyles,
+    data: {}
+  };
+
+  var passive = {
+    passive: true
+  };
+
+  function effect(_ref) {
+    var state = _ref.state,
+        instance = _ref.instance,
+        options = _ref.options;
+    var _options$scroll = options.scroll,
+        scroll = _options$scroll === void 0 ? true : _options$scroll,
+        _options$resize = options.resize,
+        resize = _options$resize === void 0 ? true : _options$resize;
+    var window = getWindow(state.elements.popper);
+    var scrollParents = [].concat(state.scrollParents.reference, state.scrollParents.popper);
+
+    if (scroll) {
+      scrollParents.forEach(function (scrollParent) {
+        scrollParent.addEventListener('scroll', instance.update, passive);
+      });
+    }
+
+    if (resize) {
+      window.addEventListener('resize', instance.update, passive);
+    }
+
+    return function () {
+      if (scroll) {
+        scrollParents.forEach(function (scrollParent) {
+          scrollParent.removeEventListener('scroll', instance.update, passive);
+        });
+      }
+
+      if (resize) {
+        window.removeEventListener('resize', instance.update, passive);
+      }
+    };
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const eventListeners = {
+    name: 'eventListeners',
+    enabled: true,
+    phase: 'write',
+    fn: function fn() {},
+    effect: effect,
+    data: {}
+  };
+
+  var hash$1 = {
+    left: 'right',
+    right: 'left',
+    bottom: 'top',
+    top: 'bottom'
+  };
+  function getOppositePlacement(placement) {
+    return placement.replace(/left|right|bottom|top/g, function (matched) {
+      return hash$1[matched];
+    });
+  }
+
+  var hash = {
+    start: 'end',
+    end: 'start'
+  };
+  function getOppositeVariationPlacement(placement) {
+    return placement.replace(/start|end/g, function (matched) {
+      return hash[matched];
+    });
+  }
+
+  function getWindowScroll(node) {
+    var win = getWindow(node);
+    var scrollLeft = win.pageXOffset;
+    var scrollTop = win.pageYOffset;
+    return {
+      scrollLeft: scrollLeft,
+      scrollTop: scrollTop
+    };
+  }
+
+  function getWindowScrollBarX(element) {
+    // If <html> has a CSS width greater than the viewport, then this will be
+    // incorrect for RTL.
+    // Popper 1 is broken in this case and never had a bug report so let's assume
+    // it's not an issue. I don't think anyone ever specifies width on <html>
+    // anyway.
+    // Browsers where the left scrollbar doesn't cause an issue report `0` for
+    // this (e.g. Edge 2019, IE11, Safari)
+    return getBoundingClientRect(getDocumentElement(element)).left + getWindowScroll(element).scrollLeft;
+  }
+
+  function getViewportRect(element, strategy) {
+    var win = getWindow(element);
+    var html = getDocumentElement(element);
+    var visualViewport = win.visualViewport;
+    var width = html.clientWidth;
+    var height = html.clientHeight;
+    var x = 0;
+    var y = 0;
+
+    if (visualViewport) {
+      width = visualViewport.width;
+      height = visualViewport.height;
+      var layoutViewport = isLayoutViewport();
+
+      if (layoutViewport || !layoutViewport && strategy === 'fixed') {
+        x = visualViewport.offsetLeft;
+        y = visualViewport.offsetTop;
+      }
+    }
+
+    return {
+      width: width,
+      height: height,
+      x: x + getWindowScrollBarX(element),
+      y: y
+    };
+  }
+
+  // of the `<html>` and `<body>` rect bounds if horizontally scrollable
+
+  function getDocumentRect(element) {
+    var _element$ownerDocumen;
+
+    var html = getDocumentElement(element);
+    var winScroll = getWindowScroll(element);
+    var body = (_element$ownerDocumen = element.ownerDocument) == null ? void 0 : _element$ownerDocumen.body;
+    var width = max(html.scrollWidth, html.clientWidth, body ? body.scrollWidth : 0, body ? body.clientWidth : 0);
+    var height = max(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
+    var x = -winScroll.scrollLeft + getWindowScrollBarX(element);
+    var y = -winScroll.scrollTop;
+
+    if (getComputedStyle$1(body || html).direction === 'rtl') {
+      x += max(html.clientWidth, body ? body.clientWidth : 0) - width;
+    }
+
+    return {
+      width: width,
+      height: height,
+      x: x,
+      y: y
+    };
+  }
+
+  function isScrollParent(element) {
+    // Firefox wants us to check `-x` and `-y` variations as well
+    var _getComputedStyle = getComputedStyle$1(element),
+        overflow = _getComputedStyle.overflow,
+        overflowX = _getComputedStyle.overflowX,
+        overflowY = _getComputedStyle.overflowY;
+
+    return /auto|scroll|overlay|hidden/.test(overflow + overflowY + overflowX);
+  }
+
+  function getScrollParent(node) {
+    if (['html', 'body', '#document'].indexOf(getNodeName(node)) >= 0) {
+      // $FlowFixMe[incompatible-return]: assume body is always available
+      return node.ownerDocument.body;
+    }
+
+    if (isHTMLElement(node) && isScrollParent(node)) {
+      return node;
+    }
+
+    return getScrollParent(getParentNode(node));
+  }
+
+  /*
+  given a DOM element, return the list of all scroll parents, up the list of ancesors
+  until we get to the top window object. This list is what we attach scroll listeners
+  to, because if any of these parent elements scroll, we'll need to re-calculate the
+  reference element's position.
+  */
+
+  function listScrollParents(element, list) {
+    var _element$ownerDocumen;
+
+    if (list === void 0) {
+      list = [];
+    }
+
+    var scrollParent = getScrollParent(element);
+    var isBody = scrollParent === ((_element$ownerDocumen = element.ownerDocument) == null ? void 0 : _element$ownerDocumen.body);
+    var win = getWindow(scrollParent);
+    var target = isBody ? [win].concat(win.visualViewport || [], isScrollParent(scrollParent) ? scrollParent : []) : scrollParent;
+    var updatedList = list.concat(target);
+    return isBody ? updatedList : // $FlowFixMe[incompatible-call]: isBody tells us target will be an HTMLElement here
+    updatedList.concat(listScrollParents(getParentNode(target)));
+  }
+
+  function rectToClientRect(rect) {
+    return Object.assign({}, rect, {
+      left: rect.x,
+      top: rect.y,
+      right: rect.x + rect.width,
+      bottom: rect.y + rect.height
+    });
+  }
+
+  function getInnerBoundingClientRect(element, strategy) {
+    var rect = getBoundingClientRect(element, false, strategy === 'fixed');
+    rect.top = rect.top + element.clientTop;
+    rect.left = rect.left + element.clientLeft;
+    rect.bottom = rect.top + element.clientHeight;
+    rect.right = rect.left + element.clientWidth;
+    rect.width = element.clientWidth;
+    rect.height = element.clientHeight;
+    rect.x = rect.left;
+    rect.y = rect.top;
+    return rect;
+  }
+
+  function getClientRectFromMixedType(element, clippingParent, strategy) {
+    return clippingParent === viewport ? rectToClientRect(getViewportRect(element, strategy)) : isElement(clippingParent) ? getInnerBoundingClientRect(clippingParent, strategy) : rectToClientRect(getDocumentRect(getDocumentElement(element)));
+  } // A "clipping parent" is an overflowable container with the characteristic of
+  // clipping (or hiding) overflowing elements with a position different from
+  // `initial`
+
+
+  function getClippingParents(element) {
+    var clippingParents = listScrollParents(getParentNode(element));
+    var canEscapeClipping = ['absolute', 'fixed'].indexOf(getComputedStyle$1(element).position) >= 0;
+    var clipperElement = canEscapeClipping && isHTMLElement(element) ? getOffsetParent(element) : element;
+
+    if (!isElement(clipperElement)) {
+      return [];
+    } // $FlowFixMe[incompatible-return]: https://github.com/facebook/flow/issues/1414
+
+
+    return clippingParents.filter(function (clippingParent) {
+      return isElement(clippingParent) && contains(clippingParent, clipperElement) && getNodeName(clippingParent) !== 'body';
+    });
+  } // Gets the maximum area that the element is visible in due to any number of
+  // clipping parents
+
+
+  function getClippingRect(element, boundary, rootBoundary, strategy) {
+    var mainClippingParents = boundary === 'clippingParents' ? getClippingParents(element) : [].concat(boundary);
+    var clippingParents = [].concat(mainClippingParents, [rootBoundary]);
+    var firstClippingParent = clippingParents[0];
+    var clippingRect = clippingParents.reduce(function (accRect, clippingParent) {
+      var rect = getClientRectFromMixedType(element, clippingParent, strategy);
+      accRect.top = max(rect.top, accRect.top);
+      accRect.right = min(rect.right, accRect.right);
+      accRect.bottom = min(rect.bottom, accRect.bottom);
+      accRect.left = max(rect.left, accRect.left);
+      return accRect;
+    }, getClientRectFromMixedType(element, firstClippingParent, strategy));
+    clippingRect.width = clippingRect.right - clippingRect.left;
+    clippingRect.height = clippingRect.bottom - clippingRect.top;
+    clippingRect.x = clippingRect.left;
+    clippingRect.y = clippingRect.top;
+    return clippingRect;
+  }
+
+  function computeOffsets(_ref) {
+    var reference = _ref.reference,
+        element = _ref.element,
+        placement = _ref.placement;
+    var basePlacement = placement ? getBasePlacement(placement) : null;
+    var variation = placement ? getVariation(placement) : null;
+    var commonX = reference.x + reference.width / 2 - element.width / 2;
+    var commonY = reference.y + reference.height / 2 - element.height / 2;
+    var offsets;
+
+    switch (basePlacement) {
+      case top:
+        offsets = {
+          x: commonX,
+          y: reference.y - element.height
+        };
+        break;
+
+      case bottom:
+        offsets = {
+          x: commonX,
+          y: reference.y + reference.height
+        };
+        break;
+
+      case right:
+        offsets = {
+          x: reference.x + reference.width,
+          y: commonY
+        };
+        break;
+
+      case left:
+        offsets = {
+          x: reference.x - element.width,
+          y: commonY
+        };
+        break;
+
+      default:
+        offsets = {
+          x: reference.x,
+          y: reference.y
+        };
+    }
+
+    var mainAxis = basePlacement ? getMainAxisFromPlacement(basePlacement) : null;
+
+    if (mainAxis != null) {
+      var len = mainAxis === 'y' ? 'height' : 'width';
+
+      switch (variation) {
+        case start:
+          offsets[mainAxis] = offsets[mainAxis] - (reference[len] / 2 - element[len] / 2);
+          break;
+
+        case end:
+          offsets[mainAxis] = offsets[mainAxis] + (reference[len] / 2 - element[len] / 2);
+          break;
+      }
+    }
+
+    return offsets;
+  }
+
+  function detectOverflow(state, options) {
+    if (options === void 0) {
+      options = {};
+    }
+
+    var _options = options,
+        _options$placement = _options.placement,
+        placement = _options$placement === void 0 ? state.placement : _options$placement,
+        _options$strategy = _options.strategy,
+        strategy = _options$strategy === void 0 ? state.strategy : _options$strategy,
+        _options$boundary = _options.boundary,
+        boundary = _options$boundary === void 0 ? clippingParents : _options$boundary,
+        _options$rootBoundary = _options.rootBoundary,
+        rootBoundary = _options$rootBoundary === void 0 ? viewport : _options$rootBoundary,
+        _options$elementConte = _options.elementContext,
+        elementContext = _options$elementConte === void 0 ? popper : _options$elementConte,
+        _options$altBoundary = _options.altBoundary,
+        altBoundary = _options$altBoundary === void 0 ? false : _options$altBoundary,
+        _options$padding = _options.padding,
+        padding = _options$padding === void 0 ? 0 : _options$padding;
+    var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
+    var altContext = elementContext === popper ? reference : popper;
+    var popperRect = state.rects.popper;
+    var element = state.elements[altBoundary ? altContext : elementContext];
+    var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary, strategy);
+    var referenceClientRect = getBoundingClientRect(state.elements.reference);
+    var popperOffsets = computeOffsets({
+      reference: referenceClientRect,
+      element: popperRect,
+      strategy: 'absolute',
+      placement: placement
+    });
+    var popperClientRect = rectToClientRect(Object.assign({}, popperRect, popperOffsets));
+    var elementClientRect = elementContext === popper ? popperClientRect : referenceClientRect; // positive = overflowing the clipping rect
+    // 0 or negative = within the clipping rect
+
+    var overflowOffsets = {
+      top: clippingClientRect.top - elementClientRect.top + paddingObject.top,
+      bottom: elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom,
+      left: clippingClientRect.left - elementClientRect.left + paddingObject.left,
+      right: elementClientRect.right - clippingClientRect.right + paddingObject.right
+    };
+    var offsetData = state.modifiersData.offset; // Offsets can be applied only to the popper element
+
+    if (elementContext === popper && offsetData) {
+      var offset = offsetData[placement];
+      Object.keys(overflowOffsets).forEach(function (key) {
+        var multiply = [right, bottom].indexOf(key) >= 0 ? 1 : -1;
+        var axis = [top, bottom].indexOf(key) >= 0 ? 'y' : 'x';
+        overflowOffsets[key] += offset[axis] * multiply;
+      });
+    }
+
+    return overflowOffsets;
+  }
+
+  function computeAutoPlacement(state, options) {
+    if (options === void 0) {
+      options = {};
+    }
+
+    var _options = options,
+        placement = _options.placement,
+        boundary = _options.boundary,
+        rootBoundary = _options.rootBoundary,
+        padding = _options.padding,
+        flipVariations = _options.flipVariations,
+        _options$allowedAutoP = _options.allowedAutoPlacements,
+        allowedAutoPlacements = _options$allowedAutoP === void 0 ? placements : _options$allowedAutoP;
+    var variation = getVariation(placement);
+    var placements$1 = variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
+      return getVariation(placement) === variation;
+    }) : basePlacements;
+    var allowedPlacements = placements$1.filter(function (placement) {
+      return allowedAutoPlacements.indexOf(placement) >= 0;
+    });
+
+    if (allowedPlacements.length === 0) {
+      allowedPlacements = placements$1;
+    } // $FlowFixMe[incompatible-type]: Flow seems to have problems with two array unions...
+
+
+    var overflows = allowedPlacements.reduce(function (acc, placement) {
+      acc[placement] = detectOverflow(state, {
+        placement: placement,
+        boundary: boundary,
+        rootBoundary: rootBoundary,
+        padding: padding
+      })[getBasePlacement(placement)];
+      return acc;
+    }, {});
+    return Object.keys(overflows).sort(function (a, b) {
+      return overflows[a] - overflows[b];
+    });
+  }
+
+  function getExpandedFallbackPlacements(placement) {
+    if (getBasePlacement(placement) === auto) {
+      return [];
+    }
+
+    var oppositePlacement = getOppositePlacement(placement);
+    return [getOppositeVariationPlacement(placement), oppositePlacement, getOppositeVariationPlacement(oppositePlacement)];
+  }
+
+  function flip(_ref) {
+    var state = _ref.state,
+        options = _ref.options,
+        name = _ref.name;
+
+    if (state.modifiersData[name]._skip) {
+      return;
+    }
+
+    var _options$mainAxis = options.mainAxis,
+        checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+        _options$altAxis = options.altAxis,
+        checkAltAxis = _options$altAxis === void 0 ? true : _options$altAxis,
+        specifiedFallbackPlacements = options.fallbackPlacements,
+        padding = options.padding,
+        boundary = options.boundary,
+        rootBoundary = options.rootBoundary,
+        altBoundary = options.altBoundary,
+        _options$flipVariatio = options.flipVariations,
+        flipVariations = _options$flipVariatio === void 0 ? true : _options$flipVariatio,
+        allowedAutoPlacements = options.allowedAutoPlacements;
+    var preferredPlacement = state.options.placement;
+    var basePlacement = getBasePlacement(preferredPlacement);
+    var isBasePlacement = basePlacement === preferredPlacement;
+    var fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipVariations ? [getOppositePlacement(preferredPlacement)] : getExpandedFallbackPlacements(preferredPlacement));
+    var placements = [preferredPlacement].concat(fallbackPlacements).reduce(function (acc, placement) {
+      return acc.concat(getBasePlacement(placement) === auto ? computeAutoPlacement(state, {
+        placement: placement,
+        boundary: boundary,
+        rootBoundary: rootBoundary,
+        padding: padding,
+        flipVariations: flipVariations,
+        allowedAutoPlacements: allowedAutoPlacements
+      }) : placement);
+    }, []);
+    var referenceRect = state.rects.reference;
+    var popperRect = state.rects.popper;
+    var checksMap = new Map();
+    var makeFallbackChecks = true;
+    var firstFittingPlacement = placements[0];
+
+    for (var i = 0; i < placements.length; i++) {
+      var placement = placements[i];
+
+      var _basePlacement = getBasePlacement(placement);
+
+      var isStartVariation = getVariation(placement) === start;
+      var isVertical = [top, bottom].indexOf(_basePlacement) >= 0;
+      var len = isVertical ? 'width' : 'height';
+      var overflow = detectOverflow(state, {
+        placement: placement,
+        boundary: boundary,
+        rootBoundary: rootBoundary,
+        altBoundary: altBoundary,
+        padding: padding
+      });
+      var mainVariationSide = isVertical ? isStartVariation ? right : left : isStartVariation ? bottom : top;
+
+      if (referenceRect[len] > popperRect[len]) {
+        mainVariationSide = getOppositePlacement(mainVariationSide);
+      }
+
+      var altVariationSide = getOppositePlacement(mainVariationSide);
+      var checks = [];
+
+      if (checkMainAxis) {
+        checks.push(overflow[_basePlacement] <= 0);
+      }
+
+      if (checkAltAxis) {
+        checks.push(overflow[mainVariationSide] <= 0, overflow[altVariationSide] <= 0);
+      }
+
+      if (checks.every(function (check) {
+        return check;
+      })) {
+        firstFittingPlacement = placement;
+        makeFallbackChecks = false;
+        break;
+      }
+
+      checksMap.set(placement, checks);
+    }
+
+    if (makeFallbackChecks) {
+      // `2` may be desired in some cases – research later
+      var numberOfChecks = flipVariations ? 3 : 1;
+
+      var _loop = function _loop(_i) {
+        var fittingPlacement = placements.find(function (placement) {
+          var checks = checksMap.get(placement);
+
+          if (checks) {
+            return checks.slice(0, _i).every(function (check) {
+              return check;
+            });
+          }
+        });
+
+        if (fittingPlacement) {
+          firstFittingPlacement = fittingPlacement;
+          return "break";
+        }
+      };
+
+      for (var _i = numberOfChecks; _i > 0; _i--) {
+        var _ret = _loop(_i);
+
+        if (_ret === "break") break;
+      }
+    }
+
+    if (state.placement !== firstFittingPlacement) {
+      state.modifiersData[name]._skip = true;
+      state.placement = firstFittingPlacement;
+      state.reset = true;
+    }
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const flip$1 = {
+    name: 'flip',
+    enabled: true,
+    phase: 'main',
+    fn: flip,
+    requiresIfExists: ['offset'],
+    data: {
+      _skip: false
+    }
+  };
+
+  function getSideOffsets(overflow, rect, preventedOffsets) {
+    if (preventedOffsets === void 0) {
+      preventedOffsets = {
+        x: 0,
+        y: 0
+      };
+    }
+
+    return {
+      top: overflow.top - rect.height - preventedOffsets.y,
+      right: overflow.right - rect.width + preventedOffsets.x,
+      bottom: overflow.bottom - rect.height + preventedOffsets.y,
+      left: overflow.left - rect.width - preventedOffsets.x
+    };
+  }
+
+  function isAnySideFullyClipped(overflow) {
+    return [top, right, bottom, left].some(function (side) {
+      return overflow[side] >= 0;
+    });
+  }
+
+  function hide(_ref) {
+    var state = _ref.state,
+        name = _ref.name;
+    var referenceRect = state.rects.reference;
+    var popperRect = state.rects.popper;
+    var preventedOffsets = state.modifiersData.preventOverflow;
+    var referenceOverflow = detectOverflow(state, {
+      elementContext: 'reference'
+    });
+    var popperAltOverflow = detectOverflow(state, {
+      altBoundary: true
+    });
+    var referenceClippingOffsets = getSideOffsets(referenceOverflow, referenceRect);
+    var popperEscapeOffsets = getSideOffsets(popperAltOverflow, popperRect, preventedOffsets);
+    var isReferenceHidden = isAnySideFullyClipped(referenceClippingOffsets);
+    var hasPopperEscaped = isAnySideFullyClipped(popperEscapeOffsets);
+    state.modifiersData[name] = {
+      referenceClippingOffsets: referenceClippingOffsets,
+      popperEscapeOffsets: popperEscapeOffsets,
+      isReferenceHidden: isReferenceHidden,
+      hasPopperEscaped: hasPopperEscaped
+    };
+    state.attributes.popper = Object.assign({}, state.attributes.popper, {
+      'data-popper-reference-hidden': isReferenceHidden,
+      'data-popper-escaped': hasPopperEscaped
+    });
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const hide$1 = {
+    name: 'hide',
+    enabled: true,
+    phase: 'main',
+    requiresIfExists: ['preventOverflow'],
+    fn: hide
+  };
+
+  function distanceAndSkiddingToXY(placement, rects, offset) {
+    var basePlacement = getBasePlacement(placement);
+    var invertDistance = [left, top].indexOf(basePlacement) >= 0 ? -1 : 1;
+
+    var _ref = typeof offset === 'function' ? offset(Object.assign({}, rects, {
+      placement: placement
+    })) : offset,
+        skidding = _ref[0],
+        distance = _ref[1];
+
+    skidding = skidding || 0;
+    distance = (distance || 0) * invertDistance;
+    return [left, right].indexOf(basePlacement) >= 0 ? {
+      x: distance,
+      y: skidding
+    } : {
+      x: skidding,
+      y: distance
+    };
+  }
+
+  function offset(_ref2) {
+    var state = _ref2.state,
+        options = _ref2.options,
+        name = _ref2.name;
+    var _options$offset = options.offset,
+        offset = _options$offset === void 0 ? [0, 0] : _options$offset;
+    var data = placements.reduce(function (acc, placement) {
+      acc[placement] = distanceAndSkiddingToXY(placement, state.rects, offset);
+      return acc;
+    }, {});
+    var _data$state$placement = data[state.placement],
+        x = _data$state$placement.x,
+        y = _data$state$placement.y;
+
+    if (state.modifiersData.popperOffsets != null) {
+      state.modifiersData.popperOffsets.x += x;
+      state.modifiersData.popperOffsets.y += y;
+    }
+
+    state.modifiersData[name] = data;
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const offset$1 = {
+    name: 'offset',
+    enabled: true,
+    phase: 'main',
+    requires: ['popperOffsets'],
+    fn: offset
+  };
+
+  function popperOffsets(_ref) {
+    var state = _ref.state,
+        name = _ref.name;
+    // Offsets are the actual position the popper needs to have to be
+    // properly positioned near its reference element
+    // This is the most basic placement, and will be adjusted by
+    // the modifiers in the next step
+    state.modifiersData[name] = computeOffsets({
+      reference: state.rects.reference,
+      element: state.rects.popper,
+      strategy: 'absolute',
+      placement: state.placement
+    });
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const popperOffsets$1 = {
+    name: 'popperOffsets',
+    enabled: true,
+    phase: 'read',
+    fn: popperOffsets,
+    data: {}
+  };
+
+  function getAltAxis(axis) {
+    return axis === 'x' ? 'y' : 'x';
+  }
+
+  function preventOverflow(_ref) {
+    var state = _ref.state,
+        options = _ref.options,
+        name = _ref.name;
+    var _options$mainAxis = options.mainAxis,
+        checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+        _options$altAxis = options.altAxis,
+        checkAltAxis = _options$altAxis === void 0 ? false : _options$altAxis,
+        boundary = options.boundary,
+        rootBoundary = options.rootBoundary,
+        altBoundary = options.altBoundary,
+        padding = options.padding,
+        _options$tether = options.tether,
+        tether = _options$tether === void 0 ? true : _options$tether,
+        _options$tetherOffset = options.tetherOffset,
+        tetherOffset = _options$tetherOffset === void 0 ? 0 : _options$tetherOffset;
+    var overflow = detectOverflow(state, {
+      boundary: boundary,
+      rootBoundary: rootBoundary,
+      padding: padding,
+      altBoundary: altBoundary
+    });
+    var basePlacement = getBasePlacement(state.placement);
+    var variation = getVariation(state.placement);
+    var isBasePlacement = !variation;
+    var mainAxis = getMainAxisFromPlacement(basePlacement);
+    var altAxis = getAltAxis(mainAxis);
+    var popperOffsets = state.modifiersData.popperOffsets;
+    var referenceRect = state.rects.reference;
+    var popperRect = state.rects.popper;
+    var tetherOffsetValue = typeof tetherOffset === 'function' ? tetherOffset(Object.assign({}, state.rects, {
+      placement: state.placement
+    })) : tetherOffset;
+    var normalizedTetherOffsetValue = typeof tetherOffsetValue === 'number' ? {
+      mainAxis: tetherOffsetValue,
+      altAxis: tetherOffsetValue
+    } : Object.assign({
+      mainAxis: 0,
+      altAxis: 0
+    }, tetherOffsetValue);
+    var offsetModifierState = state.modifiersData.offset ? state.modifiersData.offset[state.placement] : null;
+    var data = {
+      x: 0,
+      y: 0
+    };
+
+    if (!popperOffsets) {
+      return;
+    }
+
+    if (checkMainAxis) {
+      var _offsetModifierState$;
+
+      var mainSide = mainAxis === 'y' ? top : left;
+      var altSide = mainAxis === 'y' ? bottom : right;
+      var len = mainAxis === 'y' ? 'height' : 'width';
+      var offset = popperOffsets[mainAxis];
+      var min$1 = offset + overflow[mainSide];
+      var max$1 = offset - overflow[altSide];
+      var additive = tether ? -popperRect[len] / 2 : 0;
+      var minLen = variation === start ? referenceRect[len] : popperRect[len];
+      var maxLen = variation === start ? -popperRect[len] : -referenceRect[len]; // We need to include the arrow in the calculation so the arrow doesn't go
+      // outside the reference bounds
+
+      var arrowElement = state.elements.arrow;
+      var arrowRect = tether && arrowElement ? getLayoutRect(arrowElement) : {
+        width: 0,
+        height: 0
+      };
+      var arrowPaddingObject = state.modifiersData['arrow#persistent'] ? state.modifiersData['arrow#persistent'].padding : getFreshSideObject();
+      var arrowPaddingMin = arrowPaddingObject[mainSide];
+      var arrowPaddingMax = arrowPaddingObject[altSide]; // If the reference length is smaller than the arrow length, we don't want
+      // to include its full size in the calculation. If the reference is small
+      // and near the edge of a boundary, the popper can overflow even if the
+      // reference is not overflowing as well (e.g. virtual elements with no
+      // width or height)
+
+      var arrowLen = within(0, referenceRect[len], arrowRect[len]);
+      var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis : minLen - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis;
+      var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis : maxLen + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis;
+      var arrowOffsetParent = state.elements.arrow && getOffsetParent(state.elements.arrow);
+      var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
+      var offsetModifierValue = (_offsetModifierState$ = offsetModifierState == null ? void 0 : offsetModifierState[mainAxis]) != null ? _offsetModifierState$ : 0;
+      var tetherMin = offset + minOffset - offsetModifierValue - clientOffset;
+      var tetherMax = offset + maxOffset - offsetModifierValue;
+      var preventedOffset = within(tether ? min(min$1, tetherMin) : min$1, offset, tether ? max(max$1, tetherMax) : max$1);
+      popperOffsets[mainAxis] = preventedOffset;
+      data[mainAxis] = preventedOffset - offset;
+    }
+
+    if (checkAltAxis) {
+      var _offsetModifierState$2;
+
+      var _mainSide = mainAxis === 'x' ? top : left;
+
+      var _altSide = mainAxis === 'x' ? bottom : right;
+
+      var _offset = popperOffsets[altAxis];
+
+      var _len = altAxis === 'y' ? 'height' : 'width';
+
+      var _min = _offset + overflow[_mainSide];
+
+      var _max = _offset - overflow[_altSide];
+
+      var isOriginSide = [top, left].indexOf(basePlacement) !== -1;
+
+      var _offsetModifierValue = (_offsetModifierState$2 = offsetModifierState == null ? void 0 : offsetModifierState[altAxis]) != null ? _offsetModifierState$2 : 0;
+
+      var _tetherMin = isOriginSide ? _min : _offset - referenceRect[_len] - popperRect[_len] - _offsetModifierValue + normalizedTetherOffsetValue.altAxis;
+
+      var _tetherMax = isOriginSide ? _offset + referenceRect[_len] + popperRect[_len] - _offsetModifierValue - normalizedTetherOffsetValue.altAxis : _max;
+
+      var _preventedOffset = tether && isOriginSide ? withinMaxClamp(_tetherMin, _offset, _tetherMax) : within(tether ? _tetherMin : _min, _offset, tether ? _tetherMax : _max);
+
+      popperOffsets[altAxis] = _preventedOffset;
+      data[altAxis] = _preventedOffset - _offset;
+    }
+
+    state.modifiersData[name] = data;
+  } // eslint-disable-next-line import/no-unused-modules
+
+
+  const preventOverflow$1 = {
+    name: 'preventOverflow',
+    enabled: true,
+    phase: 'main',
+    fn: preventOverflow,
+    requiresIfExists: ['offset']
+  };
+
+  function getHTMLElementScroll(element) {
+    return {
+      scrollLeft: element.scrollLeft,
+      scrollTop: element.scrollTop
+    };
+  }
+
+  function getNodeScroll(node) {
+    if (node === getWindow(node) || !isHTMLElement(node)) {
+      return getWindowScroll(node);
+    } else {
+      return getHTMLElementScroll(node);
+    }
+  }
+
+  function isElementScaled(element) {
+    var rect = element.getBoundingClientRect();
+    var scaleX = round(rect.width) / element.offsetWidth || 1;
+    var scaleY = round(rect.height) / element.offsetHeight || 1;
+    return scaleX !== 1 || scaleY !== 1;
+  } // Returns the composite rect of an element relative to its offsetParent.
+  // Composite means it takes into account transforms as well as layout.
+
+
+  function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
+    if (isFixed === void 0) {
+      isFixed = false;
+    }
+
+    var isOffsetParentAnElement = isHTMLElement(offsetParent);
+    var offsetParentIsScaled = isHTMLElement(offsetParent) && isElementScaled(offsetParent);
+    var documentElement = getDocumentElement(offsetParent);
+    var rect = getBoundingClientRect(elementOrVirtualElement, offsetParentIsScaled, isFixed);
+    var scroll = {
+      scrollLeft: 0,
+      scrollTop: 0
+    };
+    var offsets = {
+      x: 0,
+      y: 0
+    };
+
+    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+      if (getNodeName(offsetParent) !== 'body' || // https://github.com/popperjs/popper-core/issues/1078
+      isScrollParent(documentElement)) {
+        scroll = getNodeScroll(offsetParent);
+      }
+
+      if (isHTMLElement(offsetParent)) {
+        offsets = getBoundingClientRect(offsetParent, true);
+        offsets.x += offsetParent.clientLeft;
+        offsets.y += offsetParent.clientTop;
+      } else if (documentElement) {
+        offsets.x = getWindowScrollBarX(documentElement);
+      }
+    }
+
+    return {
+      x: rect.left + scroll.scrollLeft - offsets.x,
+      y: rect.top + scroll.scrollTop - offsets.y,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  function order(modifiers) {
+    var map = new Map();
+    var visited = new Set();
+    var result = [];
+    modifiers.forEach(function (modifier) {
+      map.set(modifier.name, modifier);
+    }); // On visiting object, check for its dependencies and visit them recursively
+
+    function sort(modifier) {
+      visited.add(modifier.name);
+      var requires = [].concat(modifier.requires || [], modifier.requiresIfExists || []);
+      requires.forEach(function (dep) {
+        if (!visited.has(dep)) {
+          var depModifier = map.get(dep);
+
+          if (depModifier) {
+            sort(depModifier);
+          }
+        }
+      });
+      result.push(modifier);
+    }
+
+    modifiers.forEach(function (modifier) {
+      if (!visited.has(modifier.name)) {
+        // check for visited object
+        sort(modifier);
+      }
+    });
+    return result;
+  }
+
+  function orderModifiers(modifiers) {
+    // order based on dependencies
+    var orderedModifiers = order(modifiers); // order based on phase
+
+    return modifierPhases.reduce(function (acc, phase) {
+      return acc.concat(orderedModifiers.filter(function (modifier) {
+        return modifier.phase === phase;
+      }));
+    }, []);
+  }
+
+  function debounce(fn) {
+    var pending;
+    return function () {
+      if (!pending) {
+        pending = new Promise(function (resolve) {
+          Promise.resolve().then(function () {
+            pending = undefined;
+            resolve(fn());
+          });
+        });
+      }
+
+      return pending;
+    };
+  }
+
+  function mergeByName(modifiers) {
+    var merged = modifiers.reduce(function (merged, current) {
+      var existing = merged[current.name];
+      merged[current.name] = existing ? Object.assign({}, existing, current, {
+        options: Object.assign({}, existing.options, current.options),
+        data: Object.assign({}, existing.data, current.data)
+      }) : current;
+      return merged;
+    }, {}); // IE11 does not support Object.values
+
+    return Object.keys(merged).map(function (key) {
+      return merged[key];
+    });
+  }
+
+  var DEFAULT_OPTIONS = {
+    placement: 'bottom',
+    modifiers: [],
+    strategy: 'absolute'
+  };
+
+  function areValidElements() {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return !args.some(function (element) {
+      return !(element && typeof element.getBoundingClientRect === 'function');
+    });
+  }
+
+  function popperGenerator(generatorOptions) {
+    if (generatorOptions === void 0) {
+      generatorOptions = {};
+    }
+
+    var _generatorOptions = generatorOptions,
+        _generatorOptions$def = _generatorOptions.defaultModifiers,
+        defaultModifiers = _generatorOptions$def === void 0 ? [] : _generatorOptions$def,
+        _generatorOptions$def2 = _generatorOptions.defaultOptions,
+        defaultOptions = _generatorOptions$def2 === void 0 ? DEFAULT_OPTIONS : _generatorOptions$def2;
+    return function createPopper(reference, popper, options) {
+      if (options === void 0) {
+        options = defaultOptions;
+      }
+
+      var state = {
+        placement: 'bottom',
+        orderedModifiers: [],
+        options: Object.assign({}, DEFAULT_OPTIONS, defaultOptions),
+        modifiersData: {},
+        elements: {
+          reference: reference,
+          popper: popper
+        },
+        attributes: {},
+        styles: {}
+      };
+      var effectCleanupFns = [];
+      var isDestroyed = false;
+      var instance = {
+        state: state,
+        setOptions: function setOptions(setOptionsAction) {
+          var options = typeof setOptionsAction === 'function' ? setOptionsAction(state.options) : setOptionsAction;
+          cleanupModifierEffects();
+          state.options = Object.assign({}, defaultOptions, state.options, options);
+          state.scrollParents = {
+            reference: isElement(reference) ? listScrollParents(reference) : reference.contextElement ? listScrollParents(reference.contextElement) : [],
+            popper: listScrollParents(popper)
+          }; // Orders the modifiers based on their dependencies and `phase`
+          // properties
+
+          var orderedModifiers = orderModifiers(mergeByName([].concat(defaultModifiers, state.options.modifiers))); // Strip out disabled modifiers
+
+          state.orderedModifiers = orderedModifiers.filter(function (m) {
+            return m.enabled;
+          });
+          runModifierEffects();
+          return instance.update();
+        },
+        // Sync update – it will always be executed, even if not necessary. This
+        // is useful for low frequency updates where sync behavior simplifies the
+        // logic.
+        // For high frequency updates (e.g. `resize` and `scroll` events), always
+        // prefer the async Popper#update method
+        forceUpdate: function forceUpdate() {
+          if (isDestroyed) {
+            return;
+          }
+
+          var _state$elements = state.elements,
+              reference = _state$elements.reference,
+              popper = _state$elements.popper; // Don't proceed if `reference` or `popper` are not valid elements
+          // anymore
+
+          if (!areValidElements(reference, popper)) {
+            return;
+          } // Store the reference and popper rects to be read by modifiers
+
+
+          state.rects = {
+            reference: getCompositeRect(reference, getOffsetParent(popper), state.options.strategy === 'fixed'),
+            popper: getLayoutRect(popper)
+          }; // Modifiers have the ability to reset the current update cycle. The
+          // most common use case for this is the `flip` modifier changing the
+          // placement, which then needs to re-run all the modifiers, because the
+          // logic was previously ran for the previous placement and is therefore
+          // stale/incorrect
+
+          state.reset = false;
+          state.placement = state.options.placement; // On each update cycle, the `modifiersData` property for each modifier
+          // is filled with the initial data specified by the modifier. This means
+          // it doesn't persist and is fresh on each update.
+          // To ensure persistent data, use `${name}#persistent`
+
+          state.orderedModifiers.forEach(function (modifier) {
+            return state.modifiersData[modifier.name] = Object.assign({}, modifier.data);
+          });
+
+          for (var index = 0; index < state.orderedModifiers.length; index++) {
+            if (state.reset === true) {
+              state.reset = false;
+              index = -1;
+              continue;
+            }
+
+            var _state$orderedModifie = state.orderedModifiers[index],
+                fn = _state$orderedModifie.fn,
+                _state$orderedModifie2 = _state$orderedModifie.options,
+                _options = _state$orderedModifie2 === void 0 ? {} : _state$orderedModifie2,
+                name = _state$orderedModifie.name;
+
+            if (typeof fn === 'function') {
+              state = fn({
+                state: state,
+                options: _options,
+                name: name,
+                instance: instance
+              }) || state;
+            }
+          }
+        },
+        // Async and optimistically optimized update – it will not be executed if
+        // not necessary (debounced to run at most once-per-tick)
+        update: debounce(function () {
+          return new Promise(function (resolve) {
+            instance.forceUpdate();
+            resolve(state);
+          });
+        }),
+        destroy: function destroy() {
+          cleanupModifierEffects();
+          isDestroyed = true;
+        }
+      };
+
+      if (!areValidElements(reference, popper)) {
+        return instance;
+      }
+
+      instance.setOptions(options).then(function (state) {
+        if (!isDestroyed && options.onFirstUpdate) {
+          options.onFirstUpdate(state);
+        }
+      }); // Modifiers have the ability to execute arbitrary code before the first
+      // update cycle runs. They will be executed in the same order as the update
+      // cycle. This is useful when a modifier adds some persistent data that
+      // other modifiers need to use, but the modifier is run after the dependent
+      // one.
+
+      function runModifierEffects() {
+        state.orderedModifiers.forEach(function (_ref) {
+          var name = _ref.name,
+              _ref$options = _ref.options,
+              options = _ref$options === void 0 ? {} : _ref$options,
+              effect = _ref.effect;
+
+          if (typeof effect === 'function') {
+            var cleanupFn = effect({
+              state: state,
+              name: name,
+              instance: instance,
+              options: options
+            });
+
+            var noopFn = function noopFn() {};
+
+            effectCleanupFns.push(cleanupFn || noopFn);
+          }
+        });
+      }
+
+      function cleanupModifierEffects() {
+        effectCleanupFns.forEach(function (fn) {
+          return fn();
+        });
+        effectCleanupFns = [];
+      }
+
+      return instance;
+    };
+  }
+  var createPopper$2 = /*#__PURE__*/popperGenerator(); // eslint-disable-next-line import/no-unused-modules
+
+  var defaultModifiers$1 = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1];
+  var createPopper$1 = /*#__PURE__*/popperGenerator({
+    defaultModifiers: defaultModifiers$1
+  }); // eslint-disable-next-line import/no-unused-modules
+
+  var defaultModifiers = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1, offset$1, flip$1, preventOverflow$1, arrow$1, hide$1];
+  var createPopper = /*#__PURE__*/popperGenerator({
+    defaultModifiers: defaultModifiers
+  }); // eslint-disable-next-line import/no-unused-modules
+
+  const Popper = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+    __proto__: null,
+    afterMain,
+    afterRead,
+    afterWrite,
+    applyStyles: applyStyles$1,
+    arrow: arrow$1,
+    auto,
+    basePlacements,
+    beforeMain,
+    beforeRead,
+    beforeWrite,
+    bottom,
+    clippingParents,
+    computeStyles: computeStyles$1,
+    createPopper,
+    createPopperBase: createPopper$2,
+    createPopperLite: createPopper$1,
+    detectOverflow,
+    end,
+    eventListeners,
+    flip: flip$1,
+    hide: hide$1,
+    left,
+    main,
+    modifierPhases,
+    offset: offset$1,
+    placements,
+    popper,
+    popperGenerator,
+    popperOffsets: popperOffsets$1,
+    preventOverflow: preventOverflow$1,
+    read,
+    reference,
+    right,
+    start,
+    top,
+    variationPlacements,
+    viewport,
+    write
+  }, Symbol.toStringTag, { value: 'Module' }));
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap dropdown.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$a = 'dropdown';
+  const DATA_KEY$6 = 'bs.dropdown';
+  const EVENT_KEY$6 = `.${DATA_KEY$6}`;
+  const DATA_API_KEY$3 = '.data-api';
+  const ESCAPE_KEY$2 = 'Escape';
+  const TAB_KEY$1 = 'Tab';
+  const ARROW_UP_KEY$1 = 'ArrowUp';
+  const ARROW_DOWN_KEY$1 = 'ArrowDown';
+  const RIGHT_MOUSE_BUTTON = 2; // MouseEvent.button value for the secondary button, usually the right button
+
+  const EVENT_HIDE$5 = `hide${EVENT_KEY$6}`;
+  const EVENT_HIDDEN$5 = `hidden${EVENT_KEY$6}`;
+  const EVENT_SHOW$5 = `show${EVENT_KEY$6}`;
+  const EVENT_SHOWN$5 = `shown${EVENT_KEY$6}`;
+  const EVENT_CLICK_DATA_API$3 = `click${EVENT_KEY$6}${DATA_API_KEY$3}`;
+  const EVENT_KEYDOWN_DATA_API = `keydown${EVENT_KEY$6}${DATA_API_KEY$3}`;
+  const EVENT_KEYUP_DATA_API = `keyup${EVENT_KEY$6}${DATA_API_KEY$3}`;
+  const CLASS_NAME_SHOW$6 = 'show';
+  const CLASS_NAME_DROPUP = 'dropup';
+  const CLASS_NAME_DROPEND = 'dropend';
+  const CLASS_NAME_DROPSTART = 'dropstart';
+  const CLASS_NAME_DROPUP_CENTER = 'dropup-center';
+  const CLASS_NAME_DROPDOWN_CENTER = 'dropdown-center';
+  const SELECTOR_DATA_TOGGLE$3 = '[data-bs-toggle="dropdown"]:not(.disabled):not(:disabled)';
+  const SELECTOR_DATA_TOGGLE_SHOWN = `${SELECTOR_DATA_TOGGLE$3}.${CLASS_NAME_SHOW$6}`;
+  const SELECTOR_MENU = '.dropdown-menu';
+  const SELECTOR_NAVBAR = '.navbar';
+  const SELECTOR_NAVBAR_NAV = '.navbar-nav';
+  const SELECTOR_VISIBLE_ITEMS = '.dropdown-menu .dropdown-item:not(.disabled):not(:disabled)';
+  const PLACEMENT_TOP = isRTL() ? 'top-end' : 'top-start';
+  const PLACEMENT_TOPEND = isRTL() ? 'top-start' : 'top-end';
+  const PLACEMENT_BOTTOM = isRTL() ? 'bottom-end' : 'bottom-start';
+  const PLACEMENT_BOTTOMEND = isRTL() ? 'bottom-start' : 'bottom-end';
+  const PLACEMENT_RIGHT = isRTL() ? 'left-start' : 'right-start';
+  const PLACEMENT_LEFT = isRTL() ? 'right-start' : 'left-start';
+  const PLACEMENT_TOPCENTER = 'top';
+  const PLACEMENT_BOTTOMCENTER = 'bottom';
+  const Default$9 = {
+    autoClose: true,
+    boundary: 'clippingParents',
+    display: 'dynamic',
+    offset: [0, 2],
+    popperConfig: null,
+    reference: 'toggle'
+  };
+  const DefaultType$9 = {
+    autoClose: '(boolean|string)',
+    boundary: '(string|element)',
+    display: 'string',
+    offset: '(array|string|function)',
+    popperConfig: '(null|object|function)',
+    reference: '(string|element|object)'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Dropdown extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._popper = null;
+      this._parent = this._element.parentNode; // dropdown wrapper
+      // TODO: v6 revert #37011 & change markup https://getbootstrap.com/docs/5.3/forms/input-group/
+      this._menu = SelectorEngine.next(this._element, SELECTOR_MENU)[0] || SelectorEngine.prev(this._element, SELECTOR_MENU)[0] || SelectorEngine.findOne(SELECTOR_MENU, this._parent);
+      this._inNavbar = this._detectNavbar();
+    }
+
+    // Getters
+    static get Default() {
+      return Default$9;
+    }
+    static get DefaultType() {
+      return DefaultType$9;
+    }
+    static get NAME() {
+      return NAME$a;
+    }
+
+    // Public
+    toggle() {
+      return this._isShown() ? this.hide() : this.show();
+    }
+    show() {
+      if (isDisabled(this._element) || this._isShown()) {
+        return;
+      }
+      const relatedTarget = {
+        relatedTarget: this._element
+      };
+      const showEvent = EventHandler.trigger(this._element, EVENT_SHOW$5, relatedTarget);
+      if (showEvent.defaultPrevented) {
+        return;
+      }
+      this._createPopper();
+
+      // If this is a touch-enabled device we add extra
+      // empty mouseover listeners to the body's immediate children;
+      // only needed because of broken event delegation on iOS
+      // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
+      if ('ontouchstart' in document.documentElement && !this._parent.closest(SELECTOR_NAVBAR_NAV)) {
+        for (const element of [].concat(...document.body.children)) {
+          EventHandler.on(element, 'mouseover', noop);
+        }
+      }
+      this._element.focus();
+      this._element.setAttribute('aria-expanded', true);
+      this._menu.classList.add(CLASS_NAME_SHOW$6);
+      this._element.classList.add(CLASS_NAME_SHOW$6);
+      EventHandler.trigger(this._element, EVENT_SHOWN$5, relatedTarget);
+    }
+    hide() {
+      if (isDisabled(this._element) || !this._isShown()) {
+        return;
+      }
+      const relatedTarget = {
+        relatedTarget: this._element
+      };
+      this._completeHide(relatedTarget);
+    }
+    dispose() {
+      if (this._popper) {
+        this._popper.destroy();
+      }
+      super.dispose();
+    }
+    update() {
+      this._inNavbar = this._detectNavbar();
+      if (this._popper) {
+        this._popper.update();
+      }
+    }
+
+    // Private
+    _completeHide(relatedTarget) {
+      const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE$5, relatedTarget);
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+
+      // If this is a touch-enabled device we remove the extra
+      // empty mouseover listeners we added for iOS support
+      if ('ontouchstart' in document.documentElement) {
+        for (const element of [].concat(...document.body.children)) {
+          EventHandler.off(element, 'mouseover', noop);
+        }
+      }
+      if (this._popper) {
+        this._popper.destroy();
+      }
+      this._menu.classList.remove(CLASS_NAME_SHOW$6);
+      this._element.classList.remove(CLASS_NAME_SHOW$6);
+      this._element.setAttribute('aria-expanded', 'false');
+      Manipulator.removeDataAttribute(this._menu, 'popper');
+      EventHandler.trigger(this._element, EVENT_HIDDEN$5, relatedTarget);
+    }
+    _getConfig(config) {
+      config = super._getConfig(config);
+      if (typeof config.reference === 'object' && !isElement$1(config.reference) && typeof config.reference.getBoundingClientRect !== 'function') {
+        // Popper virtual elements require a getBoundingClientRect method
+        throw new TypeError(`${NAME$a.toUpperCase()}: Option "reference" provided type "object" without a required "getBoundingClientRect" method.`);
+      }
+      return config;
+    }
+    _createPopper() {
+      if (typeof Popper === 'undefined') {
+        throw new TypeError('Bootstrap\'s dropdowns require Popper (https://popper.js.org)');
+      }
+      let referenceElement = this._element;
+      if (this._config.reference === 'parent') {
+        referenceElement = this._parent;
+      } else if (isElement$1(this._config.reference)) {
+        referenceElement = getElement(this._config.reference);
+      } else if (typeof this._config.reference === 'object') {
+        referenceElement = this._config.reference;
+      }
+      const popperConfig = this._getPopperConfig();
+      this._popper = createPopper(referenceElement, this._menu, popperConfig);
+    }
+    _isShown() {
+      return this._menu.classList.contains(CLASS_NAME_SHOW$6);
+    }
+    _getPlacement() {
+      const parentDropdown = this._parent;
+      if (parentDropdown.classList.contains(CLASS_NAME_DROPEND)) {
+        return PLACEMENT_RIGHT;
+      }
+      if (parentDropdown.classList.contains(CLASS_NAME_DROPSTART)) {
+        return PLACEMENT_LEFT;
+      }
+      if (parentDropdown.classList.contains(CLASS_NAME_DROPUP_CENTER)) {
+        return PLACEMENT_TOPCENTER;
+      }
+      if (parentDropdown.classList.contains(CLASS_NAME_DROPDOWN_CENTER)) {
+        return PLACEMENT_BOTTOMCENTER;
+      }
+
+      // We need to trim the value because custom properties can also include spaces
+      const isEnd = getComputedStyle(this._menu).getPropertyValue('--bs-position').trim() === 'end';
+      if (parentDropdown.classList.contains(CLASS_NAME_DROPUP)) {
+        return isEnd ? PLACEMENT_TOPEND : PLACEMENT_TOP;
+      }
+      return isEnd ? PLACEMENT_BOTTOMEND : PLACEMENT_BOTTOM;
+    }
+    _detectNavbar() {
+      return this._element.closest(SELECTOR_NAVBAR) !== null;
+    }
+    _getOffset() {
+      const {
+        offset
+      } = this._config;
+      if (typeof offset === 'string') {
+        return offset.split(',').map(value => Number.parseInt(value, 10));
+      }
+      if (typeof offset === 'function') {
+        return popperData => offset(popperData, this._element);
+      }
+      return offset;
+    }
+    _getPopperConfig() {
+      const defaultBsPopperConfig = {
+        placement: this._getPlacement(),
+        modifiers: [{
+          name: 'preventOverflow',
+          options: {
+            boundary: this._config.boundary
+          }
+        }, {
+          name: 'offset',
+          options: {
+            offset: this._getOffset()
+          }
+        }]
+      };
+
+      // Disable Popper if we have a static display or Dropdown is in Navbar
+      if (this._inNavbar || this._config.display === 'static') {
+        Manipulator.setDataAttribute(this._menu, 'popper', 'static'); // TODO: v6 remove
+        defaultBsPopperConfig.modifiers = [{
+          name: 'applyStyles',
+          enabled: false
+        }];
+      }
+      return {
+        ...defaultBsPopperConfig,
+        ...execute(this._config.popperConfig, [defaultBsPopperConfig])
+      };
+    }
+    _selectMenuItem({
+      key,
+      target
+    }) {
+      const items = SelectorEngine.find(SELECTOR_VISIBLE_ITEMS, this._menu).filter(element => isVisible(element));
+      if (!items.length) {
+        return;
+      }
+
+      // if target isn't included in items (e.g. when expanding the dropdown)
+      // allow cycling to get the last item in case key equals ARROW_UP_KEY
+      getNextActiveElement(items, target, key === ARROW_DOWN_KEY$1, !items.includes(target)).focus();
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Dropdown.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (typeof data[config] === 'undefined') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config]();
+      });
+    }
+    static clearMenus(event) {
+      if (event.button === RIGHT_MOUSE_BUTTON || event.type === 'keyup' && event.key !== TAB_KEY$1) {
+        return;
+      }
+      const openToggles = SelectorEngine.find(SELECTOR_DATA_TOGGLE_SHOWN);
+      for (const toggle of openToggles) {
+        const context = Dropdown.getInstance(toggle);
+        if (!context || context._config.autoClose === false) {
+          continue;
+        }
+        const composedPath = event.composedPath();
+        const isMenuTarget = composedPath.includes(context._menu);
+        if (composedPath.includes(context._element) || context._config.autoClose === 'inside' && !isMenuTarget || context._config.autoClose === 'outside' && isMenuTarget) {
+          continue;
+        }
+
+        // Tab navigation through the dropdown menu or events from contained inputs shouldn't close the menu
+        if (context._menu.contains(event.target) && (event.type === 'keyup' && event.key === TAB_KEY$1 || /input|select|option|textarea|form/i.test(event.target.tagName))) {
+          continue;
+        }
+        const relatedTarget = {
+          relatedTarget: context._element
+        };
+        if (event.type === 'click') {
+          relatedTarget.clickEvent = event;
+        }
+        context._completeHide(relatedTarget);
+      }
+    }
+    static dataApiKeydownHandler(event) {
+      // If not an UP | DOWN | ESCAPE key => not a dropdown command
+      // If input/textarea && if key is other than ESCAPE => not a dropdown command
+
+      const isInput = /input|textarea/i.test(event.target.tagName);
+      const isEscapeEvent = event.key === ESCAPE_KEY$2;
+      const isUpOrDownEvent = [ARROW_UP_KEY$1, ARROW_DOWN_KEY$1].includes(event.key);
+      if (!isUpOrDownEvent && !isEscapeEvent) {
+        return;
+      }
+      if (isInput && !isEscapeEvent) {
+        return;
+      }
+      event.preventDefault();
+
+      // TODO: v6 revert #37011 & change markup https://getbootstrap.com/docs/5.3/forms/input-group/
+      const getToggleButton = this.matches(SELECTOR_DATA_TOGGLE$3) ? this : SelectorEngine.prev(this, SELECTOR_DATA_TOGGLE$3)[0] || SelectorEngine.next(this, SELECTOR_DATA_TOGGLE$3)[0] || SelectorEngine.findOne(SELECTOR_DATA_TOGGLE$3, event.delegateTarget.parentNode);
+      const instance = Dropdown.getOrCreateInstance(getToggleButton);
+      if (isUpOrDownEvent) {
+        event.stopPropagation();
+        instance.show();
+        instance._selectMenuItem(event);
+        return;
+      }
+      if (instance._isShown()) {
+        // else is escape and we check if it is shown
+        event.stopPropagation();
+        instance.hide();
+        getToggleButton.focus();
+      }
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_KEYDOWN_DATA_API, SELECTOR_DATA_TOGGLE$3, Dropdown.dataApiKeydownHandler);
+  EventHandler.on(document, EVENT_KEYDOWN_DATA_API, SELECTOR_MENU, Dropdown.dataApiKeydownHandler);
+  EventHandler.on(document, EVENT_CLICK_DATA_API$3, Dropdown.clearMenus);
+  EventHandler.on(document, EVENT_KEYUP_DATA_API, Dropdown.clearMenus);
+  EventHandler.on(document, EVENT_CLICK_DATA_API$3, SELECTOR_DATA_TOGGLE$3, function (event) {
+    event.preventDefault();
+    Dropdown.getOrCreateInstance(this).toggle();
+  });
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Dropdown);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/backdrop.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$9 = 'backdrop';
+  const CLASS_NAME_FADE$4 = 'fade';
+  const CLASS_NAME_SHOW$5 = 'show';
+  const EVENT_MOUSEDOWN = `mousedown.bs.${NAME$9}`;
+  const Default$8 = {
+    className: 'modal-backdrop',
+    clickCallback: null,
+    isAnimated: false,
+    isVisible: true,
+    // if false, we use the backdrop helper without adding any element to the dom
+    rootElement: 'body' // give the choice to place backdrop under different elements
+  };
+
+  const DefaultType$8 = {
+    className: 'string',
+    clickCallback: '(function|null)',
+    isAnimated: 'boolean',
+    isVisible: 'boolean',
+    rootElement: '(element|string)'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Backdrop extends Config {
+    constructor(config) {
+      super();
+      this._config = this._getConfig(config);
+      this._isAppended = false;
+      this._element = null;
+    }
+
+    // Getters
+    static get Default() {
+      return Default$8;
+    }
+    static get DefaultType() {
+      return DefaultType$8;
+    }
+    static get NAME() {
+      return NAME$9;
+    }
+
+    // Public
+    show(callback) {
+      if (!this._config.isVisible) {
+        execute(callback);
+        return;
+      }
+      this._append();
+      const element = this._getElement();
+      if (this._config.isAnimated) {
+        reflow(element);
+      }
+      element.classList.add(CLASS_NAME_SHOW$5);
+      this._emulateAnimation(() => {
+        execute(callback);
+      });
+    }
+    hide(callback) {
+      if (!this._config.isVisible) {
+        execute(callback);
+        return;
+      }
+      this._getElement().classList.remove(CLASS_NAME_SHOW$5);
+      this._emulateAnimation(() => {
+        this.dispose();
+        execute(callback);
+      });
+    }
+    dispose() {
+      if (!this._isAppended) {
+        return;
+      }
+      EventHandler.off(this._element, EVENT_MOUSEDOWN);
+      this._element.remove();
+      this._isAppended = false;
+    }
+
+    // Private
+    _getElement() {
+      if (!this._element) {
+        const backdrop = document.createElement('div');
+        backdrop.className = this._config.className;
+        if (this._config.isAnimated) {
+          backdrop.classList.add(CLASS_NAME_FADE$4);
+        }
+        this._element = backdrop;
+      }
+      return this._element;
+    }
+    _configAfterMerge(config) {
+      // use getElement() with the default "body" to get a fresh Element on each instantiation
+      config.rootElement = getElement(config.rootElement);
+      return config;
+    }
+    _append() {
+      if (this._isAppended) {
+        return;
+      }
+      const element = this._getElement();
+      this._config.rootElement.append(element);
+      EventHandler.on(element, EVENT_MOUSEDOWN, () => {
+        execute(this._config.clickCallback);
+      });
+      this._isAppended = true;
+    }
+    _emulateAnimation(callback) {
+      executeAfterTransition(callback, this._getElement(), this._config.isAnimated);
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/focustrap.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$8 = 'focustrap';
+  const DATA_KEY$5 = 'bs.focustrap';
+  const EVENT_KEY$5 = `.${DATA_KEY$5}`;
+  const EVENT_FOCUSIN$2 = `focusin${EVENT_KEY$5}`;
+  const EVENT_KEYDOWN_TAB = `keydown.tab${EVENT_KEY$5}`;
+  const TAB_KEY = 'Tab';
+  const TAB_NAV_FORWARD = 'forward';
+  const TAB_NAV_BACKWARD = 'backward';
+  const Default$7 = {
+    autofocus: true,
+    trapElement: null // The element to trap focus inside of
+  };
+
+  const DefaultType$7 = {
+    autofocus: 'boolean',
+    trapElement: 'element'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class FocusTrap extends Config {
+    constructor(config) {
+      super();
+      this._config = this._getConfig(config);
+      this._isActive = false;
+      this._lastTabNavDirection = null;
+    }
+
+    // Getters
+    static get Default() {
+      return Default$7;
+    }
+    static get DefaultType() {
+      return DefaultType$7;
+    }
+    static get NAME() {
+      return NAME$8;
+    }
+
+    // Public
+    activate() {
+      if (this._isActive) {
+        return;
+      }
+      if (this._config.autofocus) {
+        this._config.trapElement.focus();
+      }
+      EventHandler.off(document, EVENT_KEY$5); // guard against infinite focus loop
+      EventHandler.on(document, EVENT_FOCUSIN$2, event => this._handleFocusin(event));
+      EventHandler.on(document, EVENT_KEYDOWN_TAB, event => this._handleKeydown(event));
+      this._isActive = true;
+    }
+    deactivate() {
+      if (!this._isActive) {
+        return;
+      }
+      this._isActive = false;
+      EventHandler.off(document, EVENT_KEY$5);
+    }
+
+    // Private
+    _handleFocusin(event) {
+      const {
+        trapElement
+      } = this._config;
+      if (event.target === document || event.target === trapElement || trapElement.contains(event.target)) {
+        return;
+      }
+      const elements = SelectorEngine.focusableChildren(trapElement);
+      if (elements.length === 0) {
+        trapElement.focus();
+      } else if (this._lastTabNavDirection === TAB_NAV_BACKWARD) {
+        elements[elements.length - 1].focus();
+      } else {
+        elements[0].focus();
+      }
+    }
+    _handleKeydown(event) {
+      if (event.key !== TAB_KEY) {
+        return;
+      }
+      this._lastTabNavDirection = event.shiftKey ? TAB_NAV_BACKWARD : TAB_NAV_FORWARD;
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/scrollBar.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const SELECTOR_FIXED_CONTENT = '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top';
+  const SELECTOR_STICKY_CONTENT = '.sticky-top';
+  const PROPERTY_PADDING = 'padding-right';
+  const PROPERTY_MARGIN = 'margin-right';
+
+  /**
+   * Class definition
+   */
+
+  class ScrollBarHelper {
+    constructor() {
+      this._element = document.body;
+    }
+
+    // Public
+    getWidth() {
+      // https://developer.mozilla.org/en-US/docs/Web/API/Window/innerWidth#usage_notes
+      const documentWidth = document.documentElement.clientWidth;
+      return Math.abs(window.innerWidth - documentWidth);
+    }
+    hide() {
+      const width = this.getWidth();
+      this._disableOverFlow();
+      // give padding to element to balance the hidden scrollbar width
+      this._setElementAttributes(this._element, PROPERTY_PADDING, calculatedValue => calculatedValue + width);
+      // trick: We adjust positive paddingRight and negative marginRight to sticky-top elements to keep showing fullwidth
+      this._setElementAttributes(SELECTOR_FIXED_CONTENT, PROPERTY_PADDING, calculatedValue => calculatedValue + width);
+      this._setElementAttributes(SELECTOR_STICKY_CONTENT, PROPERTY_MARGIN, calculatedValue => calculatedValue - width);
+    }
+    reset() {
+      this._resetElementAttributes(this._element, 'overflow');
+      this._resetElementAttributes(this._element, PROPERTY_PADDING);
+      this._resetElementAttributes(SELECTOR_FIXED_CONTENT, PROPERTY_PADDING);
+      this._resetElementAttributes(SELECTOR_STICKY_CONTENT, PROPERTY_MARGIN);
+    }
+    isOverflowing() {
+      return this.getWidth() > 0;
+    }
+
+    // Private
+    _disableOverFlow() {
+      this._saveInitialAttribute(this._element, 'overflow');
+      this._element.style.overflow = 'hidden';
+    }
+    _setElementAttributes(selector, styleProperty, callback) {
+      const scrollbarWidth = this.getWidth();
+      const manipulationCallBack = element => {
+        if (element !== this._element && window.innerWidth > element.clientWidth + scrollbarWidth) {
+          return;
+        }
+        this._saveInitialAttribute(element, styleProperty);
+        const calculatedValue = window.getComputedStyle(element).getPropertyValue(styleProperty);
+        element.style.setProperty(styleProperty, `${callback(Number.parseFloat(calculatedValue))}px`);
+      };
+      this._applyManipulationCallback(selector, manipulationCallBack);
+    }
+    _saveInitialAttribute(element, styleProperty) {
+      const actualValue = element.style.getPropertyValue(styleProperty);
+      if (actualValue) {
+        Manipulator.setDataAttribute(element, styleProperty, actualValue);
+      }
+    }
+    _resetElementAttributes(selector, styleProperty) {
+      const manipulationCallBack = element => {
+        const value = Manipulator.getDataAttribute(element, styleProperty);
+        // We only want to remove the property if the value is `null`; the value can also be zero
+        if (value === null) {
+          element.style.removeProperty(styleProperty);
+          return;
+        }
+        Manipulator.removeDataAttribute(element, styleProperty);
+        element.style.setProperty(styleProperty, value);
+      };
+      this._applyManipulationCallback(selector, manipulationCallBack);
+    }
+    _applyManipulationCallback(selector, callBack) {
+      if (isElement$1(selector)) {
+        callBack(selector);
+        return;
+      }
+      for (const sel of SelectorEngine.find(selector, this._element)) {
+        callBack(sel);
+      }
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap modal.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$7 = 'modal';
+  const DATA_KEY$4 = 'bs.modal';
+  const EVENT_KEY$4 = `.${DATA_KEY$4}`;
+  const DATA_API_KEY$2 = '.data-api';
+  const ESCAPE_KEY$1 = 'Escape';
+  const EVENT_HIDE$4 = `hide${EVENT_KEY$4}`;
+  const EVENT_HIDE_PREVENTED$1 = `hidePrevented${EVENT_KEY$4}`;
+  const EVENT_HIDDEN$4 = `hidden${EVENT_KEY$4}`;
+  const EVENT_SHOW$4 = `show${EVENT_KEY$4}`;
+  const EVENT_SHOWN$4 = `shown${EVENT_KEY$4}`;
+  const EVENT_RESIZE$1 = `resize${EVENT_KEY$4}`;
+  const EVENT_CLICK_DISMISS = `click.dismiss${EVENT_KEY$4}`;
+  const EVENT_MOUSEDOWN_DISMISS = `mousedown.dismiss${EVENT_KEY$4}`;
+  const EVENT_KEYDOWN_DISMISS$1 = `keydown.dismiss${EVENT_KEY$4}`;
+  const EVENT_CLICK_DATA_API$2 = `click${EVENT_KEY$4}${DATA_API_KEY$2}`;
+  const CLASS_NAME_OPEN = 'modal-open';
+  const CLASS_NAME_FADE$3 = 'fade';
+  const CLASS_NAME_SHOW$4 = 'show';
+  const CLASS_NAME_STATIC = 'modal-static';
+  const OPEN_SELECTOR$1 = '.modal.show';
+  const SELECTOR_DIALOG = '.modal-dialog';
+  const SELECTOR_MODAL_BODY = '.modal-body';
+  const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="modal"]';
+  const Default$6 = {
+    backdrop: true,
+    focus: true,
+    keyboard: true
+  };
+  const DefaultType$6 = {
+    backdrop: '(boolean|string)',
+    focus: 'boolean',
+    keyboard: 'boolean'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Modal extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._dialog = SelectorEngine.findOne(SELECTOR_DIALOG, this._element);
+      this._backdrop = this._initializeBackDrop();
+      this._focustrap = this._initializeFocusTrap();
+      this._isShown = false;
+      this._isTransitioning = false;
+      this._scrollBar = new ScrollBarHelper();
+      this._addEventListeners();
+    }
+
+    // Getters
+    static get Default() {
+      return Default$6;
+    }
+    static get DefaultType() {
+      return DefaultType$6;
+    }
+    static get NAME() {
+      return NAME$7;
+    }
+
+    // Public
+    toggle(relatedTarget) {
+      return this._isShown ? this.hide() : this.show(relatedTarget);
+    }
+    show(relatedTarget) {
+      if (this._isShown || this._isTransitioning) {
+        return;
+      }
+      const showEvent = EventHandler.trigger(this._element, EVENT_SHOW$4, {
+        relatedTarget
+      });
+      if (showEvent.defaultPrevented) {
+        return;
+      }
+      this._isShown = true;
+      this._isTransitioning = true;
+      this._scrollBar.hide();
+      document.body.classList.add(CLASS_NAME_OPEN);
+      this._adjustDialog();
+      this._backdrop.show(() => this._showElement(relatedTarget));
+    }
+    hide() {
+      if (!this._isShown || this._isTransitioning) {
+        return;
+      }
+      const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE$4);
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+      this._isShown = false;
+      this._isTransitioning = true;
+      this._focustrap.deactivate();
+      this._element.classList.remove(CLASS_NAME_SHOW$4);
+      this._queueCallback(() => this._hideModal(), this._element, this._isAnimated());
+    }
+    dispose() {
+      EventHandler.off(window, EVENT_KEY$4);
+      EventHandler.off(this._dialog, EVENT_KEY$4);
+      this._backdrop.dispose();
+      this._focustrap.deactivate();
+      super.dispose();
+    }
+    handleUpdate() {
+      this._adjustDialog();
+    }
+
+    // Private
+    _initializeBackDrop() {
+      return new Backdrop({
+        isVisible: Boolean(this._config.backdrop),
+        // 'static' option will be translated to true, and booleans will keep their value,
+        isAnimated: this._isAnimated()
+      });
+    }
+    _initializeFocusTrap() {
+      return new FocusTrap({
+        trapElement: this._element
+      });
+    }
+    _showElement(relatedTarget) {
+      // try to append dynamic modal
+      if (!document.body.contains(this._element)) {
+        document.body.append(this._element);
+      }
+      this._element.style.display = 'block';
+      this._element.removeAttribute('aria-hidden');
+      this._element.setAttribute('aria-modal', true);
+      this._element.setAttribute('role', 'dialog');
+      this._element.scrollTop = 0;
+      const modalBody = SelectorEngine.findOne(SELECTOR_MODAL_BODY, this._dialog);
+      if (modalBody) {
+        modalBody.scrollTop = 0;
+      }
+      reflow(this._element);
+      this._element.classList.add(CLASS_NAME_SHOW$4);
+      const transitionComplete = () => {
+        if (this._config.focus) {
+          this._focustrap.activate();
+        }
+        this._isTransitioning = false;
+        EventHandler.trigger(this._element, EVENT_SHOWN$4, {
+          relatedTarget
+        });
+      };
+      this._queueCallback(transitionComplete, this._dialog, this._isAnimated());
+    }
+    _addEventListeners() {
+      EventHandler.on(this._element, EVENT_KEYDOWN_DISMISS$1, event => {
+        if (event.key !== ESCAPE_KEY$1) {
+          return;
+        }
+        if (this._config.keyboard) {
+          this.hide();
+          return;
+        }
+        this._triggerBackdropTransition();
+      });
+      EventHandler.on(window, EVENT_RESIZE$1, () => {
+        if (this._isShown && !this._isTransitioning) {
+          this._adjustDialog();
+        }
+      });
+      EventHandler.on(this._element, EVENT_MOUSEDOWN_DISMISS, event => {
+        // a bad trick to segregate clicks that may start inside dialog but end outside, and avoid listen to scrollbar clicks
+        EventHandler.one(this._element, EVENT_CLICK_DISMISS, event2 => {
+          if (this._element !== event.target || this._element !== event2.target) {
+            return;
+          }
+          if (this._config.backdrop === 'static') {
+            this._triggerBackdropTransition();
+            return;
+          }
+          if (this._config.backdrop) {
+            this.hide();
+          }
+        });
+      });
+    }
+    _hideModal() {
+      this._element.style.display = 'none';
+      this._element.setAttribute('aria-hidden', true);
+      this._element.removeAttribute('aria-modal');
+      this._element.removeAttribute('role');
+      this._isTransitioning = false;
+      this._backdrop.hide(() => {
+        document.body.classList.remove(CLASS_NAME_OPEN);
+        this._resetAdjustments();
+        this._scrollBar.reset();
+        EventHandler.trigger(this._element, EVENT_HIDDEN$4);
+      });
+    }
+    _isAnimated() {
+      return this._element.classList.contains(CLASS_NAME_FADE$3);
+    }
+    _triggerBackdropTransition() {
+      const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE_PREVENTED$1);
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+      const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+      const initialOverflowY = this._element.style.overflowY;
+      // return if the following background transition hasn't yet completed
+      if (initialOverflowY === 'hidden' || this._element.classList.contains(CLASS_NAME_STATIC)) {
+        return;
+      }
+      if (!isModalOverflowing) {
+        this._element.style.overflowY = 'hidden';
+      }
+      this._element.classList.add(CLASS_NAME_STATIC);
+      this._queueCallback(() => {
+        this._element.classList.remove(CLASS_NAME_STATIC);
+        this._queueCallback(() => {
+          this._element.style.overflowY = initialOverflowY;
+        }, this._dialog);
+      }, this._dialog);
+      this._element.focus();
+    }
+
+    /**
+     * The following methods are used to handle overflowing modals
+     */
+
+    _adjustDialog() {
+      const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+      const scrollbarWidth = this._scrollBar.getWidth();
+      const isBodyOverflowing = scrollbarWidth > 0;
+      if (isBodyOverflowing && !isModalOverflowing) {
+        const property = isRTL() ? 'paddingLeft' : 'paddingRight';
+        this._element.style[property] = `${scrollbarWidth}px`;
+      }
+      if (!isBodyOverflowing && isModalOverflowing) {
+        const property = isRTL() ? 'paddingRight' : 'paddingLeft';
+        this._element.style[property] = `${scrollbarWidth}px`;
+      }
+    }
+    _resetAdjustments() {
+      this._element.style.paddingLeft = '';
+      this._element.style.paddingRight = '';
+    }
+
+    // Static
+    static jQueryInterface(config, relatedTarget) {
+      return this.each(function () {
+        const data = Modal.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (typeof data[config] === 'undefined') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config](relatedTarget);
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API$2, SELECTOR_DATA_TOGGLE$2, function (event) {
+    const target = SelectorEngine.getElementFromSelector(this);
+    if (['A', 'AREA'].includes(this.tagName)) {
+      event.preventDefault();
+    }
+    EventHandler.one(target, EVENT_SHOW$4, showEvent => {
+      if (showEvent.defaultPrevented) {
+        // only register focus restorer if modal will actually get shown
+        return;
+      }
+      EventHandler.one(target, EVENT_HIDDEN$4, () => {
+        if (isVisible(this)) {
+          this.focus();
+        }
+      });
+    });
+
+    // avoid conflict when clicking modal toggler while another one is open
+    const alreadyOpen = SelectorEngine.findOne(OPEN_SELECTOR$1);
+    if (alreadyOpen) {
+      Modal.getInstance(alreadyOpen).hide();
+    }
+    const data = Modal.getOrCreateInstance(target);
+    data.toggle(this);
+  });
+  enableDismissTrigger(Modal);
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Modal);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap offcanvas.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$6 = 'offcanvas';
+  const DATA_KEY$3 = 'bs.offcanvas';
+  const EVENT_KEY$3 = `.${DATA_KEY$3}`;
+  const DATA_API_KEY$1 = '.data-api';
+  const EVENT_LOAD_DATA_API$2 = `load${EVENT_KEY$3}${DATA_API_KEY$1}`;
+  const ESCAPE_KEY = 'Escape';
+  const CLASS_NAME_SHOW$3 = 'show';
+  const CLASS_NAME_SHOWING$1 = 'showing';
+  const CLASS_NAME_HIDING = 'hiding';
+  const CLASS_NAME_BACKDROP = 'offcanvas-backdrop';
+  const OPEN_SELECTOR = '.offcanvas.show';
+  const EVENT_SHOW$3 = `show${EVENT_KEY$3}`;
+  const EVENT_SHOWN$3 = `shown${EVENT_KEY$3}`;
+  const EVENT_HIDE$3 = `hide${EVENT_KEY$3}`;
+  const EVENT_HIDE_PREVENTED = `hidePrevented${EVENT_KEY$3}`;
+  const EVENT_HIDDEN$3 = `hidden${EVENT_KEY$3}`;
+  const EVENT_RESIZE = `resize${EVENT_KEY$3}`;
+  const EVENT_CLICK_DATA_API$1 = `click${EVENT_KEY$3}${DATA_API_KEY$1}`;
+  const EVENT_KEYDOWN_DISMISS = `keydown.dismiss${EVENT_KEY$3}`;
+  const SELECTOR_DATA_TOGGLE$1 = '[data-bs-toggle="offcanvas"]';
+  const Default$5 = {
+    backdrop: true,
+    keyboard: true,
+    scroll: false
+  };
+  const DefaultType$5 = {
+    backdrop: '(boolean|string)',
+    keyboard: 'boolean',
+    scroll: 'boolean'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Offcanvas extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._isShown = false;
+      this._backdrop = this._initializeBackDrop();
+      this._focustrap = this._initializeFocusTrap();
+      this._addEventListeners();
+    }
+
+    // Getters
+    static get Default() {
+      return Default$5;
+    }
+    static get DefaultType() {
+      return DefaultType$5;
+    }
+    static get NAME() {
+      return NAME$6;
+    }
+
+    // Public
+    toggle(relatedTarget) {
+      return this._isShown ? this.hide() : this.show(relatedTarget);
+    }
+    show(relatedTarget) {
+      if (this._isShown) {
+        return;
+      }
+      const showEvent = EventHandler.trigger(this._element, EVENT_SHOW$3, {
+        relatedTarget
+      });
+      if (showEvent.defaultPrevented) {
+        return;
+      }
+      this._isShown = true;
+      this._backdrop.show();
+      if (!this._config.scroll) {
+        new ScrollBarHelper().hide();
+      }
+      this._element.setAttribute('aria-modal', true);
+      this._element.setAttribute('role', 'dialog');
+      this._element.classList.add(CLASS_NAME_SHOWING$1);
+      const completeCallBack = () => {
+        if (!this._config.scroll || this._config.backdrop) {
+          this._focustrap.activate();
+        }
+        this._element.classList.add(CLASS_NAME_SHOW$3);
+        this._element.classList.remove(CLASS_NAME_SHOWING$1);
+        EventHandler.trigger(this._element, EVENT_SHOWN$3, {
+          relatedTarget
+        });
+      };
+      this._queueCallback(completeCallBack, this._element, true);
+    }
+    hide() {
+      if (!this._isShown) {
+        return;
+      }
+      const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE$3);
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+      this._focustrap.deactivate();
+      this._element.blur();
+      this._isShown = false;
+      this._element.classList.add(CLASS_NAME_HIDING);
+      this._backdrop.hide();
+      const completeCallback = () => {
+        this._element.classList.remove(CLASS_NAME_SHOW$3, CLASS_NAME_HIDING);
+        this._element.removeAttribute('aria-modal');
+        this._element.removeAttribute('role');
+        if (!this._config.scroll) {
+          new ScrollBarHelper().reset();
+        }
+        EventHandler.trigger(this._element, EVENT_HIDDEN$3);
+      };
+      this._queueCallback(completeCallback, this._element, true);
+    }
+    dispose() {
+      this._backdrop.dispose();
+      this._focustrap.deactivate();
+      super.dispose();
+    }
+
+    // Private
+    _initializeBackDrop() {
+      const clickCallback = () => {
+        if (this._config.backdrop === 'static') {
+          EventHandler.trigger(this._element, EVENT_HIDE_PREVENTED);
+          return;
+        }
+        this.hide();
+      };
+
+      // 'static' option will be translated to true, and booleans will keep their value
+      const isVisible = Boolean(this._config.backdrop);
+      return new Backdrop({
+        className: CLASS_NAME_BACKDROP,
+        isVisible,
+        isAnimated: true,
+        rootElement: this._element.parentNode,
+        clickCallback: isVisible ? clickCallback : null
+      });
+    }
+    _initializeFocusTrap() {
+      return new FocusTrap({
+        trapElement: this._element
+      });
+    }
+    _addEventListeners() {
+      EventHandler.on(this._element, EVENT_KEYDOWN_DISMISS, event => {
+        if (event.key !== ESCAPE_KEY) {
+          return;
+        }
+        if (this._config.keyboard) {
+          this.hide();
+          return;
+        }
+        EventHandler.trigger(this._element, EVENT_HIDE_PREVENTED);
+      });
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Offcanvas.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config](this);
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API$1, SELECTOR_DATA_TOGGLE$1, function (event) {
+    const target = SelectorEngine.getElementFromSelector(this);
+    if (['A', 'AREA'].includes(this.tagName)) {
+      event.preventDefault();
+    }
+    if (isDisabled(this)) {
+      return;
+    }
+    EventHandler.one(target, EVENT_HIDDEN$3, () => {
+      // focus on trigger when it is closed
+      if (isVisible(this)) {
+        this.focus();
+      }
+    });
+
+    // avoid conflict when clicking a toggler of an offcanvas, while another is open
+    const alreadyOpen = SelectorEngine.findOne(OPEN_SELECTOR);
+    if (alreadyOpen && alreadyOpen !== target) {
+      Offcanvas.getInstance(alreadyOpen).hide();
+    }
+    const data = Offcanvas.getOrCreateInstance(target);
+    data.toggle(this);
+  });
+  EventHandler.on(window, EVENT_LOAD_DATA_API$2, () => {
+    for (const selector of SelectorEngine.find(OPEN_SELECTOR)) {
+      Offcanvas.getOrCreateInstance(selector).show();
+    }
+  });
+  EventHandler.on(window, EVENT_RESIZE, () => {
+    for (const element of SelectorEngine.find('[aria-modal][class*=show][class*=offcanvas-]')) {
+      if (getComputedStyle(element).position !== 'fixed') {
+        Offcanvas.getOrCreateInstance(element).hide();
+      }
+    }
+  });
+  enableDismissTrigger(Offcanvas);
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Offcanvas);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/sanitizer.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  // js-docs-start allow-list
+  const ARIA_ATTRIBUTE_PATTERN = /^aria-[\w-]*$/i;
+  const DefaultAllowlist = {
+    // Global attributes allowed on any supplied element below.
+    '*': ['class', 'dir', 'id', 'lang', 'role', ARIA_ATTRIBUTE_PATTERN],
+    a: ['target', 'href', 'title', 'rel'],
+    area: [],
+    b: [],
+    br: [],
+    col: [],
+    code: [],
+    div: [],
+    em: [],
+    hr: [],
+    h1: [],
+    h2: [],
+    h3: [],
+    h4: [],
+    h5: [],
+    h6: [],
+    i: [],
+    img: ['src', 'srcset', 'alt', 'title', 'width', 'height'],
+    li: [],
+    ol: [],
+    p: [],
+    pre: [],
+    s: [],
+    small: [],
+    span: [],
+    sub: [],
+    sup: [],
+    strong: [],
+    u: [],
+    ul: []
+  };
+  // js-docs-end allow-list
+
+  const uriAttributes = new Set(['background', 'cite', 'href', 'itemtype', 'longdesc', 'poster', 'src', 'xlink:href']);
+
+  /**
+   * A pattern that recognizes URLs that are safe wrt. XSS in URL navigation
+   * contexts.
+   *
+   * Shout-out to Angular https://github.com/angular/angular/blob/15.2.8/packages/core/src/sanitization/url_sanitizer.ts#L38
+   */
+  // eslint-disable-next-line unicorn/better-regex
+  const SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i;
+  const allowedAttribute = (attribute, allowedAttributeList) => {
+    const attributeName = attribute.nodeName.toLowerCase();
+    if (allowedAttributeList.includes(attributeName)) {
+      if (uriAttributes.has(attributeName)) {
+        return Boolean(SAFE_URL_PATTERN.test(attribute.nodeValue));
+      }
+      return true;
+    }
+
+    // Check if a regular expression validates the attribute.
+    return allowedAttributeList.filter(attributeRegex => attributeRegex instanceof RegExp).some(regex => regex.test(attributeName));
+  };
+  function sanitizeHtml(unsafeHtml, allowList, sanitizeFunction) {
+    if (!unsafeHtml.length) {
+      return unsafeHtml;
+    }
+    if (sanitizeFunction && typeof sanitizeFunction === 'function') {
+      return sanitizeFunction(unsafeHtml);
+    }
+    const domParser = new window.DOMParser();
+    const createdDocument = domParser.parseFromString(unsafeHtml, 'text/html');
+    const elements = [].concat(...createdDocument.body.querySelectorAll('*'));
+    for (const element of elements) {
+      const elementName = element.nodeName.toLowerCase();
+      if (!Object.keys(allowList).includes(elementName)) {
+        element.remove();
+        continue;
+      }
+      const attributeList = [].concat(...element.attributes);
+      const allowedAttributes = [].concat(allowList['*'] || [], allowList[elementName] || []);
+      for (const attribute of attributeList) {
+        if (!allowedAttribute(attribute, allowedAttributes)) {
+          element.removeAttribute(attribute.nodeName);
+        }
+      }
+    }
+    return createdDocument.body.innerHTML;
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/template-factory.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$5 = 'TemplateFactory';
+  const Default$4 = {
+    allowList: DefaultAllowlist,
+    content: {},
+    // { selector : text ,  selector2 : text2 , }
+    extraClass: '',
+    html: false,
+    sanitize: true,
+    sanitizeFn: null,
+    template: '<div></div>'
+  };
+  const DefaultType$4 = {
+    allowList: 'object',
+    content: 'object',
+    extraClass: '(string|function)',
+    html: 'boolean',
+    sanitize: 'boolean',
+    sanitizeFn: '(null|function)',
+    template: 'string'
+  };
+  const DefaultContentType = {
+    entry: '(string|element|function|null)',
+    selector: '(string|element)'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class TemplateFactory extends Config {
+    constructor(config) {
+      super();
+      this._config = this._getConfig(config);
+    }
+
+    // Getters
+    static get Default() {
+      return Default$4;
+    }
+    static get DefaultType() {
+      return DefaultType$4;
+    }
+    static get NAME() {
+      return NAME$5;
+    }
+
+    // Public
+    getContent() {
+      return Object.values(this._config.content).map(config => this._resolvePossibleFunction(config)).filter(Boolean);
+    }
+    hasContent() {
+      return this.getContent().length > 0;
+    }
+    changeContent(content) {
+      this._checkContent(content);
+      this._config.content = {
+        ...this._config.content,
+        ...content
+      };
+      return this;
+    }
+    toHtml() {
+      const templateWrapper = document.createElement('div');
+      templateWrapper.innerHTML = this._maybeSanitize(this._config.template);
+      for (const [selector, text] of Object.entries(this._config.content)) {
+        this._setContent(templateWrapper, text, selector);
+      }
+      const template = templateWrapper.children[0];
+      const extraClass = this._resolvePossibleFunction(this._config.extraClass);
+      if (extraClass) {
+        template.classList.add(...extraClass.split(' '));
+      }
+      return template;
+    }
+
+    // Private
+    _typeCheckConfig(config) {
+      super._typeCheckConfig(config);
+      this._checkContent(config.content);
+    }
+    _checkContent(arg) {
+      for (const [selector, content] of Object.entries(arg)) {
+        super._typeCheckConfig({
+          selector,
+          entry: content
+        }, DefaultContentType);
+      }
+    }
+    _setContent(template, content, selector) {
+      const templateElement = SelectorEngine.findOne(selector, template);
+      if (!templateElement) {
+        return;
+      }
+      content = this._resolvePossibleFunction(content);
+      if (!content) {
+        templateElement.remove();
+        return;
+      }
+      if (isElement$1(content)) {
+        this._putElementInTemplate(getElement(content), templateElement);
+        return;
+      }
+      if (this._config.html) {
+        templateElement.innerHTML = this._maybeSanitize(content);
+        return;
+      }
+      templateElement.textContent = content;
+    }
+    _maybeSanitize(arg) {
+      return this._config.sanitize ? sanitizeHtml(arg, this._config.allowList, this._config.sanitizeFn) : arg;
+    }
+    _resolvePossibleFunction(arg) {
+      return execute(arg, [this]);
+    }
+    _putElementInTemplate(element, templateElement) {
+      if (this._config.html) {
+        templateElement.innerHTML = '';
+        templateElement.append(element);
+        return;
+      }
+      templateElement.textContent = element.textContent;
+    }
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap tooltip.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$4 = 'tooltip';
+  const DISALLOWED_ATTRIBUTES = new Set(['sanitize', 'allowList', 'sanitizeFn']);
+  const CLASS_NAME_FADE$2 = 'fade';
+  const CLASS_NAME_MODAL = 'modal';
+  const CLASS_NAME_SHOW$2 = 'show';
+  const SELECTOR_TOOLTIP_INNER = '.tooltip-inner';
+  const SELECTOR_MODAL = `.${CLASS_NAME_MODAL}`;
+  const EVENT_MODAL_HIDE = 'hide.bs.modal';
+  const TRIGGER_HOVER = 'hover';
+  const TRIGGER_FOCUS = 'focus';
+  const TRIGGER_CLICK = 'click';
+  const TRIGGER_MANUAL = 'manual';
+  const EVENT_HIDE$2 = 'hide';
+  const EVENT_HIDDEN$2 = 'hidden';
+  const EVENT_SHOW$2 = 'show';
+  const EVENT_SHOWN$2 = 'shown';
+  const EVENT_INSERTED = 'inserted';
+  const EVENT_CLICK$1 = 'click';
+  const EVENT_FOCUSIN$1 = 'focusin';
+  const EVENT_FOCUSOUT$1 = 'focusout';
+  const EVENT_MOUSEENTER = 'mouseenter';
+  const EVENT_MOUSELEAVE = 'mouseleave';
+  const AttachmentMap = {
+    AUTO: 'auto',
+    TOP: 'top',
+    RIGHT: isRTL() ? 'left' : 'right',
+    BOTTOM: 'bottom',
+    LEFT: isRTL() ? 'right' : 'left'
+  };
+  const Default$3 = {
+    allowList: DefaultAllowlist,
+    animation: true,
+    boundary: 'clippingParents',
+    container: false,
+    customClass: '',
+    delay: 0,
+    fallbackPlacements: ['top', 'right', 'bottom', 'left'],
+    html: false,
+    offset: [0, 6],
+    placement: 'top',
+    popperConfig: null,
+    sanitize: true,
+    sanitizeFn: null,
+    selector: false,
+    template: '<div class="tooltip" role="tooltip">' + '<div class="tooltip-arrow"></div>' + '<div class="tooltip-inner"></div>' + '</div>',
+    title: '',
+    trigger: 'hover focus'
+  };
+  const DefaultType$3 = {
+    allowList: 'object',
+    animation: 'boolean',
+    boundary: '(string|element)',
+    container: '(string|element|boolean)',
+    customClass: '(string|function)',
+    delay: '(number|object)',
+    fallbackPlacements: 'array',
+    html: 'boolean',
+    offset: '(array|string|function)',
+    placement: '(string|function)',
+    popperConfig: '(null|object|function)',
+    sanitize: 'boolean',
+    sanitizeFn: '(null|function)',
+    selector: '(string|boolean)',
+    template: 'string',
+    title: '(string|element|function)',
+    trigger: 'string'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Tooltip extends BaseComponent {
+    constructor(element, config) {
+      if (typeof Popper === 'undefined') {
+        throw new TypeError('Bootstrap\'s tooltips require Popper (https://popper.js.org)');
+      }
+      super(element, config);
+
+      // Private
+      this._isEnabled = true;
+      this._timeout = 0;
+      this._isHovered = null;
+      this._activeTrigger = {};
+      this._popper = null;
+      this._templateFactory = null;
+      this._newContent = null;
+
+      // Protected
+      this.tip = null;
+      this._setListeners();
+      if (!this._config.selector) {
+        this._fixTitle();
+      }
+    }
+
+    // Getters
+    static get Default() {
+      return Default$3;
+    }
+    static get DefaultType() {
+      return DefaultType$3;
+    }
+    static get NAME() {
+      return NAME$4;
+    }
+
+    // Public
+    enable() {
+      this._isEnabled = true;
+    }
+    disable() {
+      this._isEnabled = false;
+    }
+    toggleEnabled() {
+      this._isEnabled = !this._isEnabled;
+    }
+    toggle() {
+      if (!this._isEnabled) {
+        return;
+      }
+      this._activeTrigger.click = !this._activeTrigger.click;
+      if (this._isShown()) {
+        this._leave();
+        return;
+      }
+      this._enter();
+    }
+    dispose() {
+      clearTimeout(this._timeout);
+      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+      if (this._element.getAttribute('data-bs-original-title')) {
+        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
+      }
+      this._disposePopper();
+      super.dispose();
+    }
+    show() {
+      if (this._element.style.display === 'none') {
+        throw new Error('Please use show on visible elements');
+      }
+      if (!(this._isWithContent() && this._isEnabled)) {
+        return;
+      }
+      const showEvent = EventHandler.trigger(this._element, this.constructor.eventName(EVENT_SHOW$2));
+      const shadowRoot = findShadowRoot(this._element);
+      const isInTheDom = (shadowRoot || this._element.ownerDocument.documentElement).contains(this._element);
+      if (showEvent.defaultPrevented || !isInTheDom) {
+        return;
+      }
+
+      // TODO: v6 remove this or make it optional
+      this._disposePopper();
+      const tip = this._getTipElement();
+      this._element.setAttribute('aria-describedby', tip.getAttribute('id'));
+      const {
+        container
+      } = this._config;
+      if (!this._element.ownerDocument.documentElement.contains(this.tip)) {
+        container.append(tip);
+        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_INSERTED));
+      }
+      this._popper = this._createPopper(tip);
+      tip.classList.add(CLASS_NAME_SHOW$2);
+
+      // If this is a touch-enabled device we add extra
+      // empty mouseover listeners to the body's immediate children;
+      // only needed because of broken event delegation on iOS
+      // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
+      if ('ontouchstart' in document.documentElement) {
+        for (const element of [].concat(...document.body.children)) {
+          EventHandler.on(element, 'mouseover', noop);
+        }
+      }
+      const complete = () => {
+        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_SHOWN$2));
+        if (this._isHovered === false) {
+          this._leave();
+        }
+        this._isHovered = false;
+      };
+      this._queueCallback(complete, this.tip, this._isAnimated());
+    }
+    hide() {
+      if (!this._isShown()) {
+        return;
+      }
+      const hideEvent = EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDE$2));
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+      const tip = this._getTipElement();
+      tip.classList.remove(CLASS_NAME_SHOW$2);
+
+      // If this is a touch-enabled device we remove the extra
+      // empty mouseover listeners we added for iOS support
+      if ('ontouchstart' in document.documentElement) {
+        for (const element of [].concat(...document.body.children)) {
+          EventHandler.off(element, 'mouseover', noop);
+        }
+      }
+      this._activeTrigger[TRIGGER_CLICK] = false;
+      this._activeTrigger[TRIGGER_FOCUS] = false;
+      this._activeTrigger[TRIGGER_HOVER] = false;
+      this._isHovered = null; // it is a trick to support manual triggering
+
+      const complete = () => {
+        if (this._isWithActiveTrigger()) {
+          return;
+        }
+        if (!this._isHovered) {
+          this._disposePopper();
+        }
+        this._element.removeAttribute('aria-describedby');
+        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
+      };
+      this._queueCallback(complete, this.tip, this._isAnimated());
+    }
+    update() {
+      if (this._popper) {
+        this._popper.update();
+      }
+    }
+
+    // Protected
+    _isWithContent() {
+      return Boolean(this._getTitle());
+    }
+    _getTipElement() {
+      if (!this.tip) {
+        this.tip = this._createTipElement(this._newContent || this._getContentForTemplate());
+      }
+      return this.tip;
+    }
+    _createTipElement(content) {
+      const tip = this._getTemplateFactory(content).toHtml();
+
+      // TODO: remove this check in v6
+      if (!tip) {
+        return null;
+      }
+      tip.classList.remove(CLASS_NAME_FADE$2, CLASS_NAME_SHOW$2);
+      // TODO: v6 the following can be achieved with CSS only
+      tip.classList.add(`bs-${this.constructor.NAME}-auto`);
+      const tipId = getUID(this.constructor.NAME).toString();
+      tip.setAttribute('id', tipId);
+      if (this._isAnimated()) {
+        tip.classList.add(CLASS_NAME_FADE$2);
+      }
+      return tip;
+    }
+    setContent(content) {
+      this._newContent = content;
+      if (this._isShown()) {
+        this._disposePopper();
+        this.show();
+      }
+    }
+    _getTemplateFactory(content) {
+      if (this._templateFactory) {
+        this._templateFactory.changeContent(content);
+      } else {
+        this._templateFactory = new TemplateFactory({
+          ...this._config,
+          // the `content` var has to be after `this._config`
+          // to override config.content in case of popover
+          content,
+          extraClass: this._resolvePossibleFunction(this._config.customClass)
+        });
+      }
+      return this._templateFactory;
+    }
+    _getContentForTemplate() {
+      return {
+        [SELECTOR_TOOLTIP_INNER]: this._getTitle()
+      };
+    }
+    _getTitle() {
+      return this._resolvePossibleFunction(this._config.title) || this._element.getAttribute('data-bs-original-title');
+    }
+
+    // Private
+    _initializeOnDelegatedTarget(event) {
+      return this.constructor.getOrCreateInstance(event.delegateTarget, this._getDelegateConfig());
+    }
+    _isAnimated() {
+      return this._config.animation || this.tip && this.tip.classList.contains(CLASS_NAME_FADE$2);
+    }
+    _isShown() {
+      return this.tip && this.tip.classList.contains(CLASS_NAME_SHOW$2);
+    }
+    _createPopper(tip) {
+      const placement = execute(this._config.placement, [this, tip, this._element]);
+      const attachment = AttachmentMap[placement.toUpperCase()];
+      return createPopper(this._element, tip, this._getPopperConfig(attachment));
+    }
+    _getOffset() {
+      const {
+        offset
+      } = this._config;
+      if (typeof offset === 'string') {
+        return offset.split(',').map(value => Number.parseInt(value, 10));
+      }
+      if (typeof offset === 'function') {
+        return popperData => offset(popperData, this._element);
+      }
+      return offset;
+    }
+    _resolvePossibleFunction(arg) {
+      return execute(arg, [this._element]);
+    }
+    _getPopperConfig(attachment) {
+      const defaultBsPopperConfig = {
+        placement: attachment,
+        modifiers: [{
+          name: 'flip',
+          options: {
+            fallbackPlacements: this._config.fallbackPlacements
+          }
+        }, {
+          name: 'offset',
+          options: {
+            offset: this._getOffset()
+          }
+        }, {
+          name: 'preventOverflow',
+          options: {
+            boundary: this._config.boundary
+          }
+        }, {
+          name: 'arrow',
+          options: {
+            element: `.${this.constructor.NAME}-arrow`
+          }
+        }, {
+          name: 'preSetPlacement',
+          enabled: true,
+          phase: 'beforeMain',
+          fn: data => {
+            // Pre-set Popper's placement attribute in order to read the arrow sizes properly.
+            // Otherwise, Popper mixes up the width and height dimensions since the initial arrow style is for top placement
+            this._getTipElement().setAttribute('data-popper-placement', data.state.placement);
+          }
+        }]
+      };
+      return {
+        ...defaultBsPopperConfig,
+        ...execute(this._config.popperConfig, [defaultBsPopperConfig])
+      };
+    }
+    _setListeners() {
+      const triggers = this._config.trigger.split(' ');
+      for (const trigger of triggers) {
+        if (trigger === 'click') {
+          EventHandler.on(this._element, this.constructor.eventName(EVENT_CLICK$1), this._config.selector, event => {
+            const context = this._initializeOnDelegatedTarget(event);
+            context.toggle();
+          });
+        } else if (trigger !== TRIGGER_MANUAL) {
+          const eventIn = trigger === TRIGGER_HOVER ? this.constructor.eventName(EVENT_MOUSEENTER) : this.constructor.eventName(EVENT_FOCUSIN$1);
+          const eventOut = trigger === TRIGGER_HOVER ? this.constructor.eventName(EVENT_MOUSELEAVE) : this.constructor.eventName(EVENT_FOCUSOUT$1);
+          EventHandler.on(this._element, eventIn, this._config.selector, event => {
+            const context = this._initializeOnDelegatedTarget(event);
+            context._activeTrigger[event.type === 'focusin' ? TRIGGER_FOCUS : TRIGGER_HOVER] = true;
+            context._enter();
+          });
+          EventHandler.on(this._element, eventOut, this._config.selector, event => {
+            const context = this._initializeOnDelegatedTarget(event);
+            context._activeTrigger[event.type === 'focusout' ? TRIGGER_FOCUS : TRIGGER_HOVER] = context._element.contains(event.relatedTarget);
+            context._leave();
+          });
+        }
+      }
+      this._hideModalHandler = () => {
+        if (this._element) {
+          this.hide();
+        }
+      };
+      EventHandler.on(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+    }
+    _fixTitle() {
+      const title = this._element.getAttribute('title');
+      if (!title) {
+        return;
+      }
+      if (!this._element.getAttribute('aria-label') && !this._element.textContent.trim()) {
+        this._element.setAttribute('aria-label', title);
+      }
+      this._element.setAttribute('data-bs-original-title', title); // DO NOT USE IT. Is only for backwards compatibility
+      this._element.removeAttribute('title');
+    }
+    _enter() {
+      if (this._isShown() || this._isHovered) {
+        this._isHovered = true;
+        return;
+      }
+      this._isHovered = true;
+      this._setTimeout(() => {
+        if (this._isHovered) {
+          this.show();
+        }
+      }, this._config.delay.show);
+    }
+    _leave() {
+      if (this._isWithActiveTrigger()) {
+        return;
+      }
+      this._isHovered = false;
+      this._setTimeout(() => {
+        if (!this._isHovered) {
+          this.hide();
+        }
+      }, this._config.delay.hide);
+    }
+    _setTimeout(handler, timeout) {
+      clearTimeout(this._timeout);
+      this._timeout = setTimeout(handler, timeout);
+    }
+    _isWithActiveTrigger() {
+      return Object.values(this._activeTrigger).includes(true);
+    }
+    _getConfig(config) {
+      const dataAttributes = Manipulator.getDataAttributes(this._element);
+      for (const dataAttribute of Object.keys(dataAttributes)) {
+        if (DISALLOWED_ATTRIBUTES.has(dataAttribute)) {
+          delete dataAttributes[dataAttribute];
+        }
+      }
+      config = {
+        ...dataAttributes,
+        ...(typeof config === 'object' && config ? config : {})
+      };
+      config = this._mergeConfigObj(config);
+      config = this._configAfterMerge(config);
+      this._typeCheckConfig(config);
+      return config;
+    }
+    _configAfterMerge(config) {
+      config.container = config.container === false ? document.body : getElement(config.container);
+      if (typeof config.delay === 'number') {
+        config.delay = {
+          show: config.delay,
+          hide: config.delay
+        };
+      }
+      if (typeof config.title === 'number') {
+        config.title = config.title.toString();
+      }
+      if (typeof config.content === 'number') {
+        config.content = config.content.toString();
+      }
+      return config;
+    }
+    _getDelegateConfig() {
+      const config = {};
+      for (const [key, value] of Object.entries(this._config)) {
+        if (this.constructor.Default[key] !== value) {
+          config[key] = value;
+        }
+      }
+      config.selector = false;
+      config.trigger = 'manual';
+
+      // In the future can be replaced with:
+      // const keysWithDifferentValues = Object.entries(this._config).filter(entry => this.constructor.Default[entry[0]] !== this._config[entry[0]])
+      // `Object.fromEntries(keysWithDifferentValues)`
+      return config;
+    }
+    _disposePopper() {
+      if (this._popper) {
+        this._popper.destroy();
+        this._popper = null;
+      }
+      if (this.tip) {
+        this.tip.remove();
+        this.tip = null;
+      }
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Tooltip.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (typeof data[config] === 'undefined') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config]();
+      });
+    }
+  }
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Tooltip);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap popover.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$3 = 'popover';
+  const SELECTOR_TITLE = '.popover-header';
+  const SELECTOR_CONTENT = '.popover-body';
+  const Default$2 = {
+    ...Tooltip.Default,
+    content: '',
+    offset: [0, 8],
+    placement: 'right',
+    template: '<div class="popover" role="tooltip">' + '<div class="popover-arrow"></div>' + '<h3 class="popover-header"></h3>' + '<div class="popover-body"></div>' + '</div>',
+    trigger: 'click'
+  };
+  const DefaultType$2 = {
+    ...Tooltip.DefaultType,
+    content: '(null|string|element|function)'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Popover extends Tooltip {
+    // Getters
+    static get Default() {
+      return Default$2;
+    }
+    static get DefaultType() {
+      return DefaultType$2;
+    }
+    static get NAME() {
+      return NAME$3;
+    }
+
+    // Overrides
+    _isWithContent() {
+      return this._getTitle() || this._getContent();
+    }
+
+    // Private
+    _getContentForTemplate() {
+      return {
+        [SELECTOR_TITLE]: this._getTitle(),
+        [SELECTOR_CONTENT]: this._getContent()
+      };
+    }
+    _getContent() {
+      return this._resolvePossibleFunction(this._config.content);
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Popover.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (typeof data[config] === 'undefined') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config]();
+      });
+    }
+  }
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Popover);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap scrollspy.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$2 = 'scrollspy';
+  const DATA_KEY$2 = 'bs.scrollspy';
+  const EVENT_KEY$2 = `.${DATA_KEY$2}`;
+  const DATA_API_KEY = '.data-api';
+  const EVENT_ACTIVATE = `activate${EVENT_KEY$2}`;
+  const EVENT_CLICK = `click${EVENT_KEY$2}`;
+  const EVENT_LOAD_DATA_API$1 = `load${EVENT_KEY$2}${DATA_API_KEY}`;
+  const CLASS_NAME_DROPDOWN_ITEM = 'dropdown-item';
+  const CLASS_NAME_ACTIVE$1 = 'active';
+  const SELECTOR_DATA_SPY = '[data-bs-spy="scroll"]';
+  const SELECTOR_TARGET_LINKS = '[href]';
+  const SELECTOR_NAV_LIST_GROUP = '.nav, .list-group';
+  const SELECTOR_NAV_LINKS = '.nav-link';
+  const SELECTOR_NAV_ITEMS = '.nav-item';
+  const SELECTOR_LIST_ITEMS = '.list-group-item';
+  const SELECTOR_LINK_ITEMS = `${SELECTOR_NAV_LINKS}, ${SELECTOR_NAV_ITEMS} > ${SELECTOR_NAV_LINKS}, ${SELECTOR_LIST_ITEMS}`;
+  const SELECTOR_DROPDOWN = '.dropdown';
+  const SELECTOR_DROPDOWN_TOGGLE$1 = '.dropdown-toggle';
+  const Default$1 = {
+    offset: null,
+    // TODO: v6 @deprecated, keep it for backwards compatibility reasons
+    rootMargin: '0px 0px -25%',
+    smoothScroll: false,
+    target: null,
+    threshold: [0.1, 0.5, 1]
+  };
+  const DefaultType$1 = {
+    offset: '(number|null)',
+    // TODO v6 @deprecated, keep it for backwards compatibility reasons
+    rootMargin: 'string',
+    smoothScroll: 'boolean',
+    target: 'element',
+    threshold: 'array'
+  };
+
+  /**
+   * Class definition
+   */
+
+  class ScrollSpy extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+
+      // this._element is the observablesContainer and config.target the menu links wrapper
+      this._targetLinks = new Map();
+      this._observableSections = new Map();
+      this._rootElement = getComputedStyle(this._element).overflowY === 'visible' ? null : this._element;
+      this._activeTarget = null;
+      this._observer = null;
+      this._previousScrollData = {
+        visibleEntryTop: 0,
+        parentScrollTop: 0
+      };
+      this.refresh(); // initialize
+    }
+
+    // Getters
+    static get Default() {
+      return Default$1;
+    }
+    static get DefaultType() {
+      return DefaultType$1;
+    }
+    static get NAME() {
+      return NAME$2;
+    }
+
+    // Public
+    refresh() {
+      this._initializeTargetsAndObservables();
+      this._maybeEnableSmoothScroll();
+      if (this._observer) {
+        this._observer.disconnect();
+      } else {
+        this._observer = this._getNewObserver();
+      }
+      for (const section of this._observableSections.values()) {
+        this._observer.observe(section);
+      }
+    }
+    dispose() {
+      this._observer.disconnect();
+      super.dispose();
+    }
+
+    // Private
+    _configAfterMerge(config) {
+      // TODO: on v6 target should be given explicitly & remove the {target: 'ss-target'} case
+      config.target = getElement(config.target) || document.body;
+
+      // TODO: v6 Only for backwards compatibility reasons. Use rootMargin only
+      config.rootMargin = config.offset ? `${config.offset}px 0px -30%` : config.rootMargin;
+      if (typeof config.threshold === 'string') {
+        config.threshold = config.threshold.split(',').map(value => Number.parseFloat(value));
+      }
+      return config;
+    }
+    _maybeEnableSmoothScroll() {
+      if (!this._config.smoothScroll) {
+        return;
+      }
+
+      // unregister any previous listeners
+      EventHandler.off(this._config.target, EVENT_CLICK);
+      EventHandler.on(this._config.target, EVENT_CLICK, SELECTOR_TARGET_LINKS, event => {
+        const observableSection = this._observableSections.get(event.target.hash);
+        if (observableSection) {
+          event.preventDefault();
+          const root = this._rootElement || window;
+          const height = observableSection.offsetTop - this._element.offsetTop;
+          if (root.scrollTo) {
+            root.scrollTo({
+              top: height,
+              behavior: 'smooth'
+            });
+            return;
+          }
+
+          // Chrome 60 doesn't support `scrollTo`
+          root.scrollTop = height;
+        }
+      });
+    }
+    _getNewObserver() {
+      const options = {
+        root: this._rootElement,
+        threshold: this._config.threshold,
+        rootMargin: this._config.rootMargin
+      };
+      return new IntersectionObserver(entries => this._observerCallback(entries), options);
+    }
+
+    // The logic of selection
+    _observerCallback(entries) {
+      const targetElement = entry => this._targetLinks.get(`#${entry.target.id}`);
+      const activate = entry => {
+        this._previousScrollData.visibleEntryTop = entry.target.offsetTop;
+        this._process(targetElement(entry));
+      };
+      const parentScrollTop = (this._rootElement || document.documentElement).scrollTop;
+      const userScrollsDown = parentScrollTop >= this._previousScrollData.parentScrollTop;
+      this._previousScrollData.parentScrollTop = parentScrollTop;
+      for (const entry of entries) {
+        if (!entry.isIntersecting) {
+          this._activeTarget = null;
+          this._clearActiveClass(targetElement(entry));
+          continue;
+        }
+        const entryIsLowerThanPrevious = entry.target.offsetTop >= this._previousScrollData.visibleEntryTop;
+        // if we are scrolling down, pick the bigger offsetTop
+        if (userScrollsDown && entryIsLowerThanPrevious) {
+          activate(entry);
+          // if parent isn't scrolled, let's keep the first visible item, breaking the iteration
+          if (!parentScrollTop) {
+            return;
+          }
+          continue;
+        }
+
+        // if we are scrolling up, pick the smallest offsetTop
+        if (!userScrollsDown && !entryIsLowerThanPrevious) {
+          activate(entry);
+        }
+      }
+    }
+    _initializeTargetsAndObservables() {
+      this._targetLinks = new Map();
+      this._observableSections = new Map();
+      const targetLinks = SelectorEngine.find(SELECTOR_TARGET_LINKS, this._config.target);
+      for (const anchor of targetLinks) {
+        // ensure that the anchor has an id and is not disabled
+        if (!anchor.hash || isDisabled(anchor)) {
+          continue;
+        }
+        const observableSection = SelectorEngine.findOne(decodeURI(anchor.hash), this._element);
+
+        // ensure that the observableSection exists & is visible
+        if (isVisible(observableSection)) {
+          this._targetLinks.set(decodeURI(anchor.hash), anchor);
+          this._observableSections.set(anchor.hash, observableSection);
+        }
+      }
+    }
+    _process(target) {
+      if (this._activeTarget === target) {
+        return;
+      }
+      this._clearActiveClass(this._config.target);
+      this._activeTarget = target;
+      target.classList.add(CLASS_NAME_ACTIVE$1);
+      this._activateParents(target);
+      EventHandler.trigger(this._element, EVENT_ACTIVATE, {
+        relatedTarget: target
+      });
+    }
+    _activateParents(target) {
+      // Activate dropdown parents
+      if (target.classList.contains(CLASS_NAME_DROPDOWN_ITEM)) {
+        SelectorEngine.findOne(SELECTOR_DROPDOWN_TOGGLE$1, target.closest(SELECTOR_DROPDOWN)).classList.add(CLASS_NAME_ACTIVE$1);
+        return;
+      }
+      for (const listGroup of SelectorEngine.parents(target, SELECTOR_NAV_LIST_GROUP)) {
+        // Set triggered links parents as active
+        // With both <ul> and <nav> markup a parent is the previous sibling of any nav ancestor
+        for (const item of SelectorEngine.prev(listGroup, SELECTOR_LINK_ITEMS)) {
+          item.classList.add(CLASS_NAME_ACTIVE$1);
+        }
+      }
+    }
+    _clearActiveClass(parent) {
+      parent.classList.remove(CLASS_NAME_ACTIVE$1);
+      const activeNodes = SelectorEngine.find(`${SELECTOR_TARGET_LINKS}.${CLASS_NAME_ACTIVE$1}`, parent);
+      for (const node of activeNodes) {
+        node.classList.remove(CLASS_NAME_ACTIVE$1);
+      }
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = ScrollSpy.getOrCreateInstance(this, config);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config]();
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(window, EVENT_LOAD_DATA_API$1, () => {
+    for (const spy of SelectorEngine.find(SELECTOR_DATA_SPY)) {
+      ScrollSpy.getOrCreateInstance(spy);
+    }
+  });
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(ScrollSpy);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap tab.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME$1 = 'tab';
+  const DATA_KEY$1 = 'bs.tab';
+  const EVENT_KEY$1 = `.${DATA_KEY$1}`;
+  const EVENT_HIDE$1 = `hide${EVENT_KEY$1}`;
+  const EVENT_HIDDEN$1 = `hidden${EVENT_KEY$1}`;
+  const EVENT_SHOW$1 = `show${EVENT_KEY$1}`;
+  const EVENT_SHOWN$1 = `shown${EVENT_KEY$1}`;
+  const EVENT_CLICK_DATA_API = `click${EVENT_KEY$1}`;
+  const EVENT_KEYDOWN = `keydown${EVENT_KEY$1}`;
+  const EVENT_LOAD_DATA_API = `load${EVENT_KEY$1}`;
+  const ARROW_LEFT_KEY = 'ArrowLeft';
+  const ARROW_RIGHT_KEY = 'ArrowRight';
+  const ARROW_UP_KEY = 'ArrowUp';
+  const ARROW_DOWN_KEY = 'ArrowDown';
+  const CLASS_NAME_ACTIVE = 'active';
+  const CLASS_NAME_FADE$1 = 'fade';
+  const CLASS_NAME_SHOW$1 = 'show';
+  const CLASS_DROPDOWN = 'dropdown';
+  const SELECTOR_DROPDOWN_TOGGLE = '.dropdown-toggle';
+  const SELECTOR_DROPDOWN_MENU = '.dropdown-menu';
+  const NOT_SELECTOR_DROPDOWN_TOGGLE = ':not(.dropdown-toggle)';
+  const SELECTOR_TAB_PANEL = '.list-group, .nav, [role="tablist"]';
+  const SELECTOR_OUTER = '.nav-item, .list-group-item';
+  const SELECTOR_INNER = `.nav-link${NOT_SELECTOR_DROPDOWN_TOGGLE}, .list-group-item${NOT_SELECTOR_DROPDOWN_TOGGLE}, [role="tab"]${NOT_SELECTOR_DROPDOWN_TOGGLE}`;
+  const SELECTOR_DATA_TOGGLE = '[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]'; // TODO: could only be `tab` in v6
+  const SELECTOR_INNER_ELEM = `${SELECTOR_INNER}, ${SELECTOR_DATA_TOGGLE}`;
+  const SELECTOR_DATA_TOGGLE_ACTIVE = `.${CLASS_NAME_ACTIVE}[data-bs-toggle="tab"], .${CLASS_NAME_ACTIVE}[data-bs-toggle="pill"], .${CLASS_NAME_ACTIVE}[data-bs-toggle="list"]`;
+
+  /**
+   * Class definition
+   */
+
+  class Tab extends BaseComponent {
+    constructor(element) {
+      super(element);
+      this._parent = this._element.closest(SELECTOR_TAB_PANEL);
+      if (!this._parent) {
+        return;
+        // TODO: should throw exception in v6
+        // throw new TypeError(`${element.outerHTML} has not a valid parent ${SELECTOR_INNER_ELEM}`)
+      }
+
+      // Set up initial aria attributes
+      this._setInitialAttributes(this._parent, this._getChildren());
+      EventHandler.on(this._element, EVENT_KEYDOWN, event => this._keydown(event));
+    }
+
+    // Getters
+    static get NAME() {
+      return NAME$1;
+    }
+
+    // Public
+    show() {
+      // Shows this elem and deactivate the active sibling if exists
+      const innerElem = this._element;
+      if (this._elemIsActive(innerElem)) {
+        return;
+      }
+
+      // Search for active tab on same parent to deactivate it
+      const active = this._getActiveElem();
+      const hideEvent = active ? EventHandler.trigger(active, EVENT_HIDE$1, {
+        relatedTarget: innerElem
+      }) : null;
+      const showEvent = EventHandler.trigger(innerElem, EVENT_SHOW$1, {
+        relatedTarget: active
+      });
+      if (showEvent.defaultPrevented || hideEvent && hideEvent.defaultPrevented) {
+        return;
+      }
+      this._deactivate(active, innerElem);
+      this._activate(innerElem, active);
+    }
+
+    // Private
+    _activate(element, relatedElem) {
+      if (!element) {
+        return;
+      }
+      element.classList.add(CLASS_NAME_ACTIVE);
+      this._activate(SelectorEngine.getElementFromSelector(element)); // Search and activate/show the proper section
+
+      const complete = () => {
+        if (element.getAttribute('role') !== 'tab') {
+          element.classList.add(CLASS_NAME_SHOW$1);
+          return;
+        }
+        element.removeAttribute('tabindex');
+        element.setAttribute('aria-selected', true);
+        this._toggleDropDown(element, true);
+        EventHandler.trigger(element, EVENT_SHOWN$1, {
+          relatedTarget: relatedElem
+        });
+      };
+      this._queueCallback(complete, element, element.classList.contains(CLASS_NAME_FADE$1));
+    }
+    _deactivate(element, relatedElem) {
+      if (!element) {
+        return;
+      }
+      element.classList.remove(CLASS_NAME_ACTIVE);
+      element.blur();
+      this._deactivate(SelectorEngine.getElementFromSelector(element)); // Search and deactivate the shown section too
+
+      const complete = () => {
+        if (element.getAttribute('role') !== 'tab') {
+          element.classList.remove(CLASS_NAME_SHOW$1);
+          return;
+        }
+        element.setAttribute('aria-selected', false);
+        element.setAttribute('tabindex', '-1');
+        this._toggleDropDown(element, false);
+        EventHandler.trigger(element, EVENT_HIDDEN$1, {
+          relatedTarget: relatedElem
+        });
+      };
+      this._queueCallback(complete, element, element.classList.contains(CLASS_NAME_FADE$1));
+    }
+    _keydown(event) {
+      if (![ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, ARROW_DOWN_KEY].includes(event.key)) {
+        return;
+      }
+      event.stopPropagation(); // stopPropagation/preventDefault both added to support up/down keys without scrolling the page
+      event.preventDefault();
+      const isNext = [ARROW_RIGHT_KEY, ARROW_DOWN_KEY].includes(event.key);
+      const nextActiveElement = getNextActiveElement(this._getChildren().filter(element => !isDisabled(element)), event.target, isNext, true);
+      if (nextActiveElement) {
+        nextActiveElement.focus({
+          preventScroll: true
+        });
+        Tab.getOrCreateInstance(nextActiveElement).show();
+      }
+    }
+    _getChildren() {
+      // collection of inner elements
+      return SelectorEngine.find(SELECTOR_INNER_ELEM, this._parent);
+    }
+    _getActiveElem() {
+      return this._getChildren().find(child => this._elemIsActive(child)) || null;
+    }
+    _setInitialAttributes(parent, children) {
+      this._setAttributeIfNotExists(parent, 'role', 'tablist');
+      for (const child of children) {
+        this._setInitialAttributesOnChild(child);
+      }
+    }
+    _setInitialAttributesOnChild(child) {
+      child = this._getInnerElement(child);
+      const isActive = this._elemIsActive(child);
+      const outerElem = this._getOuterElement(child);
+      child.setAttribute('aria-selected', isActive);
+      if (outerElem !== child) {
+        this._setAttributeIfNotExists(outerElem, 'role', 'presentation');
+      }
+      if (!isActive) {
+        child.setAttribute('tabindex', '-1');
+      }
+      this._setAttributeIfNotExists(child, 'role', 'tab');
+
+      // set attributes to the related panel too
+      this._setInitialAttributesOnTargetPanel(child);
+    }
+    _setInitialAttributesOnTargetPanel(child) {
+      const target = SelectorEngine.getElementFromSelector(child);
+      if (!target) {
+        return;
+      }
+      this._setAttributeIfNotExists(target, 'role', 'tabpanel');
+      if (child.id) {
+        this._setAttributeIfNotExists(target, 'aria-labelledby', `${child.id}`);
+      }
+    }
+    _toggleDropDown(element, open) {
+      const outerElem = this._getOuterElement(element);
+      if (!outerElem.classList.contains(CLASS_DROPDOWN)) {
+        return;
+      }
+      const toggle = (selector, className) => {
+        const element = SelectorEngine.findOne(selector, outerElem);
+        if (element) {
+          element.classList.toggle(className, open);
+        }
+      };
+      toggle(SELECTOR_DROPDOWN_TOGGLE, CLASS_NAME_ACTIVE);
+      toggle(SELECTOR_DROPDOWN_MENU, CLASS_NAME_SHOW$1);
+      outerElem.setAttribute('aria-expanded', open);
+    }
+    _setAttributeIfNotExists(element, attribute, value) {
+      if (!element.hasAttribute(attribute)) {
+        element.setAttribute(attribute, value);
+      }
+    }
+    _elemIsActive(elem) {
+      return elem.classList.contains(CLASS_NAME_ACTIVE);
+    }
+
+    // Try to get the inner element (usually the .nav-link)
+    _getInnerElement(elem) {
+      return elem.matches(SELECTOR_INNER_ELEM) ? elem : SelectorEngine.findOne(SELECTOR_INNER_ELEM, elem);
+    }
+
+    // Try to get the outer element (usually the .nav-item)
+    _getOuterElement(elem) {
+      return elem.closest(SELECTOR_OUTER) || elem;
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Tab.getOrCreateInstance(this);
+        if (typeof config !== 'string') {
+          return;
+        }
+        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+          throw new TypeError(`No method named "${config}"`);
+        }
+        data[config]();
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  EventHandler.on(document, EVENT_CLICK_DATA_API, SELECTOR_DATA_TOGGLE, function (event) {
+    if (['A', 'AREA'].includes(this.tagName)) {
+      event.preventDefault();
+    }
+    if (isDisabled(this)) {
+      return;
+    }
+    Tab.getOrCreateInstance(this).show();
+  });
+
+  /**
+   * Initialize on focus
+   */
+  EventHandler.on(window, EVENT_LOAD_DATA_API, () => {
+    for (const element of SelectorEngine.find(SELECTOR_DATA_TOGGLE_ACTIVE)) {
+      Tab.getOrCreateInstance(element);
+    }
+  });
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Tab);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap toast.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+
+  /**
+   * Constants
+   */
+
+  const NAME = 'toast';
+  const DATA_KEY = 'bs.toast';
+  const EVENT_KEY = `.${DATA_KEY}`;
+  const EVENT_MOUSEOVER = `mouseover${EVENT_KEY}`;
+  const EVENT_MOUSEOUT = `mouseout${EVENT_KEY}`;
+  const EVENT_FOCUSIN = `focusin${EVENT_KEY}`;
+  const EVENT_FOCUSOUT = `focusout${EVENT_KEY}`;
+  const EVENT_HIDE = `hide${EVENT_KEY}`;
+  const EVENT_HIDDEN = `hidden${EVENT_KEY}`;
+  const EVENT_SHOW = `show${EVENT_KEY}`;
+  const EVENT_SHOWN = `shown${EVENT_KEY}`;
+  const CLASS_NAME_FADE = 'fade';
+  const CLASS_NAME_HIDE = 'hide'; // @deprecated - kept here only for backwards compatibility
+  const CLASS_NAME_SHOW = 'show';
+  const CLASS_NAME_SHOWING = 'showing';
+  const DefaultType = {
+    animation: 'boolean',
+    autohide: 'boolean',
+    delay: 'number'
+  };
+  const Default = {
+    animation: true,
+    autohide: true,
+    delay: 5000
+  };
+
+  /**
+   * Class definition
+   */
+
+  class Toast extends BaseComponent {
+    constructor(element, config) {
+      super(element, config);
+      this._timeout = null;
+      this._hasMouseInteraction = false;
+      this._hasKeyboardInteraction = false;
+      this._setListeners();
+    }
+
+    // Getters
+    static get Default() {
+      return Default;
+    }
+    static get DefaultType() {
+      return DefaultType;
+    }
+    static get NAME() {
+      return NAME;
+    }
+
+    // Public
+    show() {
+      const showEvent = EventHandler.trigger(this._element, EVENT_SHOW);
+      if (showEvent.defaultPrevented) {
+        return;
+      }
+      this._clearTimeout();
+      if (this._config.animation) {
+        this._element.classList.add(CLASS_NAME_FADE);
+      }
+      const complete = () => {
+        this._element.classList.remove(CLASS_NAME_SHOWING);
+        EventHandler.trigger(this._element, EVENT_SHOWN);
+        this._maybeScheduleHide();
+      };
+      this._element.classList.remove(CLASS_NAME_HIDE); // @deprecated
+      reflow(this._element);
+      this._element.classList.add(CLASS_NAME_SHOW, CLASS_NAME_SHOWING);
+      this._queueCallback(complete, this._element, this._config.animation);
+    }
+    hide() {
+      if (!this.isShown()) {
+        return;
+      }
+      const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE);
+      if (hideEvent.defaultPrevented) {
+        return;
+      }
+      const complete = () => {
+        this._element.classList.add(CLASS_NAME_HIDE); // @deprecated
+        this._element.classList.remove(CLASS_NAME_SHOWING, CLASS_NAME_SHOW);
+        EventHandler.trigger(this._element, EVENT_HIDDEN);
+      };
+      this._element.classList.add(CLASS_NAME_SHOWING);
+      this._queueCallback(complete, this._element, this._config.animation);
+    }
+    dispose() {
+      this._clearTimeout();
+      if (this.isShown()) {
+        this._element.classList.remove(CLASS_NAME_SHOW);
+      }
+      super.dispose();
+    }
+    isShown() {
+      return this._element.classList.contains(CLASS_NAME_SHOW);
+    }
+
+    // Private
+
+    _maybeScheduleHide() {
+      if (!this._config.autohide) {
+        return;
+      }
+      if (this._hasMouseInteraction || this._hasKeyboardInteraction) {
+        return;
+      }
+      this._timeout = setTimeout(() => {
+        this.hide();
+      }, this._config.delay);
+    }
+    _onInteraction(event, isInteracting) {
+      switch (event.type) {
+        case 'mouseover':
+        case 'mouseout':
+          {
+            this._hasMouseInteraction = isInteracting;
+            break;
+          }
+        case 'focusin':
+        case 'focusout':
+          {
+            this._hasKeyboardInteraction = isInteracting;
+            break;
+          }
+      }
+      if (isInteracting) {
+        this._clearTimeout();
+        return;
+      }
+      const nextElement = event.relatedTarget;
+      if (this._element === nextElement || this._element.contains(nextElement)) {
+        return;
+      }
+      this._maybeScheduleHide();
+    }
+    _setListeners() {
+      EventHandler.on(this._element, EVENT_MOUSEOVER, event => this._onInteraction(event, true));
+      EventHandler.on(this._element, EVENT_MOUSEOUT, event => this._onInteraction(event, false));
+      EventHandler.on(this._element, EVENT_FOCUSIN, event => this._onInteraction(event, true));
+      EventHandler.on(this._element, EVENT_FOCUSOUT, event => this._onInteraction(event, false));
+    }
+    _clearTimeout() {
+      clearTimeout(this._timeout);
+      this._timeout = null;
+    }
+
+    // Static
+    static jQueryInterface(config) {
+      return this.each(function () {
+        const data = Toast.getOrCreateInstance(this, config);
+        if (typeof config === 'string') {
+          if (typeof data[config] === 'undefined') {
+            throw new TypeError(`No method named "${config}"`);
+          }
+          data[config](this);
+        }
+      });
+    }
+  }
+
+  /**
+   * Data API implementation
+   */
+
+  enableDismissTrigger(Toast);
+
+  /**
+   * jQuery
+   */
+
+  defineJQueryPlugin(Toast);
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap index.umd.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  const index_umd = {
+    Alert,
+    Button,
+    Carousel,
+    Collapse,
+    Dropdown,
+    Modal,
+    Offcanvas,
+    Popover,
+    ScrollSpy,
+    Tab,
+    Toast,
+    Tooltip
+  };
+
+  return index_umd;
+
+}));
+//# sourceMappingURL=bootstrap.bundle.js.map
+
+
 /*! DataTables 2.1.8
  * © SpryMedia Ltd - datatables.net/license
  */
@@ -11245,7 +17553,7 @@ return jQuery;
 		 *
 		 *  @type string
 		 */
-		builder: "bs5/jq-3.7.0/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/cr-2.0.4/date-1.5.4/r-3.0.3/sc-2.4.3/sp-2.3.3/sl-2.1.0/sr-1.4.1",
+		builder: "bs5-5.3.0/jq-3.7.0/dt-2.1.8/af-2.7.0/b-3.2.0/b-colvis-3.2.0/b-html5-3.2.0/b-print-3.2.0/cr-2.0.4/date-1.5.4/fc-5.0.4/fh-4.0.1/kt-2.12.1/r-3.0.3/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.1/sp-2.3.3/sl-2.1.0/sr-1.4.1",
 	
 	
 		/**
@@ -30836,6 +37144,308 @@ return DataTable;
 }));
 
 
+/*!
+ * Print button for Buttons and DataTables.
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net', 'datatables.net-buttons'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+
+			if ( ! $.fn.dataTable.Buttons ) {
+				require('datatables.net-buttons')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+
+var _link = document.createElement('a');
+
+/**
+ * Clone link and style tags, taking into account the need to change the source
+ * path.
+ *
+ * @param  {node}     el Element to convert
+ */
+var _styleToAbs = function (el) {
+	var clone = $(el).clone()[0];
+
+	if (clone.nodeName.toLowerCase() === 'link') {
+		clone.href = _relToAbs(clone.href);
+	}
+
+	return clone.outerHTML;
+};
+
+/**
+ * Convert a URL from a relative to an absolute address so it will work
+ * correctly in the popup window which has no base URL.
+ *
+ * @param  {string} href URL
+ */
+var _relToAbs = function (href) {
+	// Assign to a link on the original page so the browser will do all the
+	// hard work of figuring out where the file actually is
+	_link.href = href;
+	var linkHost = _link.host;
+
+	// IE doesn't have a trailing slash on the host
+	// Chrome has it on the pathname
+	if (linkHost.indexOf('/') === -1 && _link.pathname.indexOf('/') !== 0) {
+		linkHost += '/';
+	}
+
+	return _link.protocol + '//' + linkHost + _link.pathname + _link.search;
+};
+
+DataTable.ext.buttons.print = {
+	className: 'buttons-print',
+
+	text: function (dt) {
+		return dt.i18n('buttons.print', 'Print');
+	},
+
+	action: function (e, dt, button, config, cb) {
+		var data = dt.buttons.exportData(
+			$.extend({ decodeEntities: false }, config.exportOptions) // XSS protection
+		);
+		var exportInfo = dt.buttons.exportInfo(config);
+
+		// Get the classes for the columns from the header cells
+		var columnClasses = dt
+			.columns(config.exportOptions.columns)
+			.nodes()
+			.map(function (n) {
+				return n.className;
+			})
+			.toArray();
+
+		var addRow = function (d, tag) {
+			var str = '<tr>';
+
+			for (var i = 0, ien = d.length; i < ien; i++) {
+				// null and undefined aren't useful in the print output
+				var dataOut = d[i] === null || d[i] === undefined ? '' : d[i];
+				var classAttr = columnClasses[i]
+					? 'class="' + columnClasses[i] + '"'
+					: '';
+
+				str +=
+					'<' +
+					tag +
+					' ' +
+					classAttr +
+					'>' +
+					dataOut +
+					'</' +
+					tag +
+					'>';
+			}
+
+			return str + '</tr>';
+		};
+
+		// Construct a table for printing
+		var html = '<table class="' + dt.table().node().className + '">';
+
+		if (config.header) {
+			var headerRows = data.headerStructure.map(function (row) {
+				return (
+					'<tr>' +
+					row
+						.map(function (cell) {
+							return cell
+								? '<th colspan="' +
+										cell.colspan +
+										'" rowspan="' +
+										cell.rowspan +
+										'">' +
+										cell.title +
+										'</th>'
+								: '';
+						})
+						.join('') +
+					'</tr>'
+				);
+			});
+
+			html += '<thead>' + headerRows.join('') + '</thead>';
+		}
+
+		html += '<tbody>';
+		for (var i = 0, ien = data.body.length; i < ien; i++) {
+			html += addRow(data.body[i], 'td');
+		}
+		html += '</tbody>';
+
+		if (config.footer && data.footer) {
+			var footerRows = data.footerStructure.map(function (row) {
+				return (
+					'<tr>' +
+					row
+						.map(function (cell) {
+							return cell
+								? '<th colspan="' +
+										cell.colspan +
+										'" rowspan="' +
+										cell.rowspan +
+										'">' +
+										cell.title +
+										'</th>'
+								: '';
+						})
+						.join('') +
+					'</tr>'
+				);
+			});
+
+			html += '<tfoot>' + footerRows.join('') + '</tfoot>';
+		}
+		html += '</table>';
+
+		// Open a new window for the printable table
+		var win = window.open('', '');
+
+		if (!win) {
+			dt.buttons.info(
+				dt.i18n('buttons.printErrorTitle', 'Unable to open print view'),
+				dt.i18n(
+					'buttons.printErrorMsg',
+					'Please allow popups in your browser for this site to be able to view the print view.'
+				),
+				5000
+			);
+
+			return;
+		}
+
+		win.document.close();
+
+		// Inject the title and also a copy of the style and link tags from this
+		// document so the table can retain its base styling. Note that we have
+		// to use string manipulation as IE won't allow elements to be created
+		// in the host document and then appended to the new window.
+		var head = '<title>' + exportInfo.title + '</title>';
+		$('style, link').each(function () {
+			head += _styleToAbs(this);
+		});
+
+		try {
+			win.document.head.innerHTML = head; // Work around for Edge
+		} catch (e) {
+			$(win.document.head).html(head); // Old IE
+		}
+
+		// Add any custom scripts (for example for paged.js)
+		if (config.customScripts) {
+			config.customScripts.forEach(function (script) {
+				var tag = win.document.createElement("script");
+				tag.src = script;
+				win.document.getElementsByTagName("head")[0].appendChild(tag);
+			});
+		}
+
+		// Inject the table and other surrounding information
+		win.document.body.innerHTML =
+			'<h1>' +
+			exportInfo.title +
+			'</h1>' +
+			'<div>' +
+			(exportInfo.messageTop || '') +
+			'</div>' +
+			html +
+			'<div>' +
+			(exportInfo.messageBottom || '') +
+			'</div>';
+
+		$(win.document.body).addClass('dt-print-view');
+
+		$('img', win.document.body).each(function (i, img) {
+			img.setAttribute('src', _relToAbs(img.getAttribute('src')));
+		});
+
+		if (config.customize) {
+			config.customize(win, config, dt);
+		}
+
+		// Allow stylesheets time to load
+		var autoPrint = function () {
+			if (config.autoPrint) {
+				win.print(); // blocking - so close will not
+				win.close(); // execute until this is done
+			}
+		};
+
+		win.setTimeout(autoPrint, 1000);
+
+		cb();
+	},
+
+	async: 100,
+
+	title: '*',
+
+	messageTop: '*',
+
+	messageBottom: '*',
+
+	exportOptions: {},
+
+	header: true,
+
+	footer: true,
+
+	autoPrint: true,
+
+	customize: null
+};
+
+
+return DataTable;
+}));
+
+
 /*! ColReorder 2.0.4
  * © SpryMedia Ltd - datatables.net/license
  */
@@ -33581,6 +40191,3137 @@ return DateTime;
 }));
 
 
+/*! FixedColumns 5.0.4
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+(function () {
+    'use strict';
+
+    var $$1;
+    var DataTable$1;
+    function setJQuery(jq) {
+        $$1 = jq;
+        DataTable$1 = $$1.fn.dataTable;
+    }
+    var FixedColumns = /** @class */ (function () {
+        function FixedColumns(settings, opts) {
+            var _this = this;
+            // Check that the required version of DataTables is included
+            if (!DataTable$1 ||
+                !DataTable$1.versionCheck ||
+                !DataTable$1.versionCheck('2')) {
+                throw new Error('FixedColumns requires DataTables 2 or newer');
+            }
+            var table = new DataTable$1.Api(settings);
+            this.classes = $$1.extend(true, {}, FixedColumns.classes);
+            // Get options from user
+            this.c = $$1.extend(true, {}, FixedColumns.defaults, opts);
+            this.s = {
+                dt: table,
+                rtl: $$1(table.table().node()).css('direction') === 'rtl'
+            };
+            // Backwards compatibility for deprecated options
+            if (opts && opts.leftColumns !== undefined) {
+                opts.left = opts.leftColumns;
+            }
+            if (opts && opts.left !== undefined) {
+                this.c[this.s.rtl ? 'end' : 'start'] = opts.left;
+            }
+            if (opts && opts.rightColumns !== undefined) {
+                opts.right = opts.rightColumns;
+            }
+            if (opts && opts.right !== undefined) {
+                this.c[this.s.rtl ? 'start' : 'end'] = opts.right;
+            }
+            this.dom = {
+                bottomBlocker: $$1('<div>').addClass(this.classes.bottomBlocker),
+                topBlocker: $$1('<div>').addClass(this.classes.topBlocker),
+                scroller: $$1('div.dt-scroll-body', this.s.dt.table().container())
+            };
+            if (this.s.dt.settings()[0]._bInitComplete) {
+                // Fixed Columns Initialisation
+                this._addStyles();
+                this._setKeyTableListener();
+            }
+            else {
+                table.one('init.dt.dtfc', function () {
+                    // Fixed Columns Initialisation
+                    _this._addStyles();
+                    _this._setKeyTableListener();
+                });
+            }
+            // Lots or reasons to redraw the column styles
+            table.on('column-sizing.dt.dtfc column-reorder.dt.dtfc draw.dt.dtfc', function () { return _this._addStyles(); });
+            // Column visibility can trigger a number of times quickly, so we debounce it
+            var debounced = DataTable$1.util.debounce(function () {
+                _this._addStyles();
+            }, 50);
+            table.on('column-visibility.dt.dtfc', function () {
+                debounced();
+            });
+            // Add classes to indicate scrolling state for styling
+            this.dom.scroller.on('scroll.dtfc', function () { return _this._scroll(); });
+            this._scroll();
+            // Make class available through dt object
+            table.settings()[0]._fixedColumns = this;
+            table.on('destroy', function () { return _this._destroy(); });
+            return this;
+        }
+        FixedColumns.prototype.end = function (newVal) {
+            // If the value is to change
+            if (newVal !== undefined) {
+                if (newVal >= 0 && newVal <= this.s.dt.columns().count()) {
+                    // Set the new values and redraw the columns
+                    this.c.end = newVal;
+                    this._addStyles();
+                }
+                return this;
+            }
+            return this.c.end;
+        };
+        /**
+         * Left fix - accounting for RTL
+         *
+         * @param count Columns to fix, or undefined for getter
+         */
+        FixedColumns.prototype.left = function (count) {
+            return this.s.rtl
+                ? this.end(count)
+                : this.start(count);
+        };
+        /**
+         * Right fix - accounting for RTL
+         *
+         * @param count Columns to fix, or undefined for getter
+         */
+        FixedColumns.prototype.right = function (count) {
+            return this.s.rtl
+                ? this.start(count)
+                : this.end(count);
+        };
+        FixedColumns.prototype.start = function (newVal) {
+            // If the value is to change
+            if (newVal !== undefined) {
+                if (newVal >= 0 && newVal <= this.s.dt.columns().count()) {
+                    // Set the new values and redraw the columns
+                    this.c.start = newVal;
+                    this._addStyles();
+                }
+                return this;
+            }
+            return this.c.start;
+        };
+        /**
+         * Iterates over the columns, fixing the appropriate ones to the left and right
+         */
+        FixedColumns.prototype._addStyles = function () {
+            var dt = this.s.dt;
+            var that = this;
+            var colCount = this.s.dt.columns(':visible').count();
+            var headerStruct = dt.table().header.structure(':visible');
+            var footerStruct = dt.table().footer.structure(':visible');
+            var widths = dt.columns(':visible').widths().toArray();
+            var wrapper = $$1(dt.table().node()).closest('div.dt-scroll');
+            var scroller = $$1(dt.table().node()).closest('div.dt-scroll-body')[0];
+            var rtl = this.s.rtl;
+            var start = this.c.start;
+            var end = this.c.end;
+            var left = rtl ? end : start;
+            var right = rtl ? start : end;
+            var barWidth = dt.settings()[0].oBrowser.barWidth; // dt internal
+            // Do nothing if no scrolling in the DataTable
+            if (wrapper.length === 0) {
+                return this;
+            }
+            // Bar not needed - no vertical scrolling
+            if (scroller.offsetWidth === scroller.clientWidth) {
+                barWidth = 0;
+            }
+            // Loop over the visible columns, setting their state
+            dt.columns().every(function (colIdx) {
+                var visIdx = dt.column.index('toVisible', colIdx);
+                var offset;
+                // Skip the hidden columns
+                if (visIdx === null) {
+                    return;
+                }
+                if (visIdx < start) {
+                    // Fix to the start
+                    offset = that._sum(widths, visIdx);
+                    that._fixColumn(visIdx, offset, 'start', headerStruct, footerStruct, barWidth);
+                }
+                else if (visIdx >= colCount - end) {
+                    // Fix to the end
+                    offset = that._sum(widths, colCount - visIdx - 1, true);
+                    that._fixColumn(visIdx, offset, 'end', headerStruct, footerStruct, barWidth);
+                }
+                else {
+                    // Release
+                    that._fixColumn(visIdx, 0, 'none', headerStruct, footerStruct, barWidth);
+                }
+            });
+            // Apply classes to table to indicate what state we are in
+            $$1(dt.table().node())
+                .toggleClass(that.classes.tableFixedStart, start > 0)
+                .toggleClass(that.classes.tableFixedEnd, end > 0)
+                .toggleClass(that.classes.tableFixedLeft, left > 0)
+                .toggleClass(that.classes.tableFixedRight, right > 0);
+            // Blocker elements for when scroll bars are always visible
+            var headerEl = dt.table().header();
+            var footerEl = dt.table().footer();
+            var headerHeight = $$1(headerEl).outerHeight();
+            var footerHeight = $$1(footerEl).outerHeight();
+            this.dom.topBlocker
+                .appendTo(wrapper)
+                .css('top', 0)
+                .css(this.s.rtl ? 'left' : 'right', 0)
+                .css('height', headerHeight)
+                .css('width', barWidth + 1)
+                .css('display', barWidth ? 'block' : 'none');
+            if (footerEl) {
+                this.dom.bottomBlocker
+                    .appendTo(wrapper)
+                    .css('bottom', 0)
+                    .css(this.s.rtl ? 'left' : 'right', 0)
+                    .css('height', footerHeight)
+                    .css('width', barWidth + 1)
+                    .css('display', barWidth ? 'block' : 'none');
+            }
+        };
+        /**
+         * Clean up
+         */
+        FixedColumns.prototype._destroy = function () {
+            this.s.dt.off('.dtfc');
+            this.dom.scroller.off('.dtfc');
+            $$1(this.s.dt.table().node())
+                .removeClass(this.classes.tableScrollingEnd + ' ' +
+                this.classes.tableScrollingLeft + ' ' +
+                this.classes.tableScrollingStart + ' ' +
+                this.classes.tableScrollingRight);
+            this.dom.bottomBlocker.remove();
+            this.dom.topBlocker.remove();
+        };
+        /**
+         * Fix or unfix a column
+         *
+         * @param idx Column visible index to operate on
+         * @param offset Offset from the start (pixels)
+         * @param side start, end or none to unfix a column
+         * @param header DT header structure object
+         * @param footer DT footer structure object
+         */
+        FixedColumns.prototype._fixColumn = function (idx, offset, side, header, footer, barWidth) {
+            var _this = this;
+            var dt = this.s.dt;
+            var applyStyles = function (jq, part) {
+                if (side === 'none') {
+                    jq.css('position', '')
+                        .css('left', '')
+                        .css('right', '')
+                        .removeClass(_this.classes.fixedEnd + ' ' +
+                        _this.classes.fixedLeft + ' ' +
+                        _this.classes.fixedRight + ' ' +
+                        _this.classes.fixedStart);
+                }
+                else {
+                    var positionSide = side === 'start' ? 'left' : 'right';
+                    if (_this.s.rtl) {
+                        positionSide = side === 'start' ? 'right' : 'left';
+                    }
+                    var off = offset;
+                    if (side === 'end' && (part === 'header' || part === 'footer')) {
+                        off += barWidth;
+                    }
+                    jq.css('position', 'sticky')
+                        .css(positionSide, off)
+                        .addClass(side === 'start'
+                        ? _this.classes.fixedStart
+                        : _this.classes.fixedEnd)
+                        .addClass(positionSide === 'left'
+                        ? _this.classes.fixedLeft
+                        : _this.classes.fixedRight);
+                }
+            };
+            header.forEach(function (row) {
+                if (row[idx]) {
+                    applyStyles($$1(row[idx].cell), 'header');
+                }
+            });
+            applyStyles(dt.column(idx + ':visible', { page: 'current' }).nodes().to$(), 'body');
+            if (footer) {
+                footer.forEach(function (row) {
+                    if (row[idx]) {
+                        applyStyles($$1(row[idx].cell), 'footer');
+                    }
+                });
+            }
+        };
+        /**
+         * Update classes on the table to indicate if the table is scrolling or not
+         */
+        FixedColumns.prototype._scroll = function () {
+            var scroller = this.dom.scroller[0];
+            // Not a scrolling table
+            if (!scroller) {
+                return;
+            }
+            // Need to update the classes on potentially multiple table tags. There is the
+            // main one, the scrolling ones and if FixedHeader is active, the holding
+            // position ones! jQuery will deduplicate for us.
+            var table = $$1(this.s.dt.table().node())
+                .add(this.s.dt.table().header().parentNode)
+                .add(this.s.dt.table().footer().parentNode)
+                .add('div.dt-scroll-headInner table', this.s.dt.table().container())
+                .add('div.dt-scroll-footInner table', this.s.dt.table().container());
+            var scrollLeft = scroller.scrollLeft; // 0 when fully scrolled left
+            var ltr = !this.s.rtl;
+            var scrollStart = scrollLeft !== 0;
+            var scrollEnd = scroller.scrollWidth > (scroller.clientWidth + Math.abs(scrollLeft) + 1); // extra 1 for Chrome
+            table.toggleClass(this.classes.tableScrollingStart, scrollStart);
+            table.toggleClass(this.classes.tableScrollingEnd, scrollEnd);
+            table.toggleClass(this.classes.tableScrollingLeft, (scrollStart && ltr) || (scrollEnd && !ltr));
+            table.toggleClass(this.classes.tableScrollingRight, (scrollEnd && ltr) || (scrollStart && !ltr));
+        };
+        FixedColumns.prototype._setKeyTableListener = function () {
+            var _this = this;
+            this.s.dt.on('key-focus.dt.dtfc', function (e, dt, cell) {
+                var currScroll;
+                var cellPos = $$1(cell.node()).offset();
+                var scroller = _this.dom.scroller[0];
+                var scroll = $$1($$1(_this.s.dt.table().node()).closest('div.dt-scroll-body'));
+                // If there are fixed columns to the left
+                if (_this.c.start > 0) {
+                    // Get the rightmost left fixed column header, it's position and it's width
+                    var rightMost = $$1(_this.s.dt.column(_this.c.start - 1).header());
+                    var rightMostPos = rightMost.offset();
+                    var rightMostWidth = rightMost.outerWidth();
+                    // If the current highlighted cell is left of the rightmost cell on the screen
+                    if ($$1(cell.node()).hasClass(_this.classes.fixedLeft)) {
+                        // Fixed columns have the scrollbar at the start, always
+                        scroll.scrollLeft(0);
+                    }
+                    else if (cellPos.left < rightMostPos.left + rightMostWidth) {
+                        // Scroll it into view
+                        currScroll = scroll.scrollLeft();
+                        scroll.scrollLeft(currScroll -
+                            (rightMostPos.left + rightMostWidth - cellPos.left));
+                    }
+                }
+                // If there are fixed columns to the right
+                if (_this.c.end > 0) {
+                    // Get the number of columns and the width of the cell as doing right side calc
+                    var numCols = _this.s.dt.columns().data().toArray().length;
+                    var cellWidth = $$1(cell.node()).outerWidth();
+                    // Get the leftmost right fixed column header and it's position
+                    var leftMost = $$1(_this.s.dt.column(numCols - _this.c.end).header());
+                    var leftMostPos = leftMost.offset();
+                    // If the current highlighted cell is right of the leftmost cell on the screen
+                    if ($$1(cell.node()).hasClass(_this.classes.fixedRight)) {
+                        scroll.scrollLeft(scroller.scrollWidth - scroller.clientWidth);
+                    }
+                    else if (cellPos.left + cellWidth > leftMostPos.left) {
+                        // Scroll it into view
+                        currScroll = scroll.scrollLeft();
+                        scroll.scrollLeft(currScroll -
+                            (leftMostPos.left - (cellPos.left + cellWidth)));
+                    }
+                }
+            });
+        };
+        /**
+         * Sum a range of values from an array
+         *
+         * @param widths
+         * @param index
+         * @returns
+         */
+        FixedColumns.prototype._sum = function (widths, index, reverse) {
+            if (reverse === void 0) { reverse = false; }
+            if (reverse) {
+                widths = widths.slice().reverse();
+            }
+            return widths.slice(0, index).reduce(function (accum, val) { return accum + val; }, 0);
+        };
+        FixedColumns.version = '5.0.4';
+        FixedColumns.classes = {
+            bottomBlocker: 'dtfc-bottom-blocker',
+            fixedEnd: 'dtfc-fixed-end',
+            fixedLeft: 'dtfc-fixed-left',
+            fixedRight: 'dtfc-fixed-right',
+            fixedStart: 'dtfc-fixed-start',
+            tableFixedEnd: 'dtfc-has-end',
+            tableFixedLeft: 'dtfc-has-left',
+            tableFixedRight: 'dtfc-has-right',
+            tableFixedStart: 'dtfc-has-start',
+            tableScrollingEnd: 'dtfc-scrolling-end',
+            tableScrollingLeft: 'dtfc-scrolling-left',
+            tableScrollingRight: 'dtfc-scrolling-right',
+            tableScrollingStart: 'dtfc-scrolling-start',
+            topBlocker: 'dtfc-top-blocker'
+        };
+        FixedColumns.defaults = {
+            i18n: {
+                button: 'FixedColumns'
+            },
+            start: 1,
+            end: 0
+        };
+        return FixedColumns;
+    }());
+
+    /*! FixedColumns 5.0.4
+     * © SpryMedia Ltd - datatables.net/license
+     */
+    setJQuery($);
+    $.fn.dataTable.FixedColumns = FixedColumns;
+    $.fn.DataTable.FixedColumns = FixedColumns;
+    var apiRegister = DataTable.Api.register;
+    apiRegister('fixedColumns()', function () {
+        return this;
+    });
+    apiRegister('fixedColumns().start()', function (newVal) {
+        var ctx = this.context[0];
+        if (newVal !== undefined) {
+            ctx._fixedColumns.start(newVal);
+            return this;
+        }
+        else {
+            return ctx._fixedColumns.start();
+        }
+    });
+    apiRegister('fixedColumns().end()', function (newVal) {
+        var ctx = this.context[0];
+        if (newVal !== undefined) {
+            ctx._fixedColumns.end(newVal);
+            return this;
+        }
+        else {
+            return ctx._fixedColumns.end();
+        }
+    });
+    apiRegister('fixedColumns().left()', function (newVal) {
+        var ctx = this.context[0];
+        if (newVal !== undefined) {
+            ctx._fixedColumns.left(newVal);
+            return this;
+        }
+        else {
+            return ctx._fixedColumns.left();
+        }
+    });
+    apiRegister('fixedColumns().right()', function (newVal) {
+        var ctx = this.context[0];
+        if (newVal !== undefined) {
+            ctx._fixedColumns.right(newVal);
+            return this;
+        }
+        else {
+            return ctx._fixedColumns.right();
+        }
+    });
+    DataTable.ext.buttons.fixedColumns = {
+        action: function (e, dt, node, config) {
+            if ($(node).attr('active')) {
+                $(node).removeAttr('active').removeClass('active');
+                dt.fixedColumns().start(0);
+                dt.fixedColumns().end(0);
+            }
+            else {
+                $(node).attr('active', 'true').addClass('active');
+                dt.fixedColumns().start(config.config.start);
+                dt.fixedColumns().end(config.config.end);
+            }
+        },
+        config: {
+            start: 1,
+            end: 0
+        },
+        init: function (dt, node, config) {
+            if (dt.settings()[0]._fixedColumns === undefined) {
+                _init(dt.settings(), config);
+            }
+            $(node).attr('active', 'true').addClass('active');
+            dt.button(node).text(config.text || dt.i18n('buttons.fixedColumns', dt.settings()[0]._fixedColumns.c.i18n.button));
+        },
+        text: null
+    };
+    function _init(settings, options) {
+        if (options === void 0) { options = null; }
+        var api = new DataTable.Api(settings);
+        var opts = options
+            ? options
+            : api.init().fixedColumns || DataTable.defaults.fixedColumns;
+        var fixedColumns = new FixedColumns(api, opts);
+        return fixedColumns;
+    }
+    // Attach a listener to the document which listens for DataTables initialisation
+    // events so we can automatically initialise
+    $(document).on('plugin-init.dt', function (e, settings) {
+        if (e.namespace !== 'dt') {
+            return;
+        }
+        if (settings.oInit.fixedColumns ||
+            DataTable.defaults.fixedColumns) {
+            if (!settings._fixedColumns) {
+                _init(settings, null);
+            }
+        }
+    });
+
+})();
+
+
+return DataTable;
+}));
+
+
+/*! FixedHeader 4.0.1
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+
+/**
+ * @summary     FixedHeader
+ * @description Fix a table's header or footer, so it is always visible while
+ *              scrolling
+ * @version     4.0.1
+ * @author      SpryMedia Ltd
+ * @contact     datatables.net
+ *
+ * This source file is free software, available under the following license:
+ *   MIT license - http://datatables.net/license/mit
+ *
+ * This source file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+ *
+ * For details please refer to: http://www.datatables.net
+ */
+
+var _instCounter = 0;
+
+var FixedHeader = function (dt, config) {
+	if (!DataTable.versionCheck('2')) {
+		throw 'Warning: FixedHeader requires DataTables 2 or newer';
+	}
+
+	// Sanity check - you just know it will happen
+	if (!(this instanceof FixedHeader)) {
+		throw "FixedHeader must be initialised with the 'new' keyword.";
+	}
+
+	// Allow a boolean true for defaults
+	if (config === true) {
+		config = {};
+	}
+
+	dt = new DataTable.Api(dt);
+
+	this.c = $.extend(true, {}, FixedHeader.defaults, config);
+
+	this.s = {
+		dt: dt,
+		position: {
+			theadTop: 0,
+			tbodyTop: 0,
+			tfootTop: 0,
+			tfootBottom: 0,
+			width: 0,
+			left: 0,
+			tfootHeight: 0,
+			theadHeight: 0,
+			windowHeight: $(window).height(),
+			visible: true
+		},
+		headerMode: null,
+		footerMode: null,
+		autoWidth: dt.settings()[0].oFeatures.bAutoWidth,
+		namespace: '.dtfc' + _instCounter++,
+		scrollLeft: {
+			header: -1,
+			footer: -1
+		},
+		enable: true,
+		autoDisable: false
+	};
+
+	this.dom = {
+		floatingHeader: null,
+		thead: $(dt.table().header()),
+		tbody: $(dt.table().body()),
+		tfoot: $(dt.table().footer()),
+		header: {
+			host: null,
+			floating: null,
+			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
+			placeholder: null
+		},
+		footer: {
+			host: null,
+			floating: null,
+			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
+			placeholder: null
+		}
+	};
+
+	this.dom.header.host = this.dom.thead.parent();
+	this.dom.footer.host = this.dom.tfoot.parent();
+
+	var dtSettings = dt.settings()[0];
+	if (dtSettings._fixedHeader) {
+		throw (
+			'FixedHeader already initialised on table ' + dtSettings.nTable.id
+		);
+	}
+
+	dtSettings._fixedHeader = this;
+
+	this._constructor();
+};
+
+/*
+ * Variable: FixedHeader
+ * Purpose:  Prototype for FixedHeader
+ * Scope:    global
+ */
+$.extend(FixedHeader.prototype, {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * API methods
+	 */
+
+	/**
+	 * Kill off FH and any events
+	 */
+	destroy: function () {
+		var dom = this.dom;
+
+		this.s.dt.off('.dtfc');
+		$(window).off(this.s.namespace);
+
+		// Remove clones of FC blockers
+		if (dom.header.rightBlocker) {
+			dom.header.rightBlocker.remove();
+		}
+		if (dom.header.leftBlocker) {
+			dom.header.leftBlocker.remove();
+		}
+		if (dom.footer.rightBlocker) {
+			dom.footer.rightBlocker.remove();
+		}
+		if (dom.footer.leftBlocker) {
+			dom.footer.leftBlocker.remove();
+		}
+
+		if (this.c.header) {
+			this._modeChange('in-place', 'header', true);
+		}
+
+		if (this.c.footer && dom.tfoot.length) {
+			this._modeChange('in-place', 'footer', true);
+		}
+	},
+
+	/**
+	 * Enable / disable the fixed elements
+	 *
+	 * @param  {boolean} enable `true` to enable, `false` to disable
+	 */
+	enable: function (enable, update, type) {
+		this.s.enable = enable;
+
+		this.s.enableType = type;
+
+		if (update || update === undefined) {
+			this._positions();
+			this._scroll(true);
+		}
+	},
+
+	/**
+	 * Get enabled status
+	 */
+	enabled: function () {
+		return this.s.enable;
+	},
+
+	/**
+	 * Set header offset
+	 *
+	 * @param  {int} new value for headerOffset
+	 */
+	headerOffset: function (offset) {
+		if (offset !== undefined) {
+			this.c.headerOffset = offset;
+			this.update();
+		}
+
+		return this.c.headerOffset;
+	},
+
+	/**
+	 * Set footer offset
+	 *
+	 * @param  {int} new value for footerOffset
+	 */
+	footerOffset: function (offset) {
+		if (offset !== undefined) {
+			this.c.footerOffset = offset;
+			this.update();
+		}
+
+		return this.c.footerOffset;
+	},
+
+	/**
+	 * Recalculate the position of the fixed elements and force them into place
+	 */
+	update: function (force) {
+		var table = this.s.dt.table().node();
+
+		// Update should only do something if enabled by the dev.
+		if (!this.s.enable && !this.s.autoDisable) {
+			return;
+		}
+
+		if ($(table).is(':visible')) {
+			this.s.autoDisable = false;
+			this.enable(true, false);
+		}
+		else {
+			this.s.autoDisable = true;
+			this.enable(false, false);
+		}
+
+		// Don't update if header is not in the document atm (due to
+		// async events)
+		if ($(table).children('thead').length === 0) {
+			return;
+		}
+
+		this._positions();
+		this._scroll(force !== undefined ? force : true);
+		this._widths(this.dom.header);
+		this._widths(this.dom.footer);
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Constructor
+	 */
+
+	/**
+	 * FixedHeader constructor - adding the required event listeners and
+	 * simple initialisation
+	 *
+	 * @private
+	 */
+	_constructor: function () {
+		var that = this;
+		var dt = this.s.dt;
+
+		$(window)
+			.on('scroll' + this.s.namespace, function () {
+				that._scroll();
+			})
+			.on(
+				'resize' + this.s.namespace,
+				DataTable.util.throttle(function () {
+					that.s.position.windowHeight = $(window).height();
+					that.update();
+				}, 50)
+			);
+
+		var autoHeader = $('.fh-fixedHeader');
+		if (!this.c.headerOffset && autoHeader.length) {
+			this.c.headerOffset = autoHeader.outerHeight();
+		}
+
+		var autoFooter = $('.fh-fixedFooter');
+		if (!this.c.footerOffset && autoFooter.length) {
+			this.c.footerOffset = autoFooter.outerHeight();
+		}
+
+		dt.on(
+			'column-reorder.dt.dtfc column-visibility.dt.dtfc column-sizing.dt.dtfc responsive-display.dt.dtfc',
+			function (e, ctx) {
+				that.update();
+			}
+		).on('draw.dt.dtfc', function (e, ctx) {
+			// For updates from our own table, don't reclone, but for all others, do
+			that.update(ctx === dt.settings()[0] ? false : true);
+		});
+
+		dt.on('destroy.dtfc', function () {
+			that.destroy();
+		});
+
+		this._positions();
+		this._scroll();
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Private methods
+	 */
+
+	/**
+	 * Clone a fixed item to act as a place holder for the original element
+	 * which is moved into a clone of the table element, and moved around the
+	 * document to give the fixed effect.
+	 *
+	 * @param  {string}  item  'header' or 'footer'
+	 * @param  {boolean} force Force the clone to happen, or allow automatic
+	 *   decision (reuse existing if available)
+	 * @private
+	 */
+	_clone: function (item, force) {
+		var that = this;
+		var dt = this.s.dt;
+		var itemDom = this.dom[item];
+		var itemElement = item === 'header' ? this.dom.thead : this.dom.tfoot;
+
+		// If footer and scrolling is enabled then we don't clone
+		// Instead the table's height is decreased accordingly - see `_scroll()`
+		if (item === 'footer' && this._scrollEnabled()) {
+			return;
+		}
+
+		if (!force && itemDom.floating) {
+			// existing floating element - reuse it
+			itemDom.floating.removeClass(
+				'fixedHeader-floating fixedHeader-locked'
+			);
+		}
+		else {
+			if (itemDom.floating) {
+				if (itemDom.placeholder !== null) {
+					itemDom.placeholder.remove();
+				}
+
+				itemDom.floating.children().detach();
+				itemDom.floating.remove();
+			}
+
+			var tableNode = $(dt.table().node());
+			var scrollBody = $(tableNode.parent());
+			var scrollEnabled = this._scrollEnabled();
+
+			itemDom.floating = $(dt.table().node().cloneNode(false))
+				.attr('aria-hidden', 'true')
+				.css({
+					top: 0,
+					left: 0
+				})
+				.removeAttr('id');
+
+			itemDom.floatingParent
+				.css({
+					width: scrollBody[0].offsetWidth,
+					overflow: 'hidden',
+					height: 'fit-content',
+					position: 'fixed',
+					left: scrollEnabled
+						? tableNode.offset().left + scrollBody.scrollLeft()
+						: 0
+				})
+				.css(
+					item === 'header'
+						? {
+								top: this.c.headerOffset,
+								bottom: ''
+						}
+						: {
+								top: '',
+								bottom: this.c.footerOffset
+						}
+				)
+				.addClass(
+					item === 'footer'
+						? 'dtfh-floatingparent-foot'
+						: 'dtfh-floatingparent-head'
+				)
+				.appendTo('body')
+				.children()
+				.eq(0)
+				.append(itemDom.floating);
+
+			this._stickyPosition(itemDom.floating, '-');
+
+			var scrollLeftUpdate = function () {
+				var scrollLeft = scrollBody.scrollLeft();
+				that.s.scrollLeft = { footer: scrollLeft, header: scrollLeft };
+				itemDom.floatingParent.scrollLeft(that.s.scrollLeft.header);
+			};
+
+			scrollLeftUpdate();
+			scrollBody.off('scroll.dtfh').on('scroll.dtfh', scrollLeftUpdate);
+
+			// Need padding on the header's container to allow for a scrollbar,
+			// just like how DataTables handles it
+			itemDom.floatingParent.children().css({
+				width: 'fit-content',
+				paddingRight: that.s.dt.settings()[0].oBrowser.barWidth
+			});
+
+			// Blocker to hide the table behind the scrollbar - this needs to use
+			// fixed positioning in the container since we don't have an outer wrapper
+			let blocker = $(
+				item === 'footer'
+					? 'div.dtfc-bottom-blocker'
+					: 'div.dtfc-top-blocker',
+				dt.table().container()
+			);
+
+			if (blocker.length) {
+				blocker
+					.clone()
+					.appendTo(itemDom.floatingParent)
+					.css({
+						position: 'fixed',
+						right: blocker.width()
+					});
+			}
+
+			// Insert a fake thead/tfoot into the DataTable to stop it jumping around
+			itemDom.placeholder = itemElement.clone(false);
+			itemDom.placeholder.find('*[id]').removeAttr('id');
+
+			// Move the thead / tfoot elements around - original into the floating
+			// element and clone into the original table
+			itemDom.host.prepend(itemDom.placeholder);
+			itemDom.floating.append(itemElement);
+
+			this._widths(itemDom);
+		}
+	},
+
+	/**
+	 * This method sets the sticky position of the header elements to match fixed columns
+	 * @param {JQuery<HTMLElement>} el
+	 * @param {string} sign
+	 */
+	_stickyPosition: function (el, sign) {
+		if (this._scrollEnabled()) {
+			var that = this;
+			var rtl = $(that.s.dt.table().node()).css('direction') === 'rtl';
+
+			el.find('th').each(function () {
+				// Find out if fixed header has previously set this column
+				if ($(this).css('position') === 'sticky') {
+					var right = $(this).css('right');
+					var left = $(this).css('left');
+					var potential;
+
+					if (right !== 'auto' && !rtl) {
+						potential = +right.replace(/px/g, '')
+
+						$(this).css('right', potential > 0 ? potential : 0);
+					}
+					else if (left !== 'auto' && rtl) {
+						potential = +left.replace(/px/g, '');
+
+						$(this).css('left', potential > 0 ? potential : 0);
+					}
+				}
+			});
+		}
+	},
+
+	/**
+	 * Reposition the floating elements to take account of horizontal page
+	 * scroll
+	 *
+	 * @param  {string} item       The `header` or `footer`
+	 * @param  {int}    scrollLeft Document scrollLeft
+	 * @private
+	 */
+	_horizontal: function (item, scrollLeft) {
+		var itemDom = this.dom[item];
+		var lastScrollLeft = this.s.scrollLeft;
+
+		if (itemDom.floating && lastScrollLeft[item] !== scrollLeft) {
+			// If scrolling is enabled we need to match the floating header to the body
+			if (this._scrollEnabled()) {
+				var newScrollLeft = $(
+					$(this.s.dt.table().node()).parent()
+				).scrollLeft();
+				itemDom.floating.scrollLeft(newScrollLeft);
+				itemDom.floatingParent.scrollLeft(newScrollLeft);
+			}
+
+			lastScrollLeft[item] = scrollLeft;
+		}
+	},
+
+	/**
+	 * Change from one display mode to another. Each fixed item can be in one
+	 * of:
+	 *
+	 * * `in-place` - In the main DataTable
+	 * * `in` - Floating over the DataTable
+	 * * `below` - (Header only) Fixed to the bottom of the table body
+	 * * `above` - (Footer only) Fixed to the top of the table body
+	 *
+	 * @param  {string}  mode        Mode that the item should be shown in
+	 * @param  {string}  item        'header' or 'footer'
+	 * @param  {boolean} forceChange Force a redraw of the mode, even if already
+	 *     in that mode.
+	 * @private
+	 */
+	_modeChange: function (mode, item, forceChange) {
+		var itemDom = this.dom[item];
+		var position = this.s.position;
+
+		// Just determine if scroll is enabled once
+		var scrollEnabled = this._scrollEnabled();
+
+		// If footer and scrolling is enabled then we don't clone
+		// Instead the table's height is decreased accordingly - see `_scroll()`
+		if (item === 'footer' && scrollEnabled) {
+			return;
+		}
+
+		// It isn't trivial to add a !important css attribute...
+		var importantWidth = function (w) {
+			itemDom.floating[0].style.setProperty('width', w + 'px', 'important');
+
+			// If not scrolling also have to update the floatingParent
+			if (!scrollEnabled) {
+				itemDom.floatingParent[0].style.setProperty('width', w + 'px', 'important');
+			}
+		};
+
+		// Record focus. Browser's will cause input elements to loose focus if
+		// they are inserted else where in the doc
+		var tablePart = this.dom[item === 'footer' ? 'tfoot' : 'thead'];
+		var focus = $.contains(tablePart[0], document.activeElement)
+			? document.activeElement
+			: null;
+		var scrollBody = $($(this.s.dt.table().node()).parent());
+
+		if (mode === 'in-place') {
+			// Insert the header back into the table's real header
+			if (itemDom.placeholder) {
+				itemDom.placeholder.remove();
+				itemDom.placeholder = null;
+			}
+
+			if (item === 'header') {
+				itemDom.host.prepend(tablePart);
+			}
+			else {
+				itemDom.host.append(tablePart);
+			}
+
+			if (itemDom.floating) {
+				itemDom.floating.remove();
+				itemDom.floating = null;
+				this._stickyPosition(itemDom.host, '+');
+			}
+
+			if (itemDom.floatingParent) {
+				itemDom.floatingParent.find('div.dtfc-top-blocker').remove();
+				itemDom.floatingParent.remove();
+			}
+
+			$($(itemDom.host.parent()).parent()).scrollLeft(
+				scrollBody.scrollLeft()
+			);
+		}
+		else if (mode === 'in') {
+			// Remove the header from the real table and insert into a fixed
+			// positioned floating table clone
+			this._clone(item, forceChange);
+
+			// Get useful position values
+			var scrollOffset = scrollBody.offset();
+			var windowTop = $(document).scrollTop();
+			var windowHeight = $(window).height();
+			var windowBottom = windowTop + windowHeight;
+			var bodyTop = scrollEnabled ? scrollOffset.top : position.tbodyTop;
+			var bodyBottom = scrollEnabled
+				? scrollOffset.top + scrollBody.outerHeight()
+				: position.tfootTop;
+
+			// Calculate the amount that the footer or header needs to be shuffled
+			var shuffle;
+
+			if (item === 'footer') {
+				shuffle =
+					bodyTop > windowBottom
+						? position.tfootHeight // Yes - push the footer below
+						: bodyTop + position.tfootHeight - windowBottom; // No
+			}
+			else {
+				// Otherwise must be a header so get the difference from the bottom of the
+				//  desired floating header and the bottom of the table body
+				shuffle =
+					windowTop +
+					this.c.headerOffset +
+					position.theadHeight -
+					bodyBottom;
+			}
+
+			// Set the top or bottom based off of the offset and the shuffle value
+			var prop = item === 'header' ? 'top' : 'bottom';
+			var val = this.c[item + 'Offset'] - (shuffle > 0 ? shuffle : 0);
+
+			itemDom.floating.addClass('fixedHeader-floating');
+			itemDom.floatingParent
+				.css(prop, val)
+				.css({
+					left: position.left,
+					'z-index': 3
+				});
+
+			importantWidth(position.width);
+
+			if (item === 'footer') {
+				itemDom.floating.css('top', '');
+			}
+		}
+		else if (mode === 'below') {
+			// only used for the header
+			// Fix the position of the floating header at base of the table body
+			this._clone(item, forceChange);
+
+			itemDom.floating.addClass('fixedHeader-locked');
+			itemDom.floatingParent.css({
+				position: 'absolute',
+				top: position.tfootTop - position.theadHeight,
+				left: position.left + 'px'
+			});
+
+			importantWidth(position.width);
+		}
+		else if (mode === 'above') {
+			// only used for the footer
+			// Fix the position of the floating footer at top of the table body
+			this._clone(item, forceChange);
+
+			itemDom.floating.addClass('fixedHeader-locked');
+			itemDom.floatingParent.css({
+				position: 'absolute',
+				top: position.tbodyTop,
+				left: position.left + 'px'
+			});
+
+			importantWidth(position.width);
+		}
+
+		// Restore focus if it was lost
+		if (focus && focus !== document.activeElement) {
+			setTimeout(function () {
+				focus.focus();
+			}, 10);
+		}
+
+		this.s.scrollLeft.header = -1;
+		this.s.scrollLeft.footer = -1;
+		this.s[item + 'Mode'] = mode;
+	},
+
+	/**
+	 * Cache the positional information that is required for the mode
+	 * calculations that FixedHeader performs.
+	 *
+	 * @private
+	 */
+	_positions: function () {
+		var dt = this.s.dt;
+		var table = dt.table();
+		var position = this.s.position;
+		var dom = this.dom;
+		var tableNode = $(table.node());
+		var scrollEnabled = this._scrollEnabled();
+
+		// Need to use the header and footer that are in the main table,
+		// regardless of if they are clones, since they hold the positions we
+		// want to measure from
+		var thead = $(dt.table().header());
+		var tfoot = $(dt.table().footer());
+		var tbody = dom.tbody;
+		var scrollBody = tableNode.parent();
+
+		position.visible = tableNode.is(':visible');
+		position.width = tableNode.outerWidth();
+		position.left = tableNode.offset().left;
+		position.theadTop = thead.offset().top;
+		position.tbodyTop = scrollEnabled
+			? scrollBody.offset().top
+			: tbody.offset().top;
+		position.tbodyHeight = scrollEnabled
+			? scrollBody.outerHeight()
+			: tbody.outerHeight();
+		position.theadHeight = thead.outerHeight();
+		position.theadBottom = position.theadTop + position.theadHeight;
+		position.tfootTop = position.tbodyTop + position.tbodyHeight; //tfoot.offset().top;
+
+		if (tfoot.length) {
+			position.tfootBottom = position.tfootTop + tfoot.outerHeight();
+			position.tfootHeight = tfoot.outerHeight();
+		}
+		else {
+			position.tfootBottom = position.tfootTop;
+			position.tfootHeight = 0;
+		}
+	},
+
+	/**
+	 * Mode calculation - determine what mode the fixed items should be placed
+	 * into.
+	 *
+	 * @param  {boolean} forceChange Force a redraw of the mode, even if already
+	 *     in that mode.
+	 * @private
+	 */
+	_scroll: function (forceChange) {
+		if (this.s.dt.settings()[0].bDestroying) {
+			return;
+		}
+
+		// ScrollBody details
+		var scrollEnabled = this._scrollEnabled();
+		var scrollBody = $(this.s.dt.table().node()).parent();
+		var scrollOffset = scrollBody.offset();
+		var scrollHeight = scrollBody.outerHeight();
+
+		// Window details
+		var windowLeft = $(document).scrollLeft();
+		var windowTop = $(document).scrollTop();
+		var windowHeight = $(window).height();
+		var windowBottom = windowHeight + windowTop;
+
+		var position = this.s.position;
+		var headerMode, footerMode;
+
+		// Body Details
+		var bodyTop = scrollEnabled ? scrollOffset.top : position.tbodyTop;
+		var bodyLeft = scrollEnabled ? scrollOffset.left : position.left;
+		var bodyBottom = scrollEnabled
+			? scrollOffset.top + scrollHeight
+			: position.tfootTop;
+		var bodyWidth = scrollEnabled
+			? scrollBody.outerWidth()
+			: position.tbodyWidth;
+
+		if (this.c.header) {
+			if (!this.s.enable) {
+				headerMode = 'in-place';
+			}
+			// The header is in it's normal place if the body top is lower than
+			//  the scroll of the window plus the headerOffset and the height of the header
+			else if (
+				!position.visible ||
+				windowTop + this.c.headerOffset + position.theadHeight <=
+					bodyTop
+			) {
+				headerMode = 'in-place';
+			}
+			// The header should be floated if
+			else if (
+				// The scrolling plus the header offset plus the height of the header is lower than the top of the body
+				windowTop + this.c.headerOffset + position.theadHeight >
+					bodyTop &&
+				// And the scrolling at the top plus the header offset is above the bottom of the body
+				windowTop + this.c.headerOffset + position.theadHeight <
+					bodyBottom
+			) {
+				headerMode = 'in';
+
+				// Further to the above, If the scrolling plus the header offset plus the header height is lower
+				// than the bottom of the table a shuffle is required so have to force the calculation
+				if (
+					windowTop + this.c.headerOffset + position.theadHeight >
+						bodyBottom ||
+					this.dom.header.floatingParent === undefined
+				) {
+					forceChange = true;
+				}
+				else {
+					this.dom.header.floatingParent
+						.css({
+							top: this.c.headerOffset,
+							position: 'fixed'
+						})
+						.children()
+						.eq(0)
+						.append(this.dom.header.floating);
+				}
+			}
+			// Anything else and the view is below the table
+			else {
+				headerMode = 'below';
+			}
+
+			if (forceChange || headerMode !== this.s.headerMode) {
+				this._modeChange(headerMode, 'header', forceChange);
+			}
+
+			this._horizontal('header', windowLeft);
+		}
+
+		var header = {
+			offset: { top: 0, left: 0 },
+			height: 0
+		};
+		var footer = {
+			offset: { top: 0, left: 0 },
+			height: 0
+		};
+
+		if (
+			this.c.footer &&
+			this.dom.tfoot.length &&
+			this.dom.tfoot.find('th, td').length
+		) {
+			if (!this.s.enable) {
+				footerMode = 'in-place';
+			}
+			else if (
+				!position.visible ||
+				position.tfootBottom + this.c.footerOffset <= windowBottom
+			) {
+				footerMode = 'in-place';
+			}
+			else if (
+				bodyBottom + position.tfootHeight + this.c.footerOffset >
+					windowBottom &&
+				bodyTop + this.c.footerOffset < windowBottom
+			) {
+				footerMode = 'in';
+				forceChange = true;
+			}
+			else {
+				footerMode = 'above';
+			}
+
+			if (forceChange || footerMode !== this.s.footerMode) {
+				this._modeChange(footerMode, 'footer', forceChange);
+			}
+
+			this._horizontal('footer', windowLeft);
+
+			var getOffsetHeight = function (el) {
+				return {
+					offset: el.offset(),
+					height: el.outerHeight()
+				};
+			};
+
+			header = this.dom.header.floating
+				? getOffsetHeight(this.dom.header.floating)
+				: getOffsetHeight(this.dom.thead);
+			footer = this.dom.footer.floating
+				? getOffsetHeight(this.dom.footer.floating)
+				: getOffsetHeight(this.dom.tfoot);
+
+			// If scrolling is enabled and the footer is off the screen
+			if (scrollEnabled && footer.offset.top > windowTop) {
+				// && footer.offset.top >= windowBottom) {
+				// Calculate the gap between the top of the scrollBody and the top of the window
+				var overlap = windowTop - scrollOffset.top;
+				// The new height is the bottom of the window
+				var newHeight =
+					windowBottom +
+					// If the gap between the top of the scrollbody and the window is more than
+					//  the height of the header then the top of the table is still visible so add that gap
+					// Doing this has effectively calculated the height from the top of the table to the bottom of the current page
+					(overlap > -header.height ? overlap : 0) -
+					// Take from that
+					// The top of the header plus
+					(header.offset.top +
+						// The header height if the standard header is present
+						(overlap < -header.height ? header.height : 0) +
+						// And the height of the footer
+						footer.height);
+
+				// Don't want a negative height
+				if (newHeight < 0) {
+					newHeight = 0;
+				}
+
+				// At the end of the above calculation the space between the header (top of the page if floating)
+				// and the point just above the footer should be the new value for the height of the table.
+				scrollBody.outerHeight(newHeight);
+
+				// Need some rounding here as sometimes very small decimal places are encountered
+				// If the actual height is bigger or equal to the height we just applied then the footer is "Floating"
+				if (
+					Math.round(scrollBody.outerHeight()) >=
+					Math.round(newHeight)
+				) {
+					$(this.dom.tfoot.parent()).addClass('fixedHeader-floating');
+				}
+				// Otherwise max-width has kicked in so it is not floating
+				else {
+					$(this.dom.tfoot.parent()).removeClass(
+						'fixedHeader-floating'
+					);
+				}
+			}
+		}
+
+		if (this.dom.header.floating) {
+			this.dom.header.floatingParent.css('left', bodyLeft - windowLeft);
+		}
+		if (this.dom.footer.floating) {
+			this.dom.footer.floatingParent.css('left', bodyLeft - windowLeft);
+		}
+
+		// If fixed columns is being used on this table then the blockers need to be copied across
+		// Cloning these is cleaner than creating as our own as it will keep consistency with fixedColumns automatically
+		// ASSUMING that the class remains the same
+		if (this.s.dt.settings()[0]._fixedColumns !== undefined) {
+			var adjustBlocker = function (side, end, el) {
+				if (el === undefined) {
+					var blocker = $(
+						'div.dtfc-' + side + '-' + end + '-blocker'
+					);
+
+					el =
+						blocker.length === 0
+							? null
+							: blocker.clone().css('z-index', 1);
+				}
+
+				if (el !== null) {
+					if (headerMode === 'in' || headerMode === 'below') {
+						el.appendTo('body').css({
+							top:
+								end === 'top'
+									? header.offset.top
+									: footer.offset.top,
+							left:
+								side === 'right'
+									? bodyLeft + bodyWidth - el.width()
+									: bodyLeft
+						});
+					}
+					else {
+						el.detach();
+					}
+				}
+
+				return el;
+			};
+
+			// Adjust all blockers
+			this.dom.header.rightBlocker = adjustBlocker(
+				'right',
+				'top',
+				this.dom.header.rightBlocker
+			);
+			this.dom.header.leftBlocker = adjustBlocker(
+				'left',
+				'top',
+				this.dom.header.leftBlocker
+			);
+			this.dom.footer.rightBlocker = adjustBlocker(
+				'right',
+				'bottom',
+				this.dom.footer.rightBlocker
+			);
+			this.dom.footer.leftBlocker = adjustBlocker(
+				'left',
+				'bottom',
+				this.dom.footer.leftBlocker
+			);
+		}
+	},
+
+	/**
+	 * Function to check if scrolling is enabled on the table or not
+	 * @returns Boolean value indicating if scrolling on the table is enabled or not
+	 */
+	_scrollEnabled: function () {
+		var oScroll = this.s.dt.settings()[0].oScroll;
+		if (oScroll.sY !== '' || oScroll.sX !== '') {
+			return true;
+		}
+		return false;
+	},
+
+	/**
+	 * Realign columns by using the colgroup tag and
+	 * checking column widths
+	 */
+	_widths: function (itemDom) {
+		if (! itemDom || ! itemDom.placeholder) {
+			return;
+		}
+
+		// Match the table overall width
+		var tableNode = $(this.s.dt.table().node());
+		var scrollBody = $(tableNode.parent());
+
+		itemDom.floatingParent.css('width', scrollBody[0].offsetWidth);
+		itemDom.floating.css('width', tableNode[0].offsetWidth);
+
+		// Strip out the old colgroup
+		$('colgroup', itemDom.floating).remove();
+
+		// Copy the `colgroup` element to define the number of columns - needed
+		// for complex header cases where a column might not have a unique
+		// header
+		var cols = itemDom.placeholder
+			.parent()
+			.find('colgroup')
+			.clone()
+			.appendTo(itemDom.floating)
+			.find('col');
+
+		// However, the widths defined in the colgroup from the DataTable might
+		// not exactly reflect the actual widths of the columns (content can
+		// force it to stretch). So we need to copy the actual widths into the
+		// colgroup / col's used for the floating header.
+		var widths = this.s.dt.columns(':visible').widths();
+
+		for (var i=0 ; i<widths.length ; i++) {
+			cols.eq(i).css('width', widths[i]);
+		}
+	}
+});
+
+/**
+ * Version
+ * @type {String}
+ * @static
+ */
+FixedHeader.version = '4.0.1';
+
+/**
+ * Defaults
+ * @type {Object}
+ * @static
+ */
+FixedHeader.defaults = {
+	header: true,
+	footer: false,
+	headerOffset: 0,
+	footerOffset: 0
+};
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables interfaces
+ */
+
+// Attach for constructor access
+$.fn.dataTable.FixedHeader = FixedHeader;
+$.fn.DataTable.FixedHeader = FixedHeader;
+
+// DataTables creation - check if the FixedHeader option has been defined on the
+// table and if so, initialise
+$(document).on('init.dt.dtfh', function (e, settings, json) {
+	if (e.namespace !== 'dt') {
+		return;
+	}
+
+	var init = settings.oInit.fixedHeader;
+	var defaults = DataTable.defaults.fixedHeader;
+
+	if ((init || defaults) && !settings._fixedHeader) {
+		var opts = $.extend({}, defaults, init);
+
+		if (init !== false) {
+			new FixedHeader(settings, opts);
+		}
+	}
+});
+
+// DataTables API methods
+DataTable.Api.register('fixedHeader()', function () { });
+
+DataTable.Api.register('fixedHeader.adjust()', function () {
+	return this.iterator('table', function (ctx) {
+		var fh = ctx._fixedHeader;
+
+		if (fh) {
+			fh.update();
+		}
+	});
+});
+
+DataTable.Api.register('fixedHeader.enable()', function (flag) {
+	return this.iterator('table', function (ctx) {
+		var fh = ctx._fixedHeader;
+
+		flag = flag !== undefined ? flag : true;
+		if (fh && flag !== fh.enabled()) {
+			fh.enable(flag);
+		}
+	});
+});
+
+DataTable.Api.register('fixedHeader.enabled()', function () {
+	if (this.context.length) {
+		var fh = this.context[0]._fixedHeader;
+
+		if (fh) {
+			return fh.enabled();
+		}
+	}
+
+	return false;
+});
+
+DataTable.Api.register('fixedHeader.disable()', function () {
+	return this.iterator('table', function (ctx) {
+		var fh = ctx._fixedHeader;
+
+		if (fh && fh.enabled()) {
+			fh.enable(false);
+		}
+	});
+});
+
+$.each(['header', 'footer'], function (i, el) {
+	DataTable.Api.register('fixedHeader.' + el + 'Offset()', function (offset) {
+		var ctx = this.context;
+
+		if (offset === undefined) {
+			return ctx.length && ctx[0]._fixedHeader
+				? ctx[0]._fixedHeader[el + 'Offset']()
+				: undefined;
+		}
+
+		return this.iterator('table', function (ctx) {
+			var fh = ctx._fixedHeader;
+
+			if (fh) {
+				fh[el + 'Offset'](offset);
+			}
+		});
+	});
+});
+
+
+return DataTable;
+}));
+
+
+/*! KeyTable 2.12.1
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+
+/**
+ * @summary     KeyTable
+ * @description Spreadsheet like keyboard navigation for DataTables
+ * @version     2.12.1
+ * @file        dataTables.keyTable.js
+ * @author      SpryMedia Ltd
+ * @contact     datatables.net
+ * @copyright   Copyright SpryMedia Ltd.
+ *
+ * This source file is free software, available under the following license:
+ *   MIT license - http://datatables.net/license/mit
+ *
+ * This source file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+ *
+ * For details please refer to: http://www.datatables.net
+ */
+
+var namespaceCounter = 0;
+var editorNamespaceCounter = 0;
+
+var KeyTable = function (dt, opts) {
+	// Sanity check that we are using DataTables 1.10 or newer
+	if (!DataTable.versionCheck || !DataTable.versionCheck('1.10.8')) {
+		throw 'KeyTable requires DataTables 1.10.8 or newer';
+	}
+
+	// User and defaults configuration object
+	this.c = $.extend(true, {}, DataTable.defaults.keyTable, KeyTable.defaults, opts);
+
+	// Internal settings
+	this.s = {
+		/** @type {DataTable.Api} DataTables' API instance */
+		dt: new DataTable.Api(dt),
+
+		/** Indicate when the DataTable is redrawing - take no action on key presses */
+		dtDrawing: false,
+
+		enable: true,
+
+		/** @type {bool} Flag for if a draw is triggered by focus */
+		focusDraw: false,
+
+		/** @type {bool} Flag to indicate when waiting for a draw to happen.
+		 *   Will ignore key presses at this point
+		 */
+		waitingForDraw: false,
+
+		/** @type {object} Information about the last cell that was focused */
+		lastFocus: null,
+
+		/** @type {string} Unique namespace per instance */
+		namespace: '.keyTable-' + namespaceCounter++,
+
+		/** @type {Node} Input element for tabbing into the table */
+		tabInput: null
+	};
+
+	// DOM items
+	this.dom = {};
+
+	// Check if row reorder has already been initialised on this table
+	var settings = this.s.dt.settings()[0];
+	var exisiting = settings.keytable;
+	if (exisiting) {
+		return exisiting;
+	}
+
+	settings.keytable = this;
+	this._constructor();
+};
+
+$.extend(KeyTable.prototype, {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * API methods for DataTables API interface
+	 */
+
+	/**
+	 * Blur the table's cell focus
+	 */
+	blur: function () {
+		this._blur();
+	},
+
+	/**
+	 * Enable cell focus for the table
+	 *
+	 * @param  {string} state Can be `true`, `false` or `-string navigation-only`
+	 */
+	enable: function (state) {
+		this.s.enable = state;
+	},
+
+	/**
+	 * Get enable status
+	 */
+	enabled: function () {
+		return this.s.enable;
+	},
+
+	/**
+	 * Focus on a cell
+	 * @param  {integer} row    Row index
+	 * @param  {integer} column Column index
+	 */
+	focus: function (row, column) {
+		this._focus(this.s.dt.cell(row, column));
+	},
+
+	/**
+	 * Is the cell focused
+	 * @param  {object} cell Cell index to check
+	 * @returns {boolean} true if focused, false otherwise
+	 */
+	focused: function (cell) {
+		var lastFocus = this.s.lastFocus;
+
+		if (!lastFocus) {
+			return false;
+		}
+
+		var lastIdx = this.s.lastFocus.cell.index();
+		return cell.row === lastIdx.row && cell.column === lastIdx.column;
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Constructor
+	 */
+
+	/**
+	 * Initialise the KeyTable instance
+	 *
+	 * @private
+	 */
+	_constructor: function () {
+		this._tabInput();
+
+		var that = this;
+		var dt = this.s.dt;
+		var table = $(dt.table().node());
+		var namespace = this.s.namespace;
+		var editorBlock = false;
+
+		// Need to be able to calculate the cell positions relative to the table
+		if (table.css('position') === 'static') {
+			table.css('position', 'relative');
+		}
+
+		// Click to focus
+		$(dt.table().body()).on('click' + namespace, 'th, td', function (e) {
+			if (that.s.enable === false) {
+				return;
+			}
+
+			var cell = dt.cell(this);
+
+			if (!cell.any()) {
+				return;
+			}
+
+			that._focus(cell, null, false, e);
+		});
+
+		// Key events
+		$(document).on('keydown' + namespace, function (e) {
+			if (!editorBlock && !that.s.dtDrawing) {
+				that._key(e);
+			}
+			else {
+				e.preventDefault();
+			}
+		});
+
+		// Click blur
+		if (this.c.blurable) {
+			$(document).on('mousedown' + namespace, function (e) {
+				// Click on the search input will blur focus
+				if ($(e.target).parents('.dataTables_filter, .dt-search').length) {
+					that._blur();
+				}
+
+				// If the click was inside the DataTables container, don't blur
+				if ($(e.target).parents().filter(dt.table().container()).length) {
+					return;
+				}
+
+				// Don't blur in Editor form
+				if ($(e.target).parents('div.DTE').length) {
+					return;
+				}
+
+				// Or an Editor date input
+				if (
+					$(e.target).parents('div.editor-datetime').length ||
+					$(e.target).parents('div.dt-datetime').length
+				) {
+					return;
+				}
+
+				//If the click was inside the fixed columns container, don't blur
+				if ($(e.target).parents().filter('.DTFC_Cloned').length) {
+					return;
+				}
+
+				that._blur();
+			});
+		}
+
+		if (this.c.editor) {
+			var editor = this.c.editor;
+
+			// Need to disable KeyTable when the main editor is shown
+			editor.on('open.keyTableMain', function (e, mode, action) {
+				if (mode !== 'inline' && that.s.enable) {
+					that.enable(false);
+
+					editor.one('close' + namespace, function () {
+						that.enable(true);
+					});
+				}
+			});
+
+			if (this.c.editOnFocus) {
+				dt.on(
+					'key-focus' + namespace + ' key-refocus' + namespace,
+					function (e, dt, cell, orig) {
+						that._editor(null, orig, true);
+					}
+				);
+			}
+
+			// Activate Editor when a key is pressed (will be ignored, if
+			// already active).
+			dt.on('key' + namespace, function (e, dt, key, cell, orig) {
+				that._editor(key, orig, false);
+			});
+
+			// Active editing on double click - it will already have focus from
+			// the click event handler above
+			$(dt.table().body()).on('dblclick' + namespace, 'th, td', function (e) {
+				if (that.s.enable === false) {
+					return;
+				}
+
+				var cell = dt.cell(this);
+
+				if (!cell.any()) {
+					return;
+				}
+
+				if (that.s.lastFocus && this !== that.s.lastFocus.cell.node()) {
+					return;
+				}
+
+				that._editor(null, e, true);
+			});
+
+			// While Editor is busy processing, we don't want to process any key events
+			editor
+				.on('preSubmit', function () {
+					editorBlock = true;
+				})
+				.on('preSubmitCancelled', function () {
+					editorBlock = false;
+				})
+				.on('submitComplete', function () {
+					editorBlock = false;
+				});
+		}
+
+		// Stave saving
+		// if ( dt.settings()[0].oFeatures.bStateSave ) {
+		dt.on('stateSaveParams' + namespace, function (e, s, d) {
+			d.keyTable = that.s.lastFocus ? that.s.lastFocus.cell.index() : null;
+		});
+		// }
+
+		dt.on('column-visibility' + namespace, function (e) {
+			that._tabInput();
+		});
+
+		dt.on('column-reorder' + namespace, function (e, s, d) {
+			// Need to update the last focus cell's index
+			var lastFocus = that.s.lastFocus;
+
+			if (lastFocus && lastFocus.cell) {
+				var curr = lastFocus.relative.column;
+
+				// Manipulate the API instance to correct the column index
+				lastFocus.cell[0][0].column = d.mapping.indexOf(curr);
+				lastFocus.relative.column = d.mapping.indexOf(curr);
+			}
+		});
+
+		// When the table is about to do a draw we need to block key
+		// handling. This is only important for async draws - i.e.
+		// server-side processing.
+		dt.on('preDraw' + namespace + ' scroller-will-draw' + namespace, function (e) {
+			that.s.dtDrawing = true;
+		});
+
+		// Redraw - retain focus on the current cell
+		dt.on('draw' + namespace, function (e) {
+			that.s.dtDrawing = false;
+
+			that._tabInput();
+
+			if (that.s.focusDraw) {
+				return;
+			}
+
+			var lastFocus = that.s.lastFocus;
+
+			if (lastFocus) {
+				var relative = that.s.lastFocus.relative;
+				var info = dt.page.info();
+				var row = relative.row;
+
+				if (info.recordsDisplay === 0) {
+					return;
+				}
+
+				// If the refocus is outside the current draw zone -
+				// don't attempt to refocus onto it
+				if (row < info.start || row > info.start + info.length) {
+					return;
+				}
+
+				// Reverse if needed
+				if (row >= info.recordsDisplay) {
+					row = info.recordsDisplay - 1;
+				}
+
+				that._focus(row, relative.column, true, e);
+			}
+		});
+
+		// Clipboard support
+		if (this.c.clipboard) {
+			this._clipboard();
+		}
+
+		dt.on('destroy' + namespace, function () {
+			that._blur(true);
+
+			// Event tidy up
+			dt.off(namespace);
+
+			$(dt.table().body())
+				.off('click' + namespace, 'th, td')
+				.off('dblclick' + namespace, 'th, td');
+
+			$(document)
+				.off('mousedown' + namespace)
+				.off('keydown' + namespace)
+				.off('copy' + namespace)
+				.off('paste' + namespace);
+		});
+
+		// Initial focus comes from state or options
+		var state = dt.state.loaded();
+
+		if (state && state.keyTable) {
+			// Wait until init is done
+			dt.one('init', function () {
+				var cell = dt.cell(state.keyTable);
+
+				// Ensure that the saved cell still exists
+				if (cell.any()) {
+					cell.focus();
+				}
+			});
+		}
+		else if (this.c.focus) {
+			dt.cell(this.c.focus).focus();
+		}
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Private methods
+	 */
+
+	/**
+	 * Blur the control
+	 *
+	 * @param {boolean} [noEvents=false] Don't trigger updates / events (for destroying)
+	 * @private
+	 */
+	_blur: function (noEvents) {
+		if (!this.s.enable || !this.s.lastFocus) {
+			return;
+		}
+
+		var cell = this.s.lastFocus.cell;
+
+		$(cell.node()).removeClass(this.c.className);
+		this.s.lastFocus = null;
+
+		if (!noEvents) {
+			this._updateFixedColumns(cell.index().column);
+
+			this._emitEvent('key-blur', [this.s.dt, cell]);
+		}
+	},
+
+	/**
+	 * Clipboard interaction handlers
+	 *
+	 * @private
+	 */
+	_clipboard: function () {
+		var dt = this.s.dt;
+		var that = this;
+		var namespace = this.s.namespace;
+		var opts = this.c.clipboard;
+
+		// IE8 doesn't support getting selected text
+		if (!window.getSelection) {
+			return;
+		}
+
+		if (opts === true || opts.copy) {
+			$(document).on('copy' + namespace, function (ejq) {
+				var e = ejq.originalEvent;
+				var selection = window.getSelection().toString();
+				var focused = that.s.lastFocus;
+
+				// Only copy cell text to clipboard if there is no other selection
+				// and there is a focused cell
+				if (!selection && focused) {
+					e.clipboardData.setData(
+						'text/plain',
+						focused.cell.render(that.c.clipboardOrthogonal)
+					);
+					e.preventDefault();
+				}
+			});
+		}
+
+		if (opts === true || opts.paste) {
+			$(document).on('paste' + namespace, function (ejq) {
+				var e = ejq.originalEvent;
+				var focused = that.s.lastFocus;
+				var activeEl = document.activeElement;
+				var editor = that.c.editor;
+				var pastedText;
+
+				if (focused && (!activeEl || activeEl.nodeName.toLowerCase() === 'body')) {
+					e.preventDefault();
+
+					if (window.clipboardData && window.clipboardData.getData) {
+						// IE
+						pastedText = window.clipboardData.getData('Text');
+					}
+					else if (e.clipboardData && e.clipboardData.getData) {
+						// Everything else
+						pastedText = e.clipboardData.getData('text/plain');
+					}
+
+					if (editor) {
+						// Got Editor - need to activate inline editing,
+						// set the value and submit
+						var options = that._inlineOptions(focused.cell.index());
+
+						editor
+							.inline(options.cell, options.field, options.options)
+							.set(editor.displayed()[0], pastedText)
+							.submit();
+					}
+					else {
+						// No editor, so just dump the data in
+						focused.cell.data(pastedText);
+						dt.draw(false);
+					}
+				}
+			});
+		}
+	},
+
+	/**
+	 * Get an array of the column indexes that KeyTable can operate on. This
+	 * is a merge of the user supplied columns and the visible columns.
+	 *
+	 * @private
+	 */
+	_columns: function () {
+		var dt = this.s.dt;
+		var user = dt.columns(this.c.columns).indexes();
+		var out = [];
+
+		dt.columns(':visible').every(function (i) {
+			if (user.indexOf(i) !== -1) {
+				out.push(i);
+			}
+		});
+
+		return out;
+	},
+
+	/**
+	 * Perform excel like navigation for Editor by triggering an edit on key
+	 * press
+	 *
+	 * @param  {integer} key Key code for the pressed key
+	 * @param  {object} orig Original event
+	 * @private
+	 */
+	_editor: function (key, orig, hardEdit) {
+		// If nothing focused, we can't take any action
+		if (!this.s.lastFocus) {
+			return;
+		}
+
+		// DataTables draw event
+		if (orig && orig.type === 'draw') {
+			return;
+		}
+
+		var that = this;
+		var dt = this.s.dt;
+		var editor = this.c.editor;
+		var editCell = this.s.lastFocus.cell;
+		var namespace = this.s.namespace + 'e' + editorNamespaceCounter++;
+
+		// Do nothing if there is already an inline edit in this cell
+		if ($('div.DTE', editCell.node()).length) {
+			return;
+		}
+
+		// Don't activate Editor on control key presses
+		if (
+			key !== null &&
+			((key >= 0x00 && key <= 0x09) ||
+				key === 0x0b ||
+				key === 0x0c ||
+				(key >= 0x0e && key <= 0x1f) ||
+				(key >= 0x70 && key <= 0x7b) ||
+				(key >= 0x7f && key <= 0x9f))
+		) {
+			return;
+		}
+
+		if (orig) {
+			orig.stopPropagation();
+
+			// Return key should do nothing - for textareas it would empty the
+			// contents
+			if (key === 13) {
+				orig.preventDefault();
+			}
+		}
+
+		var editInline = function () {
+			var options = that._inlineOptions(editCell.index());
+
+			editor
+				.one('open' + namespace, function () {
+					// Remove cancel open
+					editor.off('cancelOpen' + namespace);
+
+					// Excel style - select all text
+					if (!hardEdit) {
+						$(
+							'div.DTE_Field_InputControl input, div.DTE_Field_InputControl textarea'
+						).select();
+					}
+
+					// Reduce the keys the Keys listens for
+					dt.keys.enable(hardEdit ? 'tab-only' : 'navigation-only');
+
+					// On blur of the navigation submit
+					dt.on('key-blur.editor', function (e, dt, cell) {
+						// When Editor has its own blur enabled - do nothing here
+						if (editor.s.editOpts.onBlur === 'submit') {
+							return;
+						}
+
+						if (editor.displayed() && cell.node() === editCell.node()) {
+							editor.submit();
+						}
+					});
+
+					// Highlight the cell a different colour on full edit
+					if (hardEdit) {
+						$(dt.table().container()).addClass('dtk-focus-alt');
+					}
+
+					// If the dev cancels the submit, we need to return focus
+					editor.on('preSubmitCancelled' + namespace, function () {
+						setTimeout(function () {
+							that._focus(editCell, null, false);
+						}, 50);
+					});
+
+					editor.on('submitUnsuccessful' + namespace, function () {
+						that._focus(editCell, null, false);
+					});
+
+					// Restore full key navigation on close
+					editor.one('close' + namespace, function () {
+						dt.keys.enable(true);
+						dt.off('key-blur.editor');
+						editor.off(namespace);
+						$(dt.table().container()).removeClass('dtk-focus-alt');
+
+						if (that.s.returnSubmit) {
+							that.s.returnSubmit = false;
+							that._emitEvent('key-return-submit', [dt, editCell]);
+						}
+					});
+				})
+				.one('cancelOpen' + namespace, function () {
+					// `preOpen` can cancel the display of the form, so it
+					// might be that the open event handler isn't needed
+					editor.off(namespace);
+				})
+				.inline(options.cell, options.field, options.options);
+		};
+
+		// Editor 1.7 listens for `return` on keyup, so if return is the trigger
+		// key, we need to wait for `keyup` otherwise Editor would just submit
+		// the content triggered by this keypress.
+		if (key === 13) {
+			hardEdit = true;
+
+			$(document).one('keyup', function () {
+				// immediately removed
+				editInline();
+			});
+		}
+		else {
+			editInline();
+		}
+	},
+
+	_inlineOptions: function (cellIdx) {
+		if (this.c.editorOptions) {
+			return this.c.editorOptions(cellIdx);
+		}
+
+		return {
+			cell: cellIdx,
+			field: undefined,
+			options: undefined
+		};
+	},
+
+	/**
+	 * Emit an event on the DataTable for listeners
+	 *
+	 * @param  {string} name Event name
+	 * @param  {array} args Event arguments
+	 * @private
+	 */
+	_emitEvent: function (name, args) {
+		return this.s.dt.iterator('table', function (ctx, i) {
+			return $(ctx.nTable).triggerHandler(name, args);
+		});
+	},
+
+	/**
+	 * Focus on a particular cell, shifting the table's paging if required
+	 *
+	 * @param  {DataTables.Api|integer} row Can be given as an API instance that
+	 *   contains the cell to focus or as an integer. As the latter it is the
+	 *   visible row index (from the whole data set) - NOT the data index
+	 * @param  {integer} [column] Not required if a cell is given as the first
+	 *   parameter. Otherwise this is the column data index for the cell to
+	 *   focus on
+	 * @param {boolean} [shift=true] Should the viewport be moved to show cell
+	 * @private
+	 */
+	_focus: function (row, column, shift, originalEvent) {
+		var that = this;
+		var dt = this.s.dt;
+		var pageInfo = dt.page.info();
+		var lastFocus = this.s.lastFocus;
+
+		if (!originalEvent) {
+			originalEvent = null;
+		}
+
+		if (!this.s.enable) {
+			return;
+		}
+
+		if (typeof row !== 'number') {
+			// Its an API instance - check that there is actually a row
+			if (!row.any()) {
+				return;
+			}
+
+			// Convert the cell to a row and column
+			var index = row.index();
+			column = index.column;
+			row = dt.rows({ filter: 'applied', order: 'applied' }).indexes().indexOf(index.row);
+
+			// Don't focus rows that were filtered out.
+			if (row < 0) {
+				return;
+			}
+
+			// For server-side processing normalise the row by adding the start
+			// point, since `rows().indexes()` includes only rows that are
+			// available at the client-side
+			if (pageInfo.serverSide) {
+				row += pageInfo.start;
+			}
+		}
+
+		// Is the row on the current page? If not, we need to redraw to show the
+		// page
+		if (
+			pageInfo.length !== -1 &&
+			(row < pageInfo.start || row >= pageInfo.start + pageInfo.length)
+		) {
+			this.s.focusDraw = true;
+			this.s.waitingForDraw = true;
+
+			dt.one('draw', function () {
+				that.s.focusDraw = false;
+				that.s.waitingForDraw = false;
+				that._focus(row, column, undefined, originalEvent);
+			})
+				.page(Math.floor(row / pageInfo.length))
+				.draw(false);
+
+			return;
+		}
+
+		// In the available columns?
+		if ($.inArray(column, this._columns()) === -1) {
+			return;
+		}
+
+		// De-normalise the server-side processing row, so we select the row
+		// in its displayed position
+		if (pageInfo.serverSide) {
+			row -= pageInfo.start;
+		}
+
+		// Get the cell from the current position - ignoring any cells which might
+		// not have been rendered (therefore can't use `:eq()` selector).
+		var cells = dt.cells(null, column, { search: 'applied', order: 'applied' }).flatten();
+		var cell = dt.cell(cells[row]);
+
+		// Prefocus check - this event allows a focus action to be disallowed.
+		var preFocus = this._emitEvent('key-prefocus', [this.s.dt, cell, originalEvent || null]);
+		if (preFocus.indexOf(false) !== -1) {
+			return;
+		}
+
+		if (lastFocus) {
+			// Don't trigger a refocus on the same cell
+			if (lastFocus.node === cell.node()) {
+				this._emitEvent('key-refocus', [this.s.dt, cell, originalEvent || null]);
+				return;
+			}
+
+			// Otherwise blur the old focus
+			this._blur();
+		}
+
+		// Clear focus from other tables
+		this._removeOtherFocus();
+
+		var node = $(cell.node());
+		node.addClass(this.c.className);
+
+		this._updateFixedColumns(column);
+
+		// Shift viewpoint and page to make cell visible
+		if (shift === undefined || shift === true) {
+			this._scroll($(window), $(document.body), node, 'offset');
+
+			var bodyParent = dt.table().body().parentNode;
+			if (bodyParent !== dt.table().header().parentNode) {
+				var parent = $(bodyParent.parentNode);
+
+				this._scroll(parent, parent, node, 'position');
+			}
+		}
+
+		// Event and finish
+		var info = dt.page.info();
+
+		this.s.lastFocus = {
+			cell: cell,
+			node: cell.node(),
+			relative: {
+				row: info.start + dt.rows({ page: 'current' }).indexes().indexOf(cell.index().row),
+				column: cell.index().column
+			}
+		};
+
+		this._emitEvent('key-focus', [this.s.dt, cell, originalEvent || null]);
+		dt.state.save();
+	},
+
+	/**
+	 * Handle key press
+	 *
+	 * @param  {object} e Event
+	 * @private
+	 */
+	_key: function (e) {
+		// If we are waiting for a draw to happen from another key event, then
+		// do nothing for this new key press.
+		if (this.s.waitingForDraw) {
+			e.preventDefault();
+			return;
+		}
+
+		// Ignore key presses in an Editor inline create row - it is not navigatable
+		// by KeyTable
+		if ($(e.target).closest('.dte-inlineAdd').length) {
+			return;
+		}
+
+		var enable = this.s.enable;
+		this.s.returnSubmit =
+			(enable === 'navigation-only' || enable === 'tab-only') && e.keyCode === 13
+				? true
+				: false;
+
+		var navEnable = enable === true || enable === 'navigation-only';
+		if (!enable) {
+			return;
+		}
+
+		if ((e.keyCode === 0 || e.ctrlKey || e.metaKey || e.altKey) && !(e.ctrlKey && e.altKey)) {
+			return;
+		}
+
+		// If not focused, then there is no key action to take
+		var lastFocus = this.s.lastFocus;
+		if (!lastFocus) {
+			return;
+		}
+
+		// And the last focus still exists!
+		if (!this.s.dt.cell(lastFocus.node).any()) {
+			this.s.lastFocus = null;
+			return;
+		}
+
+		var that = this;
+		var dt = this.s.dt;
+		var scrolling = this.s.dt.settings()[0].oScroll.sY ? true : false;
+
+		// If we are not listening for this key, do nothing
+		if (this.c.keys && $.inArray(e.keyCode, this.c.keys) === -1) {
+			return;
+		}
+
+		switch (e.keyCode) {
+			case 9: // tab
+				// `enable` can be tab-only
+				e.preventDefault();
+
+				this._keyAction(function () {
+					that._shift(e, e.shiftKey ? 'left' : 'right', true);
+				});
+				break;
+
+			case 27: // esc
+				// If there is an inline edit in the cell, let it blur first,
+				// a second escape will then blur keytable
+				if ($(lastFocus.node).find('div.DTE').length) {
+					return;
+				}
+
+				if (this.c.blurable && enable === true) {
+					this._blur();
+				}
+				break;
+
+			case 33: // page up (previous page)
+			case 34: // page down (next page)
+				if (navEnable && !scrolling) {
+					e.preventDefault();
+
+					this._keyAction(function () {
+						dt.page(e.keyCode === 33 ? 'previous' : 'next').draw(false);
+					});
+				}
+				break;
+
+			case 35: // end (end of current page)
+			case 36: // home (start of current page)
+				if (navEnable) {
+					e.preventDefault();
+
+					this._keyAction(function () {
+						var indexes = dt.cells({ page: 'current' }).indexes();
+						var colIndexes = that._columns();
+
+						that._focus(
+							dt.cell(indexes[e.keyCode === 35 ? indexes.length - 1 : colIndexes[0]]),
+							null,
+							true,
+							e
+						);
+					});
+				}
+				break;
+
+			case 37: // left arrow
+				if (navEnable) {
+					this._keyAction(function () {
+						that._shift(e, 'left');
+					});
+				}
+				break;
+
+			case 38: // up arrow
+				if (navEnable) {
+					this._keyAction(function () {
+						that._shift(e, 'up');
+					});
+				}
+				break;
+
+			case 39: // right arrow
+				if (navEnable) {
+					this._keyAction(function () {
+						that._shift(e, 'right');
+					});
+				}
+				break;
+
+			case 40: // down arrow
+				if (navEnable) {
+					this._keyAction(function () {
+						that._shift(e, 'down');
+					});
+				}
+				break;
+
+			case 113: // F2 - Excel like hard edit
+				if (this.c.editor) {
+					this._editor(null, e, true);
+					break;
+				}
+			// else fallthrough
+
+			default:
+				// Everything else - pass through only when fully enabled
+				if (enable === true) {
+					this._emitEvent('key', [dt, e.keyCode, this.s.lastFocus.cell, e]);
+				}
+				break;
+		}
+	},
+
+	/**
+	 * Whether we perform a key shift action immediately or not depends
+	 * upon if Editor is being used. If it is, then we wait until it
+	 * completes its action
+	 * @param {*} action Function to trigger when ready
+	 */
+	_keyAction: function (action) {
+		var editor = this.c.editor;
+
+		if (editor && editor.mode() && editor.display()) {
+			editor.submit(action);
+		}
+		else {
+			action();
+		}
+	},
+
+	/**
+	 * Remove focus from all tables other than this one
+	 */
+	_removeOtherFocus: function () {
+		var thisTable = this.s.dt.table().node();
+
+		$.fn.dataTable.tables({ api: true }).iterator('table', function (settings) {
+			if (this.table().node() !== thisTable) {
+				this.cell.blur();
+			}
+		});
+	},
+
+	/**
+	 * Scroll a container to make a cell visible in it. This can be used for
+	 * both DataTables scrolling and native window scrolling.
+	 *
+	 * @param  {jQuery} container Scrolling container
+	 * @param  {jQuery} scroller  Item being scrolled
+	 * @param  {jQuery} cell      Cell in the scroller
+	 * @param  {string} posOff    `position` or `offset` - which to use for the
+	 *   calculation. `offset` for the document, otherwise `position`
+	 * @private
+	 */
+	_scroll: function (container, scroller, cell, posOff) {
+		var offset = cell[posOff]();
+		var height = cell.outerHeight();
+		var width = cell.outerWidth();
+
+		var scrollTop = scroller.scrollTop();
+		var scrollLeft = scroller.scrollLeft();
+		var containerHeight = container.height();
+		var containerWidth = container.width();
+
+		// If Scroller is being used, the table can be `position: absolute` and that
+		// needs to be taken account of in the offset. If no Scroller, this will be 0
+		if (posOff === 'position') {
+			offset.top += parseInt(cell.closest('table').css('top'), 10);
+		}
+
+		// Top correction (partially in view)
+		if (offset.top < scrollTop && offset.top + height > scrollTop - 5) {
+			scroller.scrollTop(offset.top);
+		}
+
+		// Left correction
+		if (offset.left < scrollLeft) {
+			scroller.scrollLeft(offset.left);
+		}
+
+		// Bottom correction plus in view correction. Note that the magic 5 is to allow
+		// for the edge just passing the bottom of the view
+		if (
+			offset.top + height > scrollTop + containerHeight &&
+			offset.top < scrollTop + containerHeight + 5 &&
+			height < containerHeight
+		) {
+			scroller.scrollTop(offset.top + height - containerHeight);
+		}
+
+		// Right correction
+		if (offset.left + width > scrollLeft + containerWidth && width < containerWidth) {
+			scroller.scrollLeft(offset.left + width - containerWidth);
+		}
+	},
+
+	/**
+	 * Calculate a single offset movement in the table - up, down, left and
+	 * right and then perform the focus if possible
+	 *
+	 * @param  {object}  e           Event object
+	 * @param  {string}  direction   Movement direction
+	 * @param  {boolean} keyBlurable `true` if the key press can result in the
+	 *   table being blurred. This is so arrow keys won't blur the table, but
+	 *   tab will.
+	 * @private
+	 */
+	_shift: function (e, direction, keyBlurable) {
+		var dt = this.s.dt;
+		var pageInfo = dt.page.info();
+		var rows = pageInfo.recordsDisplay;
+		var columns = this._columns();
+		var last = this.s.lastFocus;
+		if (!last) {
+			return;
+		}
+
+		var currentCell = last.cell;
+		if (!currentCell) {
+			return;
+		}
+
+		var currRow = dt
+			.rows({ filter: 'applied', order: 'applied' })
+			.indexes()
+			.indexOf(currentCell.index().row);
+
+		// When server-side processing, `rows().indexes()` only gives the rows
+		// that are available at the client-side, so we need to normalise the
+		// row's current position by the display start point
+		if (pageInfo.serverSide) {
+			currRow += pageInfo.start;
+		}
+
+		var currCol = dt.columns(columns).indexes().indexOf(currentCell.index().column);
+
+		var row = currRow,
+			column = columns[currCol]; // row is the display, column is an index
+
+		// If the direction is rtl then the logic needs to be inverted from this point forwards
+		if ($(dt.table().node()).css('direction') === 'rtl') {
+			if (direction === 'right') {
+				direction = 'left';
+			}
+			else if (direction === 'left') {
+				direction = 'right';
+			}
+		}
+
+		if (direction === 'right') {
+			if (currCol >= columns.length - 1) {
+				row++;
+				column = columns[0];
+			}
+			else {
+				column = columns[currCol + 1];
+			}
+		}
+		else if (direction === 'left') {
+			if (currCol === 0) {
+				row--;
+				column = columns[columns.length - 1];
+			}
+			else {
+				column = columns[currCol - 1];
+			}
+		}
+		else if (direction === 'up') {
+			row--;
+		}
+		else if (direction === 'down') {
+			row++;
+		}
+
+		if (row >= 0 && row < rows && $.inArray(column, columns) !== -1) {
+			if (e) {
+				e.preventDefault();
+			}
+
+			this._focus(row, column, true, e);
+		}
+		else if (!keyBlurable || !this.c.blurable) {
+			// No new focus, but if the table isn't blurable, then don't loose
+			// focus
+			if (e) {
+				e.preventDefault();
+			}
+		}
+		else {
+			this._blur();
+		}
+	},
+
+	/**
+	 * Create and insert a hidden input element that can receive focus on behalf
+	 * of the table
+	 *
+	 * @private
+	 */
+	_tabInput: function () {
+		var that = this;
+		var dt = this.s.dt;
+		var tabIndex = this.c.tabIndex !== null ? this.c.tabIndex : dt.settings()[0].iTabIndex;
+
+		if (tabIndex == -1) {
+			return;
+		}
+
+		// Only create the input element once on first class
+		if (!this.s.tabInput) {
+			var div = $('<div><input type="text" tabindex="' + tabIndex + '"/></div>').css({
+				position: 'absolute',
+				height: 1,
+				width: 0,
+				overflow: 'hidden'
+			});
+
+			div.children().on('focus', function (e) {
+				var cell = dt.cell(':eq(0)', that._columns(), { page: 'current' });
+
+				if (cell.any()) {
+					that._focus(cell, null, true, e);
+				}
+			});
+
+			this.s.tabInput = div;
+		}
+
+		// Insert the input element into the first cell in the table's body
+		var cell = this.s.dt
+			.cell(':eq(0)', '0:visible', { page: 'current', order: 'current' })
+			.node();
+		if (cell) {
+			$(cell).prepend(this.s.tabInput);
+		}
+	},
+
+	/**
+	 * Update fixed columns if they are enabled and if the cell we are
+	 * focusing is inside a fixed column
+	 * @param  {integer} column Index of the column being changed
+	 * @private
+	 */
+	_updateFixedColumns: function (column) {
+		var dt = this.s.dt;
+		var settings = dt.settings()[0];
+
+		if (settings._oFixedColumns) {
+			var leftCols = settings._oFixedColumns.s.iLeftColumns;
+			var rightCols = settings.aoColumns.length - settings._oFixedColumns.s.iRightColumns;
+
+			if (column < leftCols || column >= rightCols) {
+				dt.fixedColumns().update();
+			}
+		}
+	}
+});
+
+/**
+ * KeyTable default settings for initialisation
+ *
+ * @namespace
+ * @name KeyTable.defaults
+ * @static
+ */
+KeyTable.defaults = {
+	/**
+	 * Can focus be removed from the table
+	 * @type {Boolean}
+	 */
+	blurable: true,
+
+	/**
+	 * Class to give to the focused cell
+	 * @type {String}
+	 */
+	className: 'focus',
+
+	/**
+	 * Enable or disable clipboard support
+	 * @type {Boolean}
+	 */
+	clipboard: true,
+
+	/**
+	 * Orthogonal data that should be copied to clipboard
+	 * @type {string}
+	 */
+	clipboardOrthogonal: 'display',
+
+	/**
+	 * Columns that can be focused. This is automatically merged with the
+	 * visible columns as only visible columns can gain focus.
+	 * @type {String}
+	 */
+	columns: '', // all
+
+	/**
+	 * Editor instance to automatically perform Excel like navigation
+	 * @type {Editor}
+	 */
+	editor: null,
+
+	/**
+	 * Trigger editing immediately on focus
+	 * @type {boolean}
+	 */
+	editOnFocus: false,
+
+	/**
+	 * Options to pass to Editor's inline method
+	 * @type {function}
+	 */
+	editorOptions: null,
+
+	/**
+	 * Select a cell to automatically select on start up. `null` for no
+	 * automatic selection
+	 * @type {cell-selector}
+	 */
+	focus: null,
+
+	/**
+	 * Array of keys to listen for
+	 * @type {null|array}
+	 */
+	keys: null,
+
+	/**
+	 * Tab index for where the table should sit in the document's tab flow
+	 * @type {integer|null}
+	 */
+	tabIndex: null
+};
+
+KeyTable.version = '2.12.1';
+
+$.fn.dataTable.KeyTable = KeyTable;
+$.fn.DataTable.KeyTable = KeyTable;
+
+DataTable.Api.register('cell.blur()', function () {
+	return this.iterator('table', function (ctx) {
+		if (ctx.keytable) {
+			ctx.keytable.blur();
+		}
+	});
+});
+
+DataTable.Api.register('cell().focus()', function () {
+	return this.iterator('cell', function (ctx, row, column) {
+		if (ctx.keytable) {
+			ctx.keytable.focus(row, column);
+		}
+	});
+});
+
+DataTable.Api.register('keys.disable()', function () {
+	return this.iterator('table', function (ctx) {
+		if (ctx.keytable) {
+			ctx.keytable.enable(false);
+		}
+	});
+});
+
+DataTable.Api.register('keys.enable()', function (opts) {
+	return this.iterator('table', function (ctx) {
+		if (ctx.keytable) {
+			ctx.keytable.enable(opts === undefined ? true : opts);
+		}
+	});
+});
+
+DataTable.Api.register('keys.enabled()', function (opts) {
+	var ctx = this.context;
+
+	if (ctx.length) {
+		return ctx[0].keytable ? ctx[0].keytable.enabled() : false;
+	}
+
+	return false;
+});
+
+DataTable.Api.register('keys.move()', function (dir) {
+	return this.iterator('table', function (ctx) {
+		if (ctx.keytable) {
+			ctx.keytable._shift(null, dir, false);
+		}
+	});
+});
+
+// Cell selector
+DataTable.ext.selector.cell.push(function (settings, opts, cells) {
+	var focused = opts.focused;
+	var kt = settings.keytable;
+	var out = [];
+
+	if (!kt || focused === undefined) {
+		return cells;
+	}
+
+	for (var i = 0, ien = cells.length; i < ien; i++) {
+		if (
+			(focused === true && kt.focused(cells[i])) ||
+			(focused === false && !kt.focused(cells[i]))
+		) {
+			out.push(cells[i]);
+		}
+	}
+
+	return out;
+});
+
+// Attach a listener to the document which listens for DataTables initialisation
+// events so we can automatically initialise
+$(document).on('preInit.dt.dtk', function (e, settings, json) {
+	if (e.namespace !== 'dt') {
+		return;
+	}
+
+	var init = settings.oInit.keys;
+	var defaults = DataTable.defaults.keys;
+
+	if (init || defaults) {
+		var opts = $.extend({}, defaults, init);
+
+		if (init !== false) {
+			new KeyTable(settings, opts);
+		}
+	}
+});
+
+
+return DataTable;
+}));
+
+
 /*! Responsive 3.0.3
  * © SpryMedia Ltd - datatables.net/license
  */
@@ -35559,6 +45300,1530 @@ return DataTable;
 }));
 
 
+/*! RowGroup 1.5.1
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+
+/**
+ * @summary     RowGroup
+ * @description RowGrouping for DataTables
+ * @version     1.5.1
+ * @author      SpryMedia Ltd (www.sprymedia.co.uk)
+ * @contact     datatables.net
+ * @copyright   SpryMedia Ltd.
+ *
+ * This source file is free software, available under the following license:
+ *   MIT license - http://datatables.net/license/mit
+ *
+ * This source file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+ *
+ * For details please refer to: http://www.datatables.net
+ */
+
+var RowGroup = function (dt, opts) {
+	// Sanity check that we are using DataTables 1.10 or newer
+	if (!DataTable.versionCheck || !DataTable.versionCheck('1.11')) {
+		throw 'RowGroup requires DataTables 1.11 or newer';
+	}
+
+	// User and defaults configuration object
+	this.c = $.extend(true, {}, DataTable.defaults.rowGroup, RowGroup.defaults, opts);
+
+	// Internal settings
+	this.s = {
+		dt: new DataTable.Api(dt)
+	};
+
+	// DOM items
+	this.dom = {};
+
+	// Check if row grouping has already been initialised on this table
+	var settings = this.s.dt.settings()[0];
+	var existing = settings.rowGroup;
+	if (existing) {
+		return existing;
+	}
+
+	settings.rowGroup = this;
+	this._constructor();
+};
+
+$.extend(RowGroup.prototype, {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * API methods for DataTables API interface
+	 */
+
+	/**
+	 * Get/set the grouping data source - need to call draw after this is
+	 * executed as a setter
+	 * @returns string~RowGroup
+	 */
+	dataSrc: function (val) {
+		if (val === undefined) {
+			return this.c.dataSrc;
+		}
+
+		var dt = this.s.dt;
+
+		this.c.dataSrc = val;
+
+		$(dt.table().node()).triggerHandler('rowgroup-datasrc.dt', [dt, val]);
+
+		return this;
+	},
+
+	/**
+	 * Disable - need to call draw after this is executed
+	 * @returns RowGroup
+	 */
+	disable: function () {
+		this.c.enable = false;
+		return this;
+	},
+
+	/**
+	 * Enable - need to call draw after this is executed
+	 * @returns RowGroup
+	 */
+	enable: function (flag) {
+		if (flag === false) {
+			return this.disable();
+		}
+
+		this.c.enable = true;
+		return this;
+	},
+
+	/**
+	 * Get enabled flag
+	 * @returns boolean
+	 */
+	enabled: function () {
+		return this.c.enable;
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Constructor
+	 */
+	_constructor: function () {
+		var that = this;
+		var dt = this.s.dt;
+		var hostSettings = dt.settings()[0];
+
+		dt.on('draw.dtrg', function (e, s) {
+			if (that.c.enable && hostSettings === s) {
+				that._draw();
+			}
+		});
+
+		dt.on('column-visibility.dt.dtrg responsive-resize.dt.dtrg', function () {
+			that._adjustColspan();
+		});
+
+		dt.on('destroy', function () {
+			dt.off('.dtrg');
+		});
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Private methods
+	 */
+
+	/**
+	 * Adjust column span when column visibility changes
+	 * @private
+	 */
+	_adjustColspan: function () {
+		$('tr.' + this.c.className, this.s.dt.table().body())
+			.find('th:visible, td:visible')
+			.attr('colspan', this._colspan());
+	},
+
+	/**
+	 * Get the number of columns that a grouping row should span
+	 * @private
+	 */
+	_colspan: function () {
+		return this.s.dt
+			.columns()
+			.visible()
+			.reduce(function (a, b) {
+				return a + b;
+			}, 0);
+	},
+
+	/**
+	 * Update function that is called whenever we need to draw the grouping rows.
+	 * This is basically a bootstrap for the self iterative _group and _groupDisplay
+	 * methods
+	 * @private
+	 */
+	_draw: function () {
+		var dt = this.s.dt;
+		var groupedRows = this._group(0, dt.rows({ page: 'current' }).indexes());
+
+		this._groupDisplay(0, groupedRows);
+	},
+
+	/**
+	 * Get the grouping information from a data set (index) of rows
+	 * @param {number} level Nesting level
+	 * @param {DataTables.Api} rows API of the rows to consider for this group
+	 * @returns {object[]} Nested grouping information - it is structured like this:
+	 *	{
+	 *		dataPoint: 'Edinburgh',
+	 *		rows: [ 1,2,3,4,5,6,7 ],
+	 *		children: [ {
+	 *			dataPoint: 'developer'
+	 *			rows: [ 1, 2, 3 ]
+	 *		},
+	 *		{
+	 *			dataPoint: 'support',
+	 *			rows: [ 4, 5, 6, 7 ]
+	 *		} ]
+	 *	}
+	 * @private
+	 */
+	_group: function (level, rows) {
+		var fns = Array.isArray(this.c.dataSrc) ? this.c.dataSrc : [this.c.dataSrc];
+		var fn = DataTable.util.get(fns[level]);
+		var dt = this.s.dt;
+		var group, last;
+		var i, ien;
+		var data = [];
+		var that = this;
+
+		for (i = 0, ien = rows.length; i < ien; i++) {
+			var rowIndex = rows[i];
+			var rowData = dt.row(rowIndex).data();
+
+			group = fn(rowData, level);
+
+			if (group === null || group === undefined) {
+				group = that.c.emptyDataGroup;
+			}
+
+			if (last === undefined || group !== last) {
+				data.push({
+					dataPoint: group,
+					rows: []
+				});
+
+				last = group;
+			}
+
+			data[data.length - 1].rows.push(rowIndex);
+		}
+
+		if (fns[level + 1] !== undefined) {
+			for (i = 0, ien = data.length; i < ien; i++) {
+				data[i].children = this._group(level + 1, data[i].rows);
+			}
+		}
+
+		return data;
+	},
+
+	/**
+	 * Row group display - insert the rows into the document
+	 * @param {number} level Nesting level
+	 * @param {object[]} groups Takes the nested array from `_group`
+	 * @private
+	 */
+	_groupDisplay: function (level, groups) {
+		var dt = this.s.dt;
+		var display;
+
+		for (var i = 0, ien = groups.length; i < ien; i++) {
+			var group = groups[i];
+			var groupName = group.dataPoint;
+			var row;
+			var rows = group.rows;
+
+			if (this.c.startRender) {
+				display = this.c.startRender.call(this, dt.rows(rows), groupName, level);
+				row = this._rowWrap(display, this.c.startClassName, level);
+
+				if (row) {
+					row.insertBefore(dt.row(rows[0]).node());
+				}
+			}
+
+			if (this.c.endRender) {
+				display = this.c.endRender.call(this, dt.rows(rows), groupName, level);
+				row = this._rowWrap(display, this.c.endClassName, level);
+
+				if (row) {
+					row.insertAfter(dt.row(rows[rows.length - 1]).node());
+				}
+			}
+
+			if (group.children) {
+				this._groupDisplay(level + 1, group.children);
+			}
+		}
+	},
+
+	/**
+	 * Take a rendered value from an end user and make it suitable for display
+	 * as a row, by wrapping it in a row, or detecting that it is a row.
+	 * @param {node|jQuery|string} display Display value
+	 * @param {string} className Class to add to the row
+	 * @param {array} group
+	 * @param {number} group level
+	 * @private
+	 */
+	_rowWrap: function (display, className, level) {
+		var row;
+
+		if (display === null || display === '') {
+			display = this.c.emptyDataGroup;
+		}
+
+		if (display === undefined || display === null) {
+			return null;
+		}
+
+		if (
+			typeof display === 'object' &&
+			display.nodeName &&
+			display.nodeName.toLowerCase() === 'tr'
+		) {
+			row = $(display);
+		}
+		else if (
+			display instanceof $ &&
+			display.length &&
+			display[0].nodeName.toLowerCase() === 'tr'
+		) {
+			row = display;
+		}
+		else {
+			row = $('<tr/>').append(
+				$('<th/>').attr('colspan', this._colspan()).attr('scope', 'row').append(display)
+			);
+		}
+
+		return row
+			.addClass(this.c.className)
+			.addClass(className)
+			.addClass('dtrg-level-' + level);
+	}
+});
+
+/**
+ * RowGroup default settings for initialisation
+ *
+ * @namespace
+ * @name RowGroup.defaults
+ * @static
+ */
+RowGroup.defaults = {
+	/**
+	 * Class to apply to grouping rows - applied to both the start and
+	 * end grouping rows.
+	 * @type string
+	 */
+	className: 'dtrg-group',
+
+	/**
+	 * Data property from which to read the grouping information
+	 * @type string|integer|array
+	 */
+	dataSrc: 0,
+
+	/**
+	 * Text to show if no data is found for a group
+	 * @type string
+	 */
+	emptyDataGroup: 'No group',
+
+	/**
+	 * Initial enablement state
+	 * @boolean
+	 */
+	enable: true,
+
+	/**
+	 * Class name to give to the end grouping row
+	 * @type string
+	 */
+	endClassName: 'dtrg-end',
+
+	/**
+	 * End grouping label function
+	 * @function
+	 */
+	endRender: null,
+
+	/**
+	 * Class name to give to the start grouping row
+	 * @type string
+	 */
+	startClassName: 'dtrg-start',
+
+	/**
+	 * Start grouping label function
+	 * @function
+	 */
+	startRender: function (rows, group) {
+		return group;
+	}
+};
+
+RowGroup.version = '1.5.1';
+
+$.fn.dataTable.RowGroup = RowGroup;
+$.fn.DataTable.RowGroup = RowGroup;
+
+DataTable.Api.register('rowGroup()', function () {
+	return this;
+});
+
+DataTable.Api.register('rowGroup().disable()', function () {
+	return this.iterator('table', function (ctx) {
+		if (ctx.rowGroup) {
+			ctx.rowGroup.enable(false);
+		}
+	});
+});
+
+DataTable.Api.register('rowGroup().enable()', function (opts) {
+	return this.iterator('table', function (ctx) {
+		if (ctx.rowGroup) {
+			ctx.rowGroup.enable(opts === undefined ? true : opts);
+		}
+	});
+});
+
+DataTable.Api.register('rowGroup().enabled()', function () {
+	var ctx = this.context;
+
+	return ctx.length && ctx[0].rowGroup ? ctx[0].rowGroup.enabled() : false;
+});
+
+DataTable.Api.register('rowGroup().dataSrc()', function (val) {
+	if (val === undefined) {
+		return this.context[0].rowGroup.dataSrc();
+	}
+
+	return this.iterator('table', function (ctx) {
+		if (ctx.rowGroup) {
+			ctx.rowGroup.dataSrc(val);
+		}
+	});
+});
+
+// Attach a listener to the document which listens for DataTables initialisation
+// events so we can automatically initialise
+$(document).on('preInit.dt.dtrg', function (e, settings, json) {
+	if (e.namespace !== 'dt') {
+		return;
+	}
+
+	var init = settings.oInit.rowGroup;
+	var defaults = DataTable.defaults.rowGroup;
+
+	if (init || defaults) {
+		var opts = $.extend({}, defaults, init);
+
+		if (init !== false) {
+			new RowGroup(settings, opts);
+		}
+	}
+});
+
+
+return DataTable;
+}));
+
+
+/*! RowReorder 1.5.0
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+
+/**
+ * @summary     RowReorder
+ * @description Row reordering extension for DataTables
+ * @version     1.5.0
+ * @author      SpryMedia Ltd
+ * @contact     datatables.net
+ *
+ * This source file is free software, available under the following license:
+ *   MIT license - http://datatables.net/license/mit
+ *
+ * This source file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the license files for details.
+ *
+ * For details please refer to: http://www.datatables.net
+ */
+
+/**
+ * RowReorder provides the ability in DataTables to click and drag rows to
+ * reorder them. When a row is dropped the data for the rows effected will be
+ * updated to reflect the change. Normally this data point should also be the
+ * column being sorted upon in the DataTable but this does not need to be the
+ * case. RowReorder implements a "data swap" method - so the rows being
+ * reordered take the value of the data point from the row that used to occupy
+ * the row's new position.
+ *
+ * Initialisation is done by either:
+ *
+ * * `rowReorder` parameter in the DataTable initialisation object
+ * * `new DataTable.RowReorder( table, opts )` after DataTables
+ *   initialisation.
+ *
+ *  @class
+ *  @param {object} settings DataTables settings object for the host table
+ *  @param {object} [opts] Configuration options
+ *  @requires jQuery 1.7+
+ *  @requires DataTables 1.11
+ */
+var RowReorder = function (dt, opts) {
+	// Sanity check that we are using DataTables 1.10 or newer
+	if (!DataTable.versionCheck || !DataTable.versionCheck('1.11')) {
+		throw 'DataTables RowReorder requires DataTables 1.11 or newer';
+	}
+
+	// User and defaults configuration object
+	this.c = $.extend(true, {}, DataTable.defaults.rowReorder, RowReorder.defaults, opts);
+
+	// Internal settings
+	this.s = {
+		/** @type {integer} Scroll body top cache */
+		bodyTop: null,
+
+		/** @type {DataTable.Api} DataTables' API instance */
+		dt: new DataTable.Api(dt),
+
+		/** @type {function} Data fetch function */
+		getDataFn: DataTable.util.get(this.c.dataSrc),
+
+		/** @type {array} Pixel positions for row insertion calculation */
+		middles: null,
+
+		/** @type {Object} Cached dimension information for use in the mouse move event handler */
+		scroll: {},
+
+		/** @type {integer} Interval object used for smooth scrolling */
+		scrollInterval: null,
+
+		/** @type {function} Data set function */
+		setDataFn: DataTable.util.set(this.c.dataSrc),
+
+		/** @type {Object} Mouse down information */
+		start: {
+			top: 0,
+			left: 0,
+			offsetTop: 0,
+			offsetLeft: 0,
+			nodes: [],
+			rowIndex: 0
+		},
+
+		/** @type {integer} Window height cached value */
+		windowHeight: 0,
+
+		/** @type {integer} Document outer height cached value */
+		documentOuterHeight: 0,
+
+		/** @type {integer} DOM clone outer height cached value */
+		domCloneOuterHeight: 0,
+
+		/** @type {integer} Flag used for signing if the drop is enabled or not */
+		dropAllowed: true
+	};
+
+	// DOM items
+	this.dom = {
+		/** @type {jQuery} Cloned row being moved around */
+		clone: null,
+		cloneParent: null,
+
+		/** @type {jQuery} DataTables scrolling container */
+		dtScroll: $('div.dataTables_scrollBody, div.dt-scroll-body', this.s.dt.table().container())
+	};
+
+	// Check if row reorder has already been initialised on this table
+	var settings = this.s.dt.settings()[0];
+	var existing = settings.rowreorder;
+
+	if (existing) {
+		return existing;
+	}
+
+	if (!this.dom.dtScroll.length) {
+		this.dom.dtScroll = $(this.s.dt.table().container(), 'tbody');
+	}
+
+	settings.rowreorder = this;
+	this._constructor();
+};
+
+$.extend(RowReorder.prototype, {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Constructor
+	 */
+
+	/**
+	 * Initialise the RowReorder instance
+	 *
+	 * @private
+	 */
+	_constructor: function () {
+		var that = this;
+		var dt = this.s.dt;
+		var table = $(dt.table().node());
+
+		// Need to be able to calculate the row positions relative to the table
+		if (table.css('position') === 'static') {
+			table.css('position', 'relative');
+		}
+
+		// listen for mouse down on the target column - we have to implement
+		// this rather than using HTML5 drag and drop as drag and drop doesn't
+		// appear to work on table rows at this time. Also mobile browsers are
+		// not supported.
+		// Use `table().container()` rather than just the table node for IE8 -
+		// otherwise it only works once...
+		$(dt.table().container()).on(
+			'mousedown.rowReorder touchstart.rowReorder',
+			this.c.selector,
+			function (e) {
+				if (!that.c.enable) {
+					return;
+				}
+
+				// Ignore excluded children of the selector
+				if ($(e.target).is(that.c.excludedChildren)) {
+					return true;
+				}
+
+				var tr = $(this).closest('tr');
+				var row = dt.row(tr);
+
+				// Double check that it is a DataTable row
+				if (row.any()) {
+					that._emitEvent('pre-row-reorder', {
+						node: row.node(),
+						index: row.index()
+					});
+
+					that._mouseDown(e, tr);
+					return false;
+				}
+			}
+		);
+
+		dt.on('destroy.rowReorder', function () {
+			$(dt.table().container()).off('.rowReorder');
+			dt.off('.rowReorder');
+		});
+
+		this._keyup = this._keyup.bind(this);
+	},
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Private methods
+	 */
+
+	/**
+	 * Cache the measurements that RowReorder needs in the mouse move handler
+	 * to attempt to speed things up, rather than reading from the DOM.
+	 *
+	 * @private
+	 */
+	_cachePositions: function () {
+		var dt = this.s.dt;
+
+		// Frustratingly, if we add `position:relative` to the tbody, the
+		// position is still relatively to the parent. So we need to adjust
+		// for that
+		var headerHeight = $(dt.table().node()).find('thead').outerHeight();
+
+		// Need to pass the nodes through jQuery to get them in document order,
+		// not what DataTables thinks it is, since we have been altering the
+		// order
+		var nodes = $.unique(dt.rows({ page: 'current' }).nodes().toArray());
+		var middles = $.map(nodes, function (node, i) {
+			var top = $(node).position().top - headerHeight;
+
+			return (top + top + $(node).outerHeight()) / 2;
+		});
+
+		this.s.middles = middles;
+		this.s.bodyTop = $(dt.table().body()).offset().top;
+		this.s.windowHeight = $(window).height();
+		this.s.documentOuterHeight = $(document).outerHeight();
+		this.s.bodyArea = this._calcBodyArea();
+	},
+
+	/**
+	 * Clone a row so it can be floated around the screen
+	 *
+	 * @param  {jQuery} target Node to be cloned
+	 * @private
+	 */
+	_clone: function (target) {
+		var dt = this.s.dt;
+		var clone = $(dt.table().node().cloneNode(false))
+			.addClass('dt-rowReorder-float')
+			.append('<tbody/>')
+			.append(target.clone(false));
+
+		// Match the table and column widths - read all sizes before setting
+		// to reduce reflows
+		var tableWidth = target.outerWidth();
+		var tableHeight = target.outerHeight();
+		var scrollBody = $($(this.s.dt.table().node()).parent());
+		var scrollWidth = scrollBody.width();
+		var scrollLeft = scrollBody.scrollLeft();
+		var sizes = target.children().map(function () {
+			return $(this).width();
+		});
+
+		clone
+			.width(tableWidth)
+			.height(tableHeight)
+			.find('tr')
+			.children()
+			.each(function (i) {
+				this.style.width = sizes[i] + 'px';
+			});
+
+		var cloneParent = $('<div>')
+			.addClass('dt-rowReorder-float-parent')
+			.width(scrollWidth)
+			.append(clone)
+			.appendTo('body')
+			.scrollLeft(scrollLeft);
+
+		// Insert into the document to have it floating around
+
+		this.dom.clone = clone;
+		this.dom.cloneParent = cloneParent;
+		this.s.domCloneOuterHeight = clone.outerHeight();
+	},
+
+	/**
+	 * Update the cloned item's position in the document
+	 *
+	 * @param  {object} e Event giving the mouse's position
+	 * @private
+	 */
+	_clonePosition: function (e) {
+		var start = this.s.start;
+		var topDiff = this._eventToPage(e, 'Y') - start.top;
+		var leftDiff = this._eventToPage(e, 'X') - start.left;
+		var snap = this.c.snapX;
+		var left;
+		var top = topDiff + start.offsetTop;
+
+		if (snap === true) {
+			left = start.offsetLeft;
+		}
+		else if (typeof snap === 'number') {
+			left = start.offsetLeft + snap;
+		}
+		else {
+			left = leftDiff + start.offsetLeft + this.dom.cloneParent.scrollLeft();
+		}
+
+		if (top < 0) {
+			top = 0;
+		}
+		else if (top + this.s.domCloneOuterHeight > this.s.documentOuterHeight) {
+			top = this.s.documentOuterHeight - this.s.domCloneOuterHeight;
+		}
+
+		this.dom.cloneParent.css({
+			top: top,
+			left: left
+		});
+	},
+
+	/**
+	 * Emit an event on the DataTable for listeners
+	 *
+	 * @param  {string} name Event name
+	 * @param  {array} args Event arguments
+	 * @private
+	 */
+	_emitEvent: function ( name, args )
+	{
+		var ret;
+
+		this.s.dt.iterator( 'table', function ( ctx, i ) {
+			var innerRet = $(ctx.nTable).triggerHandler( name+'.dt', args );
+
+			if (innerRet !== undefined) {
+				ret = innerRet;
+			}
+		} );
+
+		return ret;
+	},
+
+	/**
+	 * Get pageX/Y position from an event, regardless of if it is a mouse or
+	 * touch event.
+	 *
+	 * @param  {object} e Event
+	 * @param  {string} pos X or Y (must be a capital)
+	 * @private
+	 */
+	_eventToPage: function (e, pos) {
+		if (e.type.indexOf('touch') !== -1) {
+			return e.originalEvent.touches[0]['page' + pos];
+		}
+
+		return e['page' + pos];
+	},
+
+	/**
+	 * Mouse down event handler. Read initial positions and add event handlers
+	 * for the move.
+	 *
+	 * @param  {object} e      Mouse event
+	 * @param  {jQuery} target TR element that is to be moved
+	 * @private
+	 */
+	_mouseDown: function (e, target) {
+		var that = this;
+		var dt = this.s.dt;
+		var start = this.s.start;
+		var cancelable = this.c.cancelable;
+
+		var offset = target.offset();
+		start.top = this._eventToPage(e, 'Y');
+		start.left = this._eventToPage(e, 'X');
+		start.offsetTop = offset.top;
+		start.offsetLeft = offset.left;
+		start.nodes = $.unique(dt.rows({ page: 'current' }).nodes().toArray());
+
+		this._cachePositions();
+		this._clone(target);
+		this._clonePosition(e);
+
+		var bodyY = this._eventToPage(e, 'Y') - this.s.bodyTop;
+		start.rowIndex = this._calcRowIndexByPos(bodyY);
+
+		this.dom.target = target;
+		target.addClass('dt-rowReorder-moving');
+
+		$(document)
+			.on('mouseup.rowReorder touchend.rowReorder', function (e) {
+				that._mouseUp(e);
+			})
+			.on('mousemove.rowReorder touchmove.rowReorder', function (e) {
+				that._mouseMove(e);
+			});
+
+		// Check if window is x-scrolling - if not, disable it for the duration
+		// of the drag
+		if ($(window).width() === $(document).width()) {
+			$(document.body).addClass('dt-rowReorder-noOverflow');
+		}
+
+		// Cache scrolling information so mouse move doesn't need to read.
+		// This assumes that the window and DT scroller will not change size
+		// during an row drag, which I think is a fair assumption
+		var scrollWrapper = this.dom.dtScroll;
+		this.s.scroll = {
+			windowHeight: $(window).height(),
+			windowWidth: $(window).width(),
+			dtTop: scrollWrapper.length ? scrollWrapper.offset().top : null,
+			dtLeft: scrollWrapper.length ? scrollWrapper.offset().left : null,
+			dtHeight: scrollWrapper.length ? scrollWrapper.outerHeight() : null,
+			dtWidth: scrollWrapper.length ? scrollWrapper.outerWidth() : null
+		};
+
+		// Add keyup handler if dragging is cancelable
+		if (cancelable) {
+			$(document).on('keyup', this._keyup);
+		}
+	},
+
+	/**
+	 * Mouse move event handler - move the cloned row and shuffle the table's
+	 * rows if required.
+	 *
+	 * @param  {object} e Mouse event
+	 * @private
+	 */
+	_mouseMove: function (e) {
+		this._clonePosition(e);
+
+		var start = this.s.start;
+		var cancelable = this.c.cancelable;
+
+		if (cancelable) {
+			var bodyArea = this.s.bodyArea;
+			var cloneArea = this._calcCloneParentArea();
+			this.s.dropAllowed = this._rectanglesIntersect(bodyArea, cloneArea);
+
+			this.s.dropAllowed
+				? $(this.dom.cloneParent).removeClass('drop-not-allowed')
+				: $(this.dom.cloneParent).addClass('drop-not-allowed');
+		}
+
+		// Transform the mouse position into a position in the table's body
+		var bodyY = this._eventToPage(e, 'Y') - this.s.bodyTop;
+		var middles = this.s.middles;
+		var insertPoint = null;
+
+		// Determine where the row should be inserted based on the mouse
+		// position
+		for (var i = 0, ien = middles.length; i < ien; i++) {
+			if (bodyY < middles[i]) {
+				insertPoint = i;
+				break;
+			}
+		}
+
+		if (insertPoint === null) {
+			insertPoint = middles.length;
+		}
+
+		if (cancelable) {
+			if (!this.s.dropAllowed) {
+				// Move the row back to its original position becasuse the drop is not allowed
+				insertPoint =
+					start.rowIndex > this.s.lastInsert ? start.rowIndex + 1 : start.rowIndex;
+			}
+
+			this.dom.target.toggleClass('dt-rowReorder-moving', this.s.dropAllowed);
+		}
+
+		this._moveTargetIntoPosition(insertPoint);
+
+		this._shiftScroll(e);
+	},
+
+	/**
+	 * Mouse up event handler - release the event handlers and perform the
+	 * table updates
+	 *
+	 * @param  {object} e Mouse event
+	 * @private
+	 */
+	_mouseUp: function (e) {
+		var that = this;
+		var dt = this.s.dt;
+		var i, ien;
+		var dataSrc = this.c.dataSrc;
+		var dropAllowed = this.s.dropAllowed;
+
+		if (!dropAllowed) {
+			that._cancel();
+			return;
+		}
+
+		// Calculate the difference
+		var startNodes = this.s.start.nodes;
+		var endNodes = $.unique(dt.rows({ page: 'current' }).nodes().toArray());
+		var idDiff = {};
+		var fullDiff = [];
+		var diffNodes = [];
+		var getDataFn = this.s.getDataFn;
+		var setDataFn = this.s.setDataFn;
+
+		for (i = 0, ien = startNodes.length; i < ien; i++) {
+			if (startNodes[i] !== endNodes[i]) {
+				var id = dt.row(endNodes[i]).id();
+				var endRowData = dt.row(endNodes[i]).data();
+				var startRowData = dt.row(startNodes[i]).data();
+
+				if (id) {
+					idDiff[id] = getDataFn(startRowData);
+				}
+
+				fullDiff.push({
+					node: endNodes[i],
+					oldData: getDataFn(endRowData),
+					newData: getDataFn(startRowData),
+					newPosition: i,
+					oldPosition: $.inArray(endNodes[i], startNodes)
+				});
+
+				diffNodes.push(endNodes[i]);
+			}
+		}
+
+		// Create event args
+		var eventArgs = [
+			fullDiff,
+			{
+				dataSrc: dataSrc,
+				nodes: diffNodes,
+				values: idDiff,
+				triggerRow: dt.row(this.dom.target),
+				originalEvent: e
+			}
+		];
+
+		// Emit event
+		var eventResult = this._emitEvent( 'row-reorder', eventArgs );
+
+		if (eventResult === false) {
+			that._cancel();
+			return;
+		}
+
+		// Remove cloned elements, handlers, etc
+		this._cleanupDragging();
+
+		var update = function () {
+			if (that.c.update) {
+				for (i = 0, ien = fullDiff.length; i < ien; i++) {
+					var row = dt.row(fullDiff[i].node);
+					var rowData = row.data();
+
+					setDataFn(rowData, fullDiff[i].newData);
+
+					// Invalidate the cell that has the same data source as the dataSrc
+					dt.columns().every(function () {
+						if (this.dataSrc() === dataSrc) {
+							dt.cell(fullDiff[i].node, this.index()).invalidate('data');
+						}
+					});
+				}
+
+				// Trigger row reordered event
+				that._emitEvent('row-reordered', eventArgs);
+
+				dt.draw(false);
+			}
+		};
+
+		// Editor interface
+		if (this.c.editor) {
+			// Disable user interaction while Editor is submitting
+			this.c.enable = false;
+
+			this.c.editor
+				.edit(diffNodes, false, $.extend({ submit: 'changed' }, this.c.formOptions))
+				.multiSet(dataSrc, idDiff)
+				.one('preSubmitCancelled.rowReorder', function () {
+					that.c.enable = true;
+					that.c.editor.off('.rowReorder');
+					dt.draw(false);
+				})
+				.one('submitUnsuccessful.rowReorder', function () {
+					dt.draw(false);
+				})
+				.one('submitSuccess.rowReorder', function () {
+					update();
+				})
+				.one('submitComplete', function () {
+					that.c.enable = true;
+					that.c.editor.off('.rowReorder');
+				})
+				.submit();
+		}
+		else {
+			update();
+		}
+	},
+
+	/**
+	 * Moves the current target into the given position within the table
+	 * and caches the new positions
+	 *
+	 * @param  {integer} insertPoint Position
+	 * @private
+	 */
+	_moveTargetIntoPosition: function (insertPoint) {
+		var dt = this.s.dt;
+
+		// Perform the DOM shuffle if it has changed from last time
+		if (this.s.lastInsert === null || this.s.lastInsert !== insertPoint) {
+			var nodes = $.unique(dt.rows({ page: 'current' }).nodes().toArray());
+			var insertPlacement = '';
+
+			if (insertPoint > this.s.lastInsert) {
+				this.dom.target.insertAfter(nodes[insertPoint - 1]);
+				insertPlacement = 'after';
+			}
+			else {
+				this.dom.target.insertBefore(nodes[insertPoint]);
+				insertPlacement = 'before';
+			}
+
+			this._cachePositions();
+
+			this.s.lastInsert = insertPoint;
+
+			this._emitEvent('row-reorder-changed', {
+				insertPlacement,
+				insertPoint,
+				row: dt.row(this.dom.target)
+			});
+		}
+	},
+
+	/**
+	 * Removes the cloned elements, event handlers, scrolling intervals, etc
+	 *
+	 * @private
+	 */
+	_cleanupDragging: function () {
+		var cancelable = this.c.cancelable;
+
+		this.dom.clone.remove();
+		this.dom.cloneParent.remove();
+		this.dom.clone = null;
+		this.dom.cloneParent = null;
+
+		this.dom.target.removeClass('dt-rowReorder-moving');
+		//this.dom.target = null;
+
+		$(document).off('.rowReorder');
+		$(document.body).removeClass('dt-rowReorder-noOverflow');
+
+		clearInterval(this.s.scrollInterval);
+		this.s.scrollInterval = null;
+
+		if (cancelable) {
+			$(document).off('keyup', this._keyup);
+		}
+	},
+
+	/**
+	 * Move the window and DataTables scrolling during a drag to scroll new
+	 * content into view.
+	 *
+	 * This matches the `_shiftScroll` method used in AutoFill, but only
+	 * horizontal scrolling is considered here.
+	 *
+	 * @param  {object} e Mouse move event object
+	 * @private
+	 */
+	_shiftScroll: function (e) {
+		var that = this;
+		var scroll = this.s.scroll;
+		var runInterval = false;
+		var scrollSpeed = 5;
+		var buffer = 65;
+		var windowY = e.pageY - document.body.scrollTop,
+			windowVert,
+			dtVert;
+
+		// Window calculations - based on the mouse position in the window,
+		// regardless of scrolling
+		if (windowY < $(window).scrollTop() + buffer) {
+			windowVert = scrollSpeed * -1;
+		}
+		else if (windowY > scroll.windowHeight + $(window).scrollTop() - buffer) {
+			windowVert = scrollSpeed;
+		}
+
+		// DataTables scrolling calculations - based on the table's position in
+		// the document and the mouse position on the page
+		if (scroll.dtTop !== null && e.pageY < scroll.dtTop + buffer) {
+			dtVert = scrollSpeed * -1;
+		}
+		else if (scroll.dtTop !== null && e.pageY > scroll.dtTop + scroll.dtHeight - buffer) {
+			dtVert = scrollSpeed;
+		}
+
+		// This is where it gets interesting. We want to continue scrolling
+		// without requiring a mouse move, so we need an interval to be
+		// triggered. The interval should continue until it is no longer needed,
+		// but it must also use the latest scroll commands (for example consider
+		// that the mouse might move from scrolling up to scrolling left, all
+		// with the same interval running. We use the `scroll` object to "pass"
+		// this information to the interval. Can't use local variables as they
+		// wouldn't be the ones that are used by an already existing interval!
+		if (windowVert || dtVert) {
+			scroll.windowVert = windowVert;
+			scroll.dtVert = dtVert;
+			runInterval = true;
+		}
+		else if (this.s.scrollInterval) {
+			// Don't need to scroll - remove any existing timer
+			clearInterval(this.s.scrollInterval);
+			this.s.scrollInterval = null;
+		}
+
+		// If we need to run the interval to scroll and there is no existing
+		// interval (if there is an existing one, it will continue to run)
+		if (!this.s.scrollInterval && runInterval) {
+			this.s.scrollInterval = setInterval(function () {
+				// Don't need to worry about setting scroll <0 or beyond the
+				// scroll bound as the browser will just reject that.
+				if (scroll.windowVert) {
+					var top = $(document).scrollTop();
+					$(document).scrollTop(top + scroll.windowVert);
+
+					if (top !== $(document).scrollTop()) {
+						var move = parseFloat(that.dom.cloneParent.css('top'));
+						that.dom.cloneParent.css('top', move + scroll.windowVert);
+					}
+				}
+
+				// DataTables scrolling
+				if (scroll.dtVert) {
+					var scroller = that.dom.dtScroll[0];
+
+					if (scroll.dtVert) {
+						scroller.scrollTop += scroll.dtVert;
+					}
+				}
+			}, 20);
+		}
+	},
+
+	/**
+	 * Calculates the current area of the table body and returns it as a rectangle
+	 *
+	 * @private
+	 */
+	_calcBodyArea: function (e) {
+		var dt = this.s.dt;
+		var offset = $(dt.table().body()).offset();
+		var area = {
+			left: offset.left,
+			top: offset.top,
+			right: offset.left + $(dt.table().body()).width(),
+			bottom: offset.top + $(dt.table().body()).height()
+		};
+
+		return area;
+	},
+
+	/**
+	 * Calculates the current area of the cloned parent element and returns it as a rectangle
+	 *
+	 * @private
+	 */
+	_calcCloneParentArea: function (e) {
+		var offset = $(this.dom.cloneParent).offset();
+		var area = {
+			left: offset.left,
+			top: offset.top,
+			right: offset.left + $(this.dom.cloneParent).width(),
+			bottom: offset.top + $(this.dom.cloneParent).height()
+		};
+
+		return area;
+	},
+
+	/**
+	 * Returns whether the given reactangles intersect or not
+	 *
+	 * @private
+	 */
+	_rectanglesIntersect: function (a, b) {
+		var noOverlap =
+			a.left >= b.right || b.left >= a.right || a.top >= b.bottom || b.top >= a.bottom;
+
+		return !noOverlap;
+	},
+
+	/**
+	 * Calculates the index of the row which lays under the given Y position or
+	 * returns -1 if no such row
+	 *
+	 * @param  {integer} insertPoint Position
+	 * @private
+	 */
+	_calcRowIndexByPos: function (bodyY) {
+		// Determine where the row is located based on the mouse
+		// position
+
+		var dt = this.s.dt;
+		var nodes = $.unique(dt.rows({ page: 'current' }).nodes().toArray());
+		var rowIndex = -1;
+		var headerHeight = $(dt.table().node()).find('thead').outerHeight();
+
+		$.each(nodes, function (i, node) {
+			var top = $(node).position().top - headerHeight;
+			var bottom = top + $(node).outerHeight();
+
+			if (bodyY >= top && bodyY <= bottom) {
+				rowIndex = i;
+			}
+		});
+
+		return rowIndex;
+	},
+
+	/**
+	 * Handles key up events and cancels the dragging if ESC key is pressed
+	 *
+	 * @param  {object} e Mouse move event object
+	 * @private
+	 */
+	_keyup: function (e) {
+		var cancelable = this.c.cancelable;
+
+		if (cancelable && e.which === 27) {
+			// ESC key is up
+			e.preventDefault();
+			this._cancel();
+		}
+	},
+
+	/**
+	 * Cancels the dragging, moves target back into its original position
+	 * and cleans up the dragging
+	 *
+	 * @param  {object} e Mouse move event object
+	 * @private
+	 */
+	_cancel: function () {
+		var start = this.s.start;
+		var insertPoint = start.rowIndex > this.s.lastInsert ? start.rowIndex + 1 : start.rowIndex;
+
+		this._moveTargetIntoPosition(insertPoint);
+
+		this._cleanupDragging();
+
+		// Emit event
+		this._emitEvent('row-reorder-canceled', [this.s.start.rowIndex]);
+	}
+});
+
+/**
+ * RowReorder default settings for initialisation
+ *
+ * @namespace
+ * @name RowReorder.defaults
+ * @static
+ */
+RowReorder.defaults = {
+	/**
+	 * Data point in the host row's data source object for where to get and set
+	 * the data to reorder. This will normally also be the sorting column.
+	 *
+	 * @type {Number}
+	 */
+	dataSrc: 0,
+
+	/**
+	 * Editor instance that will be used to perform the update
+	 *
+	 * @type {DataTable.Editor}
+	 */
+	editor: null,
+
+	/**
+	 * Enable / disable RowReorder's user interaction
+	 * @type {Boolean}
+	 */
+	enable: true,
+
+	/**
+	 * Form options to pass to Editor when submitting a change in the row order.
+	 * See the Editor `from-options` object for details of the options
+	 * available.
+	 * @type {Object}
+	 */
+	formOptions: {},
+
+	/**
+	 * Drag handle selector. This defines the element that when dragged will
+	 * reorder a row.
+	 *
+	 * @type {String}
+	 */
+	selector: 'td:first-child',
+
+	/**
+	 * Optionally lock the dragged row's x-position. This can be `true` to
+	 * fix the position match the host table's, `false` to allow free movement
+	 * of the row, or a number to define an offset from the host table.
+	 *
+	 * @type {Boolean|number}
+	 */
+	snapX: false,
+
+	/**
+	 * Update the table's data on drop
+	 *
+	 * @type {Boolean}
+	 */
+	update: true,
+
+	/**
+	 * Selector for children of the drag handle selector that mouseDown events
+	 * will be passed through to and drag will not activate
+	 *
+	 * @type {String}
+	 */
+	excludedChildren: 'a',
+
+	/**
+	 * Enable / disable the canceling of the drag & drop interaction
+	 *
+	 * @type {Boolean}
+	 */
+	cancelable: false
+};
+
+/*
+ * API
+ */
+var Api = $.fn.dataTable.Api;
+
+// Doesn't do anything - work around for a bug in DT... Not documented
+Api.register('rowReorder()', function () {
+	return this;
+});
+
+Api.register('rowReorder.enable()', function (toggle) {
+	if (toggle === undefined) {
+		toggle = true;
+	}
+
+	return this.iterator('table', function (ctx) {
+		if (ctx.rowreorder) {
+			ctx.rowreorder.c.enable = toggle;
+		}
+	});
+});
+
+Api.register('rowReorder.disable()', function () {
+	return this.iterator('table', function (ctx) {
+		if (ctx.rowreorder) {
+			ctx.rowreorder.c.enable = false;
+		}
+	});
+});
+
+/**
+ * Version information
+ *
+ * @name RowReorder.version
+ * @static
+ */
+RowReorder.version = '1.5.0';
+
+$.fn.dataTable.RowReorder = RowReorder;
+$.fn.DataTable.RowReorder = RowReorder;
+
+// Attach a listener to the document which listens for DataTables initialisation
+// events so we can automatically initialise
+$(document).on('init.dt.dtr', function (e, settings, json) {
+	if (e.namespace !== 'dt') {
+		return;
+	}
+
+	var init = settings.oInit.rowReorder;
+	var defaults = DataTable.defaults.rowReorder;
+
+	if (init || defaults) {
+		var opts = $.extend({}, init, defaults);
+
+		if (init !== false) {
+			new RowReorder(settings, opts);
+		}
+	}
+});
+
+
+return DataTable;
+}));
+
+
 /*! Scroller 2.4.3
  * © SpryMedia Ltd - datatables.net/license
  */
@@ -36953,6 +48218,3945 @@ Api.register('scroller.page()', function () {
 		return ctx[0].oScroller.pageInfo();
 	}
 	// undefined
+});
+
+
+return DataTable;
+}));
+
+
+/*! SearchBuilder 1.8.1
+ * ©SpryMedia Ltd - datatables.net/license/mit
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+(function () {
+    'use strict';
+
+    var $$3;
+    var dataTable$2;
+    /** Get a moment object. Attempt to get from DataTables for module loading first. */
+    function moment() {
+        var used = DataTable.use('moment');
+        return used
+            ? used
+            : window.moment;
+    }
+    /** Get a luxon object. Attempt to get from DataTables for module loading first. */
+    function luxon() {
+        var used = DataTable.use('luxon');
+        return used
+            ? used
+            : window.luxon;
+    }
+    /**
+     * Sets the value of jQuery for use in the file
+     *
+     * @param jq the instance of jQuery to be set
+     */
+    function setJQuery$2(jq) {
+        $$3 = jq;
+        dataTable$2 = jq.fn.dataTable;
+    }
+    /**
+     * The Criteria class is used within SearchBuilder to represent a search criteria
+     */
+    var Criteria = /** @class */ (function () {
+        function Criteria(table, opts, topGroup, index, depth, serverData, liveSearch) {
+            if (index === void 0) { index = 0; }
+            if (depth === void 0) { depth = 1; }
+            if (serverData === void 0) { serverData = undefined; }
+            if (liveSearch === void 0) { liveSearch = false; }
+            var _this = this;
+            this.classes = $$3.extend(true, {}, Criteria.classes);
+            // Get options from user and any extra conditions/column types defined by plug-ins
+            this.c = $$3.extend(true, {}, Criteria.defaults, $$3.fn.dataTable.ext.searchBuilder, opts);
+            var i18n = this.c.i18n;
+            this.s = {
+                condition: undefined,
+                conditions: {},
+                data: undefined,
+                dataIdx: -1,
+                dataPoints: [],
+                dateFormat: false,
+                depth: depth,
+                dt: table,
+                filled: false,
+                index: index,
+                liveSearch: liveSearch,
+                origData: undefined,
+                preventRedraw: false,
+                serverData: serverData,
+                topGroup: topGroup,
+                type: '',
+                value: []
+            };
+            this.dom = {
+                buttons: $$3('<div/>')
+                    .addClass(this.classes.buttonContainer),
+                condition: $$3('<select disabled/>')
+                    .addClass(this.classes.condition)
+                    .addClass(this.classes.dropDown)
+                    .addClass(this.classes.italic)
+                    .attr('autocomplete', 'hacking'),
+                conditionTitle: $$3('<option value="" disabled selected hidden/>')
+                    .html(this.s.dt.i18n('searchBuilder.condition', i18n.condition)),
+                container: $$3('<div/>')
+                    .addClass(this.classes.container),
+                data: $$3('<select/>')
+                    .addClass(this.classes.data)
+                    .addClass(this.classes.dropDown)
+                    .addClass(this.classes.italic),
+                dataTitle: $$3('<option value="" disabled selected hidden/>')
+                    .html(this.s.dt.i18n('searchBuilder.data', i18n.data)),
+                defaultValue: $$3('<select disabled/>')
+                    .addClass(this.classes.value)
+                    .addClass(this.classes.dropDown)
+                    .addClass(this.classes.select)
+                    .addClass(this.classes.italic),
+                "delete": $$3('<button/>')
+                    .html(this.s.dt.i18n('searchBuilder.delete', i18n["delete"]))
+                    .addClass(this.classes["delete"])
+                    .addClass(this.classes.button)
+                    .attr('title', this.s.dt.i18n('searchBuilder.deleteTitle', i18n.deleteTitle))
+                    .attr('type', 'button'),
+                inputCont: $$3('<div/>')
+                    .addClass(this.classes.inputCont),
+                // eslint-disable-next-line no-useless-escape
+                left: $$3('<button/>')
+                    .html(this.s.dt.i18n('searchBuilder.left', i18n.left))
+                    .addClass(this.classes.left)
+                    .addClass(this.classes.button)
+                    .attr('title', this.s.dt.i18n('searchBuilder.leftTitle', i18n.leftTitle))
+                    .attr('type', 'button'),
+                // eslint-disable-next-line no-useless-escape
+                right: $$3('<button/>')
+                    .html(this.s.dt.i18n('searchBuilder.right', i18n.right))
+                    .addClass(this.classes.right)
+                    .addClass(this.classes.button)
+                    .attr('title', this.s.dt.i18n('searchBuilder.rightTitle', i18n.rightTitle))
+                    .attr('type', 'button'),
+                value: [
+                    $$3('<select disabled/>')
+                        .addClass(this.classes.value)
+                        .addClass(this.classes.dropDown)
+                        .addClass(this.classes.italic)
+                        .addClass(this.classes.select)
+                ],
+                valueTitle: $$3('<option value="--valueTitle--" disabled selected hidden/>')
+                    .html(this.s.dt.i18n('searchBuilder.value', i18n.value))
+            };
+            // If the greyscale option is selected then add the class to add the grey colour to SearchBuilder
+            if (this.c.greyscale) {
+                this.dom.data.addClass(this.classes.greyscale);
+                this.dom.condition.addClass(this.classes.greyscale);
+                this.dom.defaultValue.addClass(this.classes.greyscale);
+                for (var _i = 0, _a = this.dom.value; _i < _a.length; _i++) {
+                    var val = _a[_i];
+                    val.addClass(this.classes.greyscale);
+                }
+            }
+            $$3(window).on('resize.dtsb', dataTable$2.util.throttle(function () {
+                _this.s.topGroup.trigger('dtsb-redrawLogic');
+            }));
+            this._buildCriteria();
+            return this;
+        }
+        /**
+         * Escape html characters within a string
+         *
+         * @param txt the string to be escaped
+         * @returns the escaped string
+         */
+        Criteria._escapeHTML = function (txt) {
+            return txt
+                .toString()
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, '&');
+        };
+        /**
+         * Redraw the DataTable with the current search parameters
+         */
+        Criteria.prototype.doSearch = function () {
+            // Only do the search if live search is disabled, otherwise the search
+            // is triggered by the button at the top level group.
+            if (this.c.liveSearch) {
+                this.s.dt.draw();
+            }
+        };
+        /**
+         * Parses formatted numbers down to a form where they can be compared.
+         * Note that this does not account for different decimal characters. Use
+         * parseNumber instead on the instance.
+         *
+         * @param val the value to convert
+         * @returns the converted value
+         */
+        Criteria.parseNumFmt = function (val) {
+            return +val.replace(/(?!^-)[^0-9.]/g, '');
+        };
+        /**
+         * Adds the left button to the criteria
+         */
+        Criteria.prototype.updateArrows = function (hasSiblings) {
+            if (hasSiblings === void 0) { hasSiblings = false; }
+            // Empty the container and append all of the elements in the correct order
+            this.dom.container.children().detach();
+            this.dom.container
+                .append(this.dom.data)
+                .append(this.dom.condition)
+                .append(this.dom.inputCont);
+            this.setListeners();
+            // Trigger the inserted events for the value elements as they are inserted
+            if (this.dom.value[0] !== undefined) {
+                $$3(this.dom.value[0]).trigger('dtsb-inserted');
+            }
+            for (var i = 1; i < this.dom.value.length; i++) {
+                this.dom.inputCont.append(this.dom.value[i]);
+                $$3(this.dom.value[i]).trigger('dtsb-inserted');
+            }
+            // If this is a top level criteria then don't let it move left
+            if (this.s.depth > 1) {
+                this.dom.buttons.append(this.dom.left);
+            }
+            // If the depthLimit of the query has been hit then don't add the right button
+            if ((this.c.depthLimit === false || this.s.depth < this.c.depthLimit) && hasSiblings) {
+                this.dom.buttons.append(this.dom.right);
+            }
+            else {
+                this.dom.right.remove();
+            }
+            this.dom.buttons.append(this.dom["delete"]);
+            this.dom.container.append(this.dom.buttons);
+        };
+        /**
+         * Destroys the criteria, removing listeners and container from the dom
+         */
+        Criteria.prototype.destroy = function () {
+            // Turn off listeners
+            this.dom.data.off('.dtsb');
+            this.dom.condition.off('.dtsb');
+            this.dom["delete"].off('.dtsb');
+            for (var _i = 0, _a = this.dom.value; _i < _a.length; _i++) {
+                var val = _a[_i];
+                val.off('.dtsb');
+            }
+            // Remove container from the dom
+            this.dom.container.remove();
+        };
+        /**
+         * Passes in the data for the row and compares it against this single criteria
+         *
+         * @param rowData The data for the row to be compared
+         * @returns boolean Whether the criteria has passed
+         */
+        Criteria.prototype.search = function (rowData, rowIdx) {
+            var settings = this.s.dt.settings()[0];
+            var condition = this.s.conditions[this.s.condition];
+            if (this.s.condition !== undefined && condition !== undefined) {
+                var filter = rowData[this.s.dataIdx];
+                // This check is in place for if a custom decimal character is in place
+                if (this.s.type &&
+                    this.s.type.includes('num') &&
+                    (settings.oLanguage.sDecimal !== '' ||
+                        settings.oLanguage.sThousands !== '')) {
+                    var splitRD = [rowData[this.s.dataIdx]];
+                    if (settings.oLanguage.sDecimal !== '') {
+                        splitRD = rowData[this.s.dataIdx].split(settings.oLanguage.sDecimal);
+                    }
+                    if (settings.oLanguage.sThousands !== '') {
+                        for (var i = 0; i < splitRD.length; i++) {
+                            splitRD[i] = splitRD[i].replace(settings.oLanguage.sThousands, ',');
+                        }
+                    }
+                    filter = splitRD.join('.');
+                }
+                // If orthogonal data is in place we need to get it's values for searching
+                if (this.c.orthogonal.search !== 'filter') {
+                    filter = settings.fastData(rowIdx, this.s.dataIdx, typeof this.c.orthogonal === 'string' ?
+                        this.c.orthogonal :
+                        this.c.orthogonal.search);
+                }
+                if (this.s.type === 'array') {
+                    // Make sure we are working with an array
+                    if (!Array.isArray(filter)) {
+                        filter = [filter];
+                    }
+                    filter.sort();
+                    for (var _i = 0, filter_1 = filter; _i < filter_1.length; _i++) {
+                        var filt = filter_1[_i];
+                        if (filt && typeof filt === 'string') {
+                            filt = filt.replace(/[\r\n\u2028]/g, ' ');
+                        }
+                    }
+                }
+                else if (filter !== null && typeof filter === 'string') {
+                    filter = filter.replace(/[\r\n\u2028]/g, ' ');
+                }
+                if (this.s.type.includes('html') && typeof filter === 'string') {
+                    filter = filter.replace(/(<([^>]+)>)/ig, '');
+                }
+                // Not ideal, but jqueries .val() returns an empty string even
+                // when the value set is null, so we shall assume the two are equal
+                if (filter === null) {
+                    filter = '';
+                }
+                return condition.search(filter, this.s.value, this);
+            }
+        };
+        /**
+         * Gets the details required to rebuild the criteria
+         */
+        Criteria.prototype.getDetails = function (deFormatDates) {
+            if (deFormatDates === void 0) { deFormatDates = false; }
+            var i;
+            var settings = this.s.dt.settings()[0];
+            // This check is in place for if a custom decimal character is in place
+            if (this.s.type !== null &&
+                ["num", "num-fmt", "html-num", "html-num-fmt"].includes(this.s.type) &&
+                (settings.oLanguage.sDecimal !== '' || settings.oLanguage.sThousands !== '')) {
+                for (i = 0; i < this.s.value.length; i++) {
+                    var splitRD = [this.s.value[i].toString()];
+                    if (settings.oLanguage.sDecimal !== '') {
+                        splitRD = this.s.value[i].split(settings.oLanguage.sDecimal);
+                    }
+                    if (settings.oLanguage.sThousands !== '') {
+                        for (var j = 0; j < splitRD.length; j++) {
+                            splitRD[j] = splitRD[j].replace(settings.oLanguage.sThousands, ',');
+                        }
+                    }
+                    this.s.value[i] = splitRD.join('.');
+                }
+            }
+            else if (this.s.type !== null && deFormatDates) {
+                if (this.s.type.includes('date') ||
+                    this.s.type.includes('time')) {
+                    for (i = 0; i < this.s.value.length; i++) {
+                        if (this.s.value[i].match(/^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/g) === null) {
+                            this.s.value[i] = '';
+                        }
+                    }
+                }
+                else if (this.s.type.includes('moment')) {
+                    for (i = 0; i < this.s.value.length; i++) {
+                        if (this.s.value[i] &&
+                            this.s.value[i].length > 0 &&
+                            moment()(this.s.value[i], this.s.dateFormat, true).isValid()) {
+                            this.s.value[i] = moment()(this.s.value[i], this.s.dateFormat).format('YYYY-MM-DD HH:mm:ss');
+                        }
+                    }
+                }
+                else if (this.s.type.includes('luxon')) {
+                    for (i = 0; i < this.s.value.length; i++) {
+                        if (this.s.value[i] &&
+                            this.s.value[i].length > 0 &&
+                            luxon().DateTime.fromFormat(this.s.value[i], this.s.dateFormat).invalid === null) {
+                            this.s.value[i] = luxon().DateTime.fromFormat(this.s.value[i], this.s.dateFormat).toFormat('yyyy-MM-dd HH:mm:ss');
+                        }
+                    }
+                }
+            }
+            if (this.s.type && this.s.type.includes('num') && this.s.dt.page.info().serverSide) {
+                for (i = 0; i < this.s.value.length; i++) {
+                    this.s.value[i] = this.s.value[i].replace(/[^0-9.\-]/g, '');
+                }
+            }
+            return {
+                condition: this.s.condition,
+                data: this.s.data,
+                origData: this.s.origData,
+                type: this.s.type,
+                value: this.s.value.map(function (a) { return a !== null && a !== undefined ? a.toString() : a; })
+            };
+        };
+        /**
+         * Getter for the node for the container of the criteria
+         *
+         * @returns JQuery<HTMLElement> the node for the container
+         */
+        Criteria.prototype.getNode = function () {
+            return this.dom.container;
+        };
+        /**
+         * Parses formatted numbers down to a form where they can be compared
+         *
+         * @param val the value to convert
+         * @returns the converted value
+         */
+        Criteria.prototype.parseNumber = function (val) {
+            var decimal = this.s.dt.i18n('decimal');
+            // Remove any periods and then replace the decimal with a period
+            if (decimal && decimal !== '.') {
+                val = val.replace(/\./g, '').replace(decimal, '.');
+            }
+            return +val.replace(/(?!^-)[^0-9.]/g, '');
+        };
+        /**
+         * Populates the criteria data, condition and value(s) as far as has been selected
+         */
+        Criteria.prototype.populate = function () {
+            this._populateData();
+            // If the column index has been found attempt to select a condition
+            if (this.s.dataIdx !== -1) {
+                this._populateCondition();
+                // If the condittion has been found attempt to select the values
+                if (this.s.condition !== undefined) {
+                    this._populateValue();
+                }
+            }
+        };
+        /**
+         * Rebuilds the criteria based upon the details passed in
+         *
+         * @param loadedCriteria the details required to rebuild the criteria
+         */
+        Criteria.prototype.rebuild = function (loadedCriteria) {
+            // Check to see if the previously selected data exists, if so select it
+            var foundData = false;
+            var dataIdx, i;
+            this._populateData();
+            // If a data selection has previously been made attempt to find and select it
+            if (loadedCriteria.data !== undefined) {
+                var italic_1 = this.classes.italic;
+                var data_1 = this.dom.data;
+                this.dom.data.children('option').each(function () {
+                    if (!foundData &&
+                        ($$3(this).text() === loadedCriteria.data ||
+                            loadedCriteria.origData && $$3(this).prop('origData') === loadedCriteria.origData)) {
+                        $$3(this).prop('selected', true);
+                        data_1.removeClass(italic_1);
+                        foundData = true;
+                        dataIdx = parseInt($$3(this).val(), 10);
+                    }
+                    else {
+                        $$3(this).removeProp('selected');
+                    }
+                });
+            }
+            // If the data has been found and selected then the condition can be populated and searched
+            if (foundData) {
+                this.s.data = loadedCriteria.data;
+                this.s.origData = loadedCriteria.origData;
+                this.s.dataIdx = dataIdx;
+                this.c.orthogonal = this._getOptions().orthogonal;
+                this.dom.dataTitle.remove();
+                this._populateCondition();
+                this.dom.conditionTitle.remove();
+                var condition = void 0;
+                // Check to see if the previously selected condition exists, if so select it
+                var options = this.dom.condition.children('option');
+                for (i = 0; i < options.length; i++) {
+                    var option = $$3(options[i]);
+                    if (loadedCriteria.condition !== undefined &&
+                        option.val() === loadedCriteria.condition &&
+                        typeof loadedCriteria.condition === 'string') {
+                        option.prop('selected', true);
+                        condition = option.val();
+                    }
+                    else {
+                        option.removeProp('selected');
+                    }
+                }
+                this.s.condition = condition;
+                // If the condition has been found and selected then the value can be populated and searched
+                if (this.s.condition !== undefined) {
+                    this.dom.conditionTitle.removeProp('selected');
+                    this.dom.conditionTitle.remove();
+                    this.dom.condition.removeClass(this.classes.italic);
+                    for (i = 0; i < options.length; i++) {
+                        var opt = $$3(options[i]);
+                        if (opt.val() !== this.s.condition) {
+                            opt.removeProp('selected');
+                        }
+                    }
+                    this._populateValue(loadedCriteria);
+                }
+                else {
+                    this.dom.conditionTitle.prependTo(this.dom.condition).prop('selected', true);
+                }
+            }
+        };
+        /**
+         * Sets the listeners for the criteria
+         */
+        Criteria.prototype.setListeners = function () {
+            var _this = this;
+            this.dom.data
+                .unbind('change')
+                .on('change.dtsb', function () {
+                _this.dom.dataTitle.removeProp('selected');
+                // Need to go over every option to identify the correct selection
+                var options = _this.dom.data.children('option.' + _this.classes.option);
+                for (var i = 0; i < options.length; i++) {
+                    var option = $$3(options[i]);
+                    if (option.val() === _this.dom.data.val()) {
+                        _this.dom.data.removeClass(_this.classes.italic);
+                        option.prop('selected', true);
+                        _this.s.dataIdx = +option.val();
+                        _this.s.data = option.text();
+                        _this.s.origData = option.prop('origData');
+                        _this.c.orthogonal = _this._getOptions().orthogonal;
+                        // When the data is changed, the values in condition and
+                        // value may also change so need to renew them
+                        _this._clearCondition();
+                        _this._clearValue();
+                        _this._populateCondition();
+                        // If this criteria was previously active in the search then
+                        // remove it from the search and trigger a new search
+                        if (_this.s.filled) {
+                            _this.s.filled = false;
+                            _this.doSearch();
+                            _this.setListeners();
+                        }
+                        _this.s.dt.state.save();
+                    }
+                    else {
+                        option.removeProp('selected');
+                    }
+                }
+            });
+            this.dom.condition
+                .unbind('change')
+                .on('change.dtsb', function () {
+                _this.dom.conditionTitle.removeProp('selected');
+                // Need to go over every option to identify the correct selection
+                var options = _this.dom.condition.children('option.' + _this.classes.option);
+                for (var i = 0; i < options.length; i++) {
+                    var option = $$3(options[i]);
+                    if (option.val() === _this.dom.condition.val()) {
+                        _this.dom.condition.removeClass(_this.classes.italic);
+                        option.prop('selected', true);
+                        var condDisp = option.val();
+                        // Find the condition that has been selected and store it internally
+                        for (var _i = 0, _a = Object.keys(_this.s.conditions); _i < _a.length; _i++) {
+                            var cond = _a[_i];
+                            if (cond === condDisp) {
+                                _this.s.condition = condDisp;
+                                break;
+                            }
+                        }
+                        // When the condition is changed, the value selector may switch between
+                        // a select element and an input element
+                        _this._clearValue();
+                        _this._populateValue();
+                        for (var _b = 0, _c = _this.dom.value; _b < _c.length; _b++) {
+                            var val = _c[_b];
+                            // If this criteria was previously active in the search then remove
+                            // it from the search and trigger a new search
+                            if (_this.s.filled && val !== undefined && _this.dom.inputCont.has(val[0]).length !== 0) {
+                                _this.s.filled = false;
+                                _this.doSearch();
+                                _this.setListeners();
+                            }
+                        }
+                        if (_this.dom.value.length === 0 ||
+                            _this.dom.value.length === 1 && _this.dom.value[0] === undefined) {
+                            _this.doSearch();
+                        }
+                    }
+                    else {
+                        option.removeProp('selected');
+                    }
+                }
+            });
+        };
+        Criteria.prototype.setupButtons = function () {
+            if (window.innerWidth > 550) {
+                this.dom.container.removeClass(this.classes.vertical);
+                this.dom.buttons.css('left', null);
+                this.dom.buttons.css('top', null);
+                return;
+            }
+            this.dom.container.addClass(this.classes.vertical);
+            this.dom.buttons.css('left', this.dom.data.innerWidth());
+            this.dom.buttons.css('top', this.dom.data.position().top);
+        };
+        /**
+         * Builds the elements of the dom together
+         */
+        Criteria.prototype._buildCriteria = function () {
+            // Append Titles for select elements
+            this.dom.data.append(this.dom.dataTitle);
+            this.dom.condition.append(this.dom.conditionTitle);
+            // Add elements to container
+            this.dom.container
+                .append(this.dom.data)
+                .append(this.dom.condition);
+            this.dom.inputCont.empty();
+            for (var _i = 0, _a = this.dom.value; _i < _a.length; _i++) {
+                var val = _a[_i];
+                val.append(this.dom.valueTitle);
+                this.dom.inputCont.append(val);
+            }
+            // Add buttons to container
+            this.dom.buttons
+                .append(this.dom["delete"])
+                .append(this.dom.right);
+            this.dom.container.append(this.dom.inputCont).append(this.dom.buttons);
+            this.setListeners();
+        };
+        /**
+         * Clears the condition select element
+         */
+        Criteria.prototype._clearCondition = function () {
+            this.dom.condition.empty();
+            this.dom.conditionTitle.prop('selected', true).attr('disabled', 'true');
+            this.dom.condition.prepend(this.dom.conditionTitle).prop('selectedIndex', 0);
+            this.s.conditions = {};
+            this.s.condition = undefined;
+        };
+        /**
+         * Clears the value elements
+         */
+        Criteria.prototype._clearValue = function () {
+            var val;
+            if (this.s.condition !== undefined) {
+                if (this.dom.value.length > 0 && this.dom.value[0] !== undefined) {
+                    // Remove all of the value elements
+                    for (var _i = 0, _a = this.dom.value; _i < _a.length; _i++) {
+                        val = _a[_i];
+                        if (val !== undefined) {
+                            // Timeout is annoying but because of IOS
+                            setTimeout(function () {
+                                val.remove();
+                            }, 50);
+                        }
+                    }
+                }
+                // Call the init function to get the value elements for this condition
+                this.dom.value = [].concat(this.s.conditions[this.s.condition].init(this, Criteria.updateListener));
+                if (this.dom.value.length > 0 && this.dom.value[0] !== undefined) {
+                    this.dom.inputCont
+                        .empty()
+                        .append(this.dom.value[0])
+                        .insertAfter(this.dom.condition);
+                    $$3(this.dom.value[0]).trigger('dtsb-inserted');
+                    // Insert all of the value elements
+                    for (var i = 1; i < this.dom.value.length; i++) {
+                        this.dom.inputCont.append(this.dom.value[i]);
+                        $$3(this.dom.value[i]).trigger('dtsb-inserted');
+                    }
+                }
+            }
+            else {
+                // Remove all of the value elements
+                for (var _b = 0, _c = this.dom.value; _b < _c.length; _b++) {
+                    val = _c[_b];
+                    if (val !== undefined) {
+                        // Timeout is annoying but because of IOS
+                        setTimeout(function () {
+                            val.remove();
+                        }, 50);
+                    }
+                }
+                // Append the default valueTitle to the default select element
+                this.dom.valueTitle
+                    .prop('selected', true);
+                this.dom.defaultValue
+                    .append(this.dom.valueTitle)
+                    .insertAfter(this.dom.condition);
+            }
+            this.s.value = [];
+            this.dom.value = [
+                $$3('<select disabled/>')
+                    .addClass(this.classes.value)
+                    .addClass(this.classes.dropDown)
+                    .addClass(this.classes.italic)
+                    .addClass(this.classes.select)
+                    .append(this.dom.valueTitle.clone())
+            ];
+        };
+        /**
+         * Gets the options for the column
+         *
+         * @returns {object} The options for the column
+         */
+        Criteria.prototype._getOptions = function () {
+            var table = this.s.dt;
+            return $$3.extend(true, {}, Criteria.defaults, table.settings()[0].aoColumns[this.s.dataIdx].searchBuilder);
+        };
+        /**
+         * Populates the condition dropdown
+         */
+        Criteria.prototype._populateCondition = function () {
+            var conditionOpts = [];
+            var conditionsLength = Object.keys(this.s.conditions).length;
+            var dt = this.s.dt;
+            var colInits = dt.settings()[0].aoColumns;
+            var column = +this.dom.data.children('option:selected').val();
+            var condition, condName;
+            // If there are no conditions stored then we need to get them from the appropriate type
+            if (conditionsLength === 0) {
+                this.s.type = dt.column(column).type();
+                if (colInits !== undefined) {
+                    var colInit = colInits[column];
+                    if (colInit.searchBuilderType !== undefined && colInit.searchBuilderType !== null) {
+                        this.s.type = colInit.searchBuilderType;
+                    }
+                    else if (this.s.type === undefined || this.s.type === null) {
+                        this.s.type = colInit.sType;
+                    }
+                }
+                // If the column type is still unknown use the internal API to detect type
+                if (this.s.type === null || this.s.type === undefined) {
+                    // This can only happen in DT1 - DT2 will do the invalidation of the type itself
+                    if ($$3.fn.dataTable.ext.oApi) {
+                        $$3.fn.dataTable.ext.oApi._fnColumnTypes(dt.settings()[0]);
+                    }
+                    this.s.type = dt.column(column).type();
+                }
+                // Enable the condition element
+                this.dom.condition
+                    .removeAttr('disabled')
+                    .empty()
+                    .append(this.dom.conditionTitle)
+                    .addClass(this.classes.italic);
+                this.dom.conditionTitle
+                    .prop('selected', true);
+                var decimal = dt.settings()[0].oLanguage.sDecimal;
+                // This check is in place for if a custom decimal character is in place
+                if (decimal !== '' && this.s.type && this.s.type.indexOf(decimal) === this.s.type.length - decimal.length) {
+                    if (this.s.type.includes('num-fmt')) {
+                        this.s.type = this.s.type.replace(decimal, '');
+                    }
+                    else if (this.s.type.includes('num')) {
+                        this.s.type = this.s.type.replace(decimal, '');
+                    }
+                }
+                // Select which conditions are going to be used based on the column type
+                var conditionObj = void 0;
+                if (this.c.conditions[this.s.type] !== undefined) {
+                    conditionObj = this.c.conditions[this.s.type];
+                }
+                else if (this.s.type && this.s.type.includes('datetime-')) {
+                    // Date / time data types in DataTables are driven by Luxon or
+                    // Moment.js.
+                    conditionObj = DataTable.use('moment')
+                        ? this.c.conditions.moment
+                        : this.c.conditions.luxon;
+                    this.s.dateFormat = this.s.type.replace(/datetime-/g, '');
+                }
+                else if (this.s.type && this.s.type.includes('moment')) {
+                    conditionObj = this.c.conditions.moment;
+                    this.s.dateFormat = this.s.type.replace(/moment-/g, '');
+                }
+                else if (this.s.type && this.s.type.includes('luxon')) {
+                    conditionObj = this.c.conditions.luxon;
+                    this.s.dateFormat = this.s.type.replace(/luxon-/g, '');
+                }
+                else {
+                    conditionObj = this.c.conditions.string;
+                }
+                // Add all of the conditions to the select element
+                for (var _i = 0, _a = Object.keys(conditionObj); _i < _a.length; _i++) {
+                    condition = _a[_i];
+                    if (conditionObj[condition] !== null) {
+                        // Serverside processing does not supply the options for the select elements
+                        // Instead input elements need to be used for these instead
+                        if (dt.page.info().serverSide && conditionObj[condition].init === Criteria.initSelect) {
+                            var col = colInits[column];
+                            if (this.s.serverData && this.s.serverData[col.data]) {
+                                conditionObj[condition].init = Criteria.initSelectSSP;
+                                conditionObj[condition].inputValue = Criteria.inputValueSelect;
+                                conditionObj[condition].isInputValid = Criteria.isInputValidSelect;
+                            }
+                            else {
+                                conditionObj[condition].init = Criteria.initInput;
+                                conditionObj[condition].inputValue = Criteria.inputValueInput;
+                                conditionObj[condition].isInputValid = Criteria.isInputValidInput;
+                            }
+                        }
+                        this.s.conditions[condition] = conditionObj[condition];
+                        condName = conditionObj[condition].conditionName;
+                        if (typeof condName === 'function') {
+                            condName = condName(dt, this.c.i18n);
+                        }
+                        conditionOpts.push($$3('<option>', {
+                            text: condName,
+                            value: condition
+                        })
+                            .addClass(this.classes.option)
+                            .addClass(this.classes.notItalic));
+                    }
+                }
+            }
+            // Otherwise we can just load them in
+            else if (conditionsLength > 0) {
+                this.dom.condition.empty().removeAttr('disabled').addClass(this.classes.italic);
+                for (var _b = 0, _c = Object.keys(this.s.conditions); _b < _c.length; _b++) {
+                    condition = _c[_b];
+                    var name_1 = this.s.conditions[condition].conditionName;
+                    if (typeof name_1 === 'function') {
+                        name_1 = name_1(dt, this.c.i18n);
+                    }
+                    var newOpt = $$3('<option>', {
+                        text: name_1,
+                        value: condition
+                    })
+                        .addClass(this.classes.option)
+                        .addClass(this.classes.notItalic);
+                    if (this.s.condition !== undefined && this.s.condition === name_1) {
+                        newOpt.prop('selected', true);
+                        this.dom.condition.removeClass(this.classes.italic);
+                    }
+                    conditionOpts.push(newOpt);
+                }
+            }
+            else {
+                this.dom.condition
+                    .attr('disabled', 'true')
+                    .addClass(this.classes.italic);
+                return;
+            }
+            for (var _d = 0, conditionOpts_1 = conditionOpts; _d < conditionOpts_1.length; _d++) {
+                var opt = conditionOpts_1[_d];
+                this.dom.condition.append(opt);
+            }
+            // Selecting a default condition if one is set
+            if (colInits[column].searchBuilder && colInits[column].searchBuilder.defaultCondition) {
+                var defaultCondition = colInits[column].searchBuilder.defaultCondition;
+                // If it is a number just use it as an index
+                if (typeof defaultCondition === 'number') {
+                    this.dom.condition.prop('selectedIndex', defaultCondition);
+                    this.dom.condition.trigger('change');
+                }
+                // If it is a string then things get slightly more tricly
+                else if (typeof defaultCondition === 'string') {
+                    // We need to check each condition option to see if any will match
+                    for (var i = 0; i < conditionOpts.length; i++) {
+                        // Need to check against the stored conditions so we can match the token "cond" to the option
+                        for (var _e = 0, _f = Object.keys(this.s.conditions); _e < _f.length; _e++) {
+                            var cond = _f[_e];
+                            condName = this.s.conditions[cond].conditionName;
+                            if (
+                            // If the conditionName matches the text of the option
+                            (typeof condName === 'string' ? condName : condName(dt, this.c.i18n)) ===
+                                conditionOpts[i].text() &&
+                                // and the tokens match
+                                cond === defaultCondition) {
+                                // Select that option
+                                this.dom.condition
+                                    .prop('selectedIndex', this.dom.condition.children().toArray().indexOf(conditionOpts[i][0]))
+                                    .removeClass(this.classes.italic);
+                                this.dom.condition.trigger('change');
+                                i = conditionOpts.length;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // If not default set then default to 0, the title
+            else {
+                this.dom.condition.prop('selectedIndex', 0);
+            }
+        };
+        /**
+         * Populates the data / column select element
+         */
+        Criteria.prototype._populateData = function () {
+            var columns = this.s.dt.settings()[0].aoColumns;
+            var includeColumns = this.s.dt.columns(this.c.columns).indexes().toArray();
+            this.dom.data.empty().append(this.dom.dataTitle);
+            for (var index = 0; index < columns.length; index++) {
+                // Need to check that the column can be filtered on before adding it
+                if (this.c.columns === true || includeColumns.includes(index)) {
+                    var col = columns[index];
+                    var opt = {
+                        index: index,
+                        origData: col.data,
+                        text: (col.searchBuilderTitle || col.sTitle)
+                            .replace(/(<([^>]+)>)/ig, '')
+                    };
+                    this.dom.data.append($$3('<option>', {
+                        text: opt.text,
+                        value: opt.index
+                    })
+                        .addClass(this.classes.option)
+                        .addClass(this.classes.notItalic)
+                        .prop('origData', col.data)
+                        .prop('selected', this.s.dataIdx === opt.index ? true : false));
+                    if (this.s.dataIdx === opt.index) {
+                        this.dom.dataTitle.removeProp('selected');
+                    }
+                }
+            }
+        };
+        /**
+         * Populates the Value select element
+         *
+         * @param loadedCriteria optional, used to reload criteria from predefined filters
+         */
+        Criteria.prototype._populateValue = function (loadedCriteria) {
+            var _this = this;
+            var prevFilled = this.s.filled;
+            var i;
+            this.s.filled = false;
+            // Remove any previous value elements
+            // Timeout is annoying but because of IOS
+            setTimeout(function () {
+                _this.dom.defaultValue.remove();
+            }, 50);
+            var _loop_1 = function (val) {
+                // Timeout is annoying but because of IOS
+                setTimeout(function () {
+                    if (val !== undefined) {
+                        val.remove();
+                    }
+                }, 50);
+            };
+            for (var _i = 0, _a = this.dom.value; _i < _a.length; _i++) {
+                var val = _a[_i];
+                _loop_1(val);
+            }
+            var children = this.dom.inputCont.children();
+            if (children.length > 1) {
+                for (i = 0; i < children.length; i++) {
+                    $$3(children[i]).remove();
+                }
+            }
+            // Find the column with the title matching the data for the criteria and take note of the index
+            if (loadedCriteria !== undefined) {
+                this.s.dt.columns().every(function (index) {
+                    if (_this.s.dt.settings()[0].aoColumns[index].sTitle === loadedCriteria.data) {
+                        _this.s.dataIdx = index;
+                    }
+                });
+            }
+            // Initialise the value elements based on the condition
+            this.dom.value = [].concat(this.s.conditions[this.s.condition].init(this, Criteria.updateListener, loadedCriteria !== undefined ? loadedCriteria.value : undefined));
+            if (loadedCriteria !== undefined && loadedCriteria.value !== undefined) {
+                this.s.value = loadedCriteria.value;
+            }
+            this.dom.inputCont.empty();
+            // Insert value elements and trigger the inserted event
+            if (this.dom.value[0] !== undefined) {
+                $$3(this.dom.value[0])
+                    .appendTo(this.dom.inputCont)
+                    .trigger('dtsb-inserted');
+            }
+            for (i = 1; i < this.dom.value.length; i++) {
+                $$3(this.dom.value[i])
+                    .insertAfter(this.dom.value[i - 1])
+                    .trigger('dtsb-inserted');
+            }
+            // Check if the criteria can be used in a search
+            this.s.filled = this.s.conditions[this.s.condition].isInputValid(this.dom.value, this);
+            this.setListeners();
+            // If it can and this is different to before then trigger a draw
+            if (!this.s.preventRedraw && prevFilled !== this.s.filled) {
+                // If using SSP we want to restrict the amount of server calls that take place
+                //  and this will already have taken place
+                if (!this.s.dt.page.info().serverSide) {
+                    this.doSearch();
+                }
+                this.setListeners();
+            }
+        };
+        /**
+         * Provides throttling capabilities to SearchBuilder without having to use dt's _fnThrottle function
+         * This is because that function is not quite suitable for our needs as it runs initially rather than waiting
+         *
+         * @param args arguments supplied to the throttle function
+         * @returns Function that is to be run that implements the throttling
+         */
+        Criteria.prototype._throttle = function (fn, frequency) {
+            if (frequency === void 0) { frequency = 200; }
+            var last = null;
+            var timer = null;
+            var that = this;
+            if (frequency === null) {
+                frequency = 200;
+            }
+            return function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                var now = +new Date();
+                if (last !== null && now < last + frequency) {
+                    clearTimeout(timer);
+                }
+                else {
+                    last = now;
+                }
+                timer = setTimeout(function () {
+                    last = null;
+                    fn.apply(that, args);
+                }, frequency);
+            };
+        };
+        Criteria.version = '1.1.0';
+        Criteria.classes = {
+            button: 'dtsb-button',
+            buttonContainer: 'dtsb-buttonContainer',
+            condition: 'dtsb-condition',
+            container: 'dtsb-criteria',
+            data: 'dtsb-data',
+            "delete": 'dtsb-delete',
+            dropDown: 'dtsb-dropDown',
+            greyscale: 'dtsb-greyscale',
+            input: 'dtsb-input',
+            inputCont: 'dtsb-inputCont',
+            italic: 'dtsb-italic',
+            joiner: 'dtsb-joiner',
+            left: 'dtsb-left',
+            notItalic: 'dtsb-notItalic',
+            option: 'dtsb-option',
+            right: 'dtsb-right',
+            select: 'dtsb-select',
+            value: 'dtsb-value',
+            vertical: 'dtsb-vertical'
+        };
+        /**
+         * Default initialisation function for select conditions
+         */
+        Criteria.initSelect = function (that, fn, preDefined, array) {
+            if (preDefined === void 0) { preDefined = null; }
+            if (array === void 0) { array = false; }
+            var column = that.dom.data.children('option:selected').val();
+            var indexArray = that.s.dt.rows().indexes().toArray();
+            var fastData = that.s.dt.settings()[0].fastData;
+            that.dom.valueTitle.prop('selected', true);
+            // Declare select element to be used with all of the default classes and listeners.
+            var el = $$3('<select/>')
+                .addClass(Criteria.classes.value)
+                .addClass(Criteria.classes.dropDown)
+                .addClass(Criteria.classes.italic)
+                .addClass(Criteria.classes.select)
+                .append(that.dom.valueTitle)
+                .on('change.dtsb', function () {
+                $$3(this).removeClass(Criteria.classes.italic);
+                fn(that, this);
+            });
+            if (that.c.greyscale) {
+                el.addClass(Criteria.classes.greyscale);
+            }
+            var added = [];
+            var options = [];
+            // Add all of the options from the table to the select element.
+            // Only add one option for each possible value
+            for (var _i = 0, indexArray_1 = indexArray; _i < indexArray_1.length; _i++) {
+                var index = indexArray_1[_i];
+                var filter = fastData(index, column, typeof that.c.orthogonal === 'string' ?
+                    that.c.orthogonal :
+                    that.c.orthogonal.search);
+                var value = {
+                    filter: typeof filter === 'string' ?
+                        filter.replace(/[\r\n\u2028]/g, ' ') : // Need to replace certain characters to match search values
+                        filter,
+                    index: index,
+                    text: fastData(index, column, typeof that.c.orthogonal === 'string' ?
+                        that.c.orthogonal :
+                        that.c.orthogonal.display)
+                };
+                // If we are dealing with an array type, either make sure we are working with arrays, or sort them
+                if (that.s.type === 'array') {
+                    value.filter = !Array.isArray(value.filter) ? [value.filter] : value.filter;
+                    value.text = !Array.isArray(value.text) ? [value.text] : value.text;
+                }
+                // Function to add an option to the select element
+                var addOption = function (filt, text) {
+                    if (that.s.type.includes('html') && filt !== null && typeof filt === 'string') {
+                        filt.replace(/(<([^>]+)>)/ig, '');
+                    }
+                    // Add text and value, stripping out any html if that is the column type
+                    var opt = $$3('<option>', {
+                        type: Array.isArray(filt) ? 'Array' : 'String',
+                        value: filt
+                    })
+                        .data('sbv', filt)
+                        .addClass(that.classes.option)
+                        .addClass(that.classes.notItalic)
+                        // Have to add the text this way so that special html characters are not escaped - &amp; etc.
+                        .html(typeof text === 'string' ?
+                        text.replace(/(<([^>]+)>)/ig, '') :
+                        text);
+                    var val = opt.val();
+                    // Check that this value has not already been added
+                    if (added.indexOf(val) === -1) {
+                        added.push(val);
+                        options.push(opt);
+                        if (preDefined !== null && Array.isArray(preDefined[0])) {
+                            preDefined[0] = preDefined[0].sort().join(',');
+                        }
+                        // If this value was previously selected as indicated by preDefined, then select it again
+                        if (preDefined !== null && opt.val() === preDefined[0]) {
+                            opt.prop('selected', true);
+                            el.removeClass(Criteria.classes.italic);
+                            that.dom.valueTitle.removeProp('selected');
+                        }
+                    }
+                };
+                // If this is to add the individual values within the array we need to loop over the array
+                if (array) {
+                    for (var i = 0; i < value.filter.length; i++) {
+                        addOption(value.filter[i], value.text[i]);
+                    }
+                }
+                // Otherwise the value that is in the cell is to be added
+                else {
+                    addOption(value.filter, Array.isArray(value.text) ? value.text.join(', ') : value.text);
+                }
+            }
+            options.sort(function (a, b) {
+                if (that.s.type === 'array' ||
+                    that.s.type === 'string' ||
+                    that.s.type === 'html') {
+                    if (a.val() < b.val()) {
+                        return -1;
+                    }
+                    else if (a.val() > b.val()) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
+                else if (that.s.type === 'num' ||
+                    that.s.type === 'html-num') {
+                    if (+a.val().replace(/(<([^>]+)>)/ig, '') < +b.val().replace(/(<([^>]+)>)/ig, '')) {
+                        return -1;
+                    }
+                    else if (+a.val().replace(/(<([^>]+)>)/ig, '') > +b.val().replace(/(<([^>]+)>)/ig, '')) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
+                else if (that.s.type === 'num-fmt' || that.s.type === 'html-num-fmt') {
+                    if (+a.val().replace(/[^0-9.]/g, '') < +b.val().replace(/[^0-9.]/g, '')) {
+                        return -1;
+                    }
+                    else if (+a.val().replace(/[^0-9.]/g, '') > +b.val().replace(/[^0-9.]/g, '')) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
+            });
+            for (var _a = 0, options_1 = options; _a < options_1.length; _a++) {
+                var opt = options_1[_a];
+                el.append(opt);
+            }
+            return el;
+        };
+        /**
+         * Default initialisation function for select conditions
+         */
+        Criteria.initSelectSSP = function (that, fn, preDefined) {
+            if (preDefined === void 0) { preDefined = null; }
+            that.dom.valueTitle.prop('selected', true);
+            // Declare select element to be used with all of the default classes and listeners.
+            var el = $$3('<select/>')
+                .addClass(Criteria.classes.value)
+                .addClass(Criteria.classes.dropDown)
+                .addClass(Criteria.classes.italic)
+                .addClass(Criteria.classes.select)
+                .append(that.dom.valueTitle)
+                .on('change.dtsb', function () {
+                $$3(this).removeClass(Criteria.classes.italic);
+                fn(that, this);
+            });
+            if (that.c.greyscale) {
+                el.addClass(Criteria.classes.greyscale);
+            }
+            var options = [];
+            for (var _i = 0, _a = that.s.serverData[that.s.origData]; _i < _a.length; _i++) {
+                var option = _a[_i];
+                var value = option.value;
+                var label = option.label;
+                // Function to add an option to the select element
+                var addOption = function (filt, text) {
+                    if (that.s.type.includes('html') && filt !== null && typeof filt === 'string') {
+                        filt.replace(/(<([^>]+)>)/ig, '');
+                    }
+                    // Add text and value, stripping out any html if that is the column type
+                    var opt = $$3('<option>', {
+                        type: Array.isArray(filt) ? 'Array' : 'String',
+                        value: filt
+                    })
+                        .data('sbv', filt)
+                        .addClass(that.classes.option)
+                        .addClass(that.classes.notItalic)
+                        // Have to add the text this way so that special html characters are not escaped - &amp; etc.
+                        .html(typeof text === 'string' ?
+                        text.replace(/(<([^>]+)>)/ig, '') :
+                        text);
+                    options.push(opt);
+                    // If this value was previously selected as indicated by preDefined, then select it again
+                    if (preDefined !== null && opt.val() === preDefined[0]) {
+                        opt.prop('selected', true);
+                        el.removeClass(Criteria.classes.italic);
+                        that.dom.valueTitle.removeProp('selected');
+                    }
+                };
+                addOption(value, label);
+            }
+            for (var _b = 0, options_2 = options; _b < options_2.length; _b++) {
+                var opt = options_2[_b];
+                el.append(opt);
+            }
+            return el;
+        };
+        /**
+         * Default initialisation function for select array conditions
+         *
+         * This exists because there needs to be different select functionality for contains/without and equals/not
+         */
+        Criteria.initSelectArray = function (that, fn, preDefined) {
+            if (preDefined === void 0) { preDefined = null; }
+            return Criteria.initSelect(that, fn, preDefined, true);
+        };
+        /**
+         * Default initialisation function for input conditions
+         */
+        Criteria.initInput = function (that, fn, preDefined) {
+            if (preDefined === void 0) { preDefined = null; }
+            // Declare the input element
+            var searchDelay = that.s.dt.settings()[0].searchDelay;
+            var el = $$3('<input/>')
+                .addClass(Criteria.classes.value)
+                .addClass(Criteria.classes.input)
+                .on('input.dtsb keypress.dtsb', that._throttle(function (e) {
+                var code = e.keyCode || e.which;
+                return fn(that, this, code);
+            }, searchDelay === null ? 100 : searchDelay));
+            if (that.c.greyscale) {
+                el.addClass(Criteria.classes.greyscale);
+            }
+            // If there is a preDefined value then add it
+            if (preDefined !== null) {
+                el.val(preDefined[0]);
+            }
+            // This is add responsive functionality to the logic button without redrawing everything else
+            that.s.dt.one('draw.dtsb', function () {
+                that.s.topGroup.trigger('dtsb-redrawLogic');
+            });
+            return el;
+        };
+        /**
+         * Default initialisation function for conditions requiring 2 inputs
+         */
+        Criteria.init2Input = function (that, fn, preDefined) {
+            if (preDefined === void 0) { preDefined = null; }
+            // Declare all of the necessary jQuery elements
+            var searchDelay = that.s.dt.settings()[0].searchDelay;
+            var els = [
+                $$3('<input/>')
+                    .addClass(Criteria.classes.value)
+                    .addClass(Criteria.classes.input)
+                    .on('input.dtsb keypress.dtsb', that._throttle(function (e) {
+                    var code = e.keyCode || e.which;
+                    return fn(that, this, code);
+                }, searchDelay === null ? 100 : searchDelay)),
+                $$3('<span>')
+                    .addClass(that.classes.joiner)
+                    .html(that.s.dt.i18n('searchBuilder.valueJoiner', that.c.i18n.valueJoiner)),
+                $$3('<input/>')
+                    .addClass(Criteria.classes.value)
+                    .addClass(Criteria.classes.input)
+                    .on('input.dtsb keypress.dtsb', that._throttle(function (e) {
+                    var code = e.keyCode || e.which;
+                    return fn(that, this, code);
+                }, searchDelay === null ? 100 : searchDelay))
+            ];
+            if (that.c.greyscale) {
+                els[0].addClass(Criteria.classes.greyscale);
+                els[2].addClass(Criteria.classes.greyscale);
+            }
+            // If there is a preDefined value then add it
+            if (preDefined !== null) {
+                els[0].val(preDefined[0]);
+                els[2].val(preDefined[1]);
+            }
+            // This is add responsive functionality to the logic button without redrawing everything else
+            that.s.dt.one('draw.dtsb', function () {
+                that.s.topGroup.trigger('dtsb-redrawLogic');
+            });
+            return els;
+        };
+        /**
+         * Default initialisation function for date conditions
+         */
+        Criteria.initDate = function (that, fn, preDefined) {
+            if (preDefined === void 0) { preDefined = null; }
+            var searchDelay = that.s.dt.settings()[0].searchDelay;
+            var i18n = that.s.dt.i18n('datetime', {});
+            // Declare date element using DataTables dateTime plugin
+            var el = $$3('<input/>')
+                .addClass(Criteria.classes.value)
+                .addClass(Criteria.classes.input)
+                .dtDateTime({
+                attachTo: 'input',
+                format: that.s.dateFormat ? that.s.dateFormat : undefined,
+                i18n: i18n
+            })
+                .on('change.dtsb', that._throttle(function () {
+                return fn(that, this);
+            }, searchDelay === null ? 100 : searchDelay))
+                .on('input.dtsb keypress.dtsb', function (e) {
+                that._throttle(function () {
+                    var code = e.keyCode || e.which;
+                    return fn(that, this, code);
+                }, searchDelay === null ? 100 : searchDelay);
+            });
+            if (that.c.greyscale) {
+                el.addClass(Criteria.classes.greyscale);
+            }
+            // If there is a preDefined value then add it
+            if (preDefined !== null) {
+                el.val(preDefined[0]);
+            }
+            // This is add responsive functionality to the logic button without redrawing everything else
+            that.s.dt.one('draw.dtsb', function () {
+                that.s.topGroup.trigger('dtsb-redrawLogic');
+            });
+            return el;
+        };
+        Criteria.initNoValue = function (that) {
+            // This is add responsive functionality to the logic button without redrawing everything else
+            that.s.dt.one('draw.dtsb', function () {
+                that.s.topGroup.trigger('dtsb-redrawLogic');
+            });
+            return [];
+        };
+        Criteria.init2Date = function (that, fn, preDefined) {
+            var _this = this;
+            if (preDefined === void 0) { preDefined = null; }
+            var searchDelay = that.s.dt.settings()[0].searchDelay;
+            var i18n = that.s.dt.i18n('datetime', {});
+            // Declare all of the date elements that are required using DataTables dateTime plugin
+            var els = [
+                $$3('<input/>')
+                    .addClass(Criteria.classes.value)
+                    .addClass(Criteria.classes.input)
+                    .dtDateTime({
+                    attachTo: 'input',
+                    format: that.s.dateFormat ? that.s.dateFormat : undefined,
+                    i18n: i18n
+                })
+                    .on('change.dtsb', searchDelay !== null ?
+                    DataTable.util.throttle(function () {
+                        return fn(that, this);
+                    }, searchDelay) :
+                    function () {
+                        fn(that, _this);
+                    })
+                    .on('input.dtsb keypress.dtsb', function (e) {
+                    DataTable.util.throttle(function () {
+                        var code = e.keyCode || e.which;
+                        return fn(that, this, code);
+                    }, searchDelay === null ? 0 : searchDelay);
+                }),
+                $$3('<span>')
+                    .addClass(that.classes.joiner)
+                    .html(that.s.dt.i18n('searchBuilder.valueJoiner', that.c.i18n.valueJoiner)),
+                $$3('<input/>')
+                    .addClass(Criteria.classes.value)
+                    .addClass(Criteria.classes.input)
+                    .dtDateTime({
+                    attachTo: 'input',
+                    format: that.s.dateFormat ? that.s.dateFormat : undefined,
+                    i18n: i18n
+                })
+                    .on('change.dtsb', searchDelay !== null ?
+                    DataTable.util.throttle(function () {
+                        return fn(that, this);
+                    }, searchDelay) :
+                    function () {
+                        fn(that, _this);
+                    })
+                    .on('input.dtsb keypress.dtsb', !that.c.enterSearch &&
+                    !(that.s.dt.settings()[0].oInit.search !== undefined &&
+                        that.s.dt.settings()[0].oInit.search["return"]) &&
+                    searchDelay !== null ?
+                    DataTable.util.throttle(function () {
+                        return fn(that, this);
+                    }, searchDelay) :
+                    function (e) {
+                        var code = e.keyCode || e.which;
+                        fn(that, _this, code);
+                    })
+            ];
+            if (that.c.greyscale) {
+                els[0].addClass(Criteria.classes.greyscale);
+                els[2].addClass(Criteria.classes.greyscale);
+            }
+            // If there are and preDefined values then add them
+            if (preDefined !== null && preDefined.length > 0) {
+                els[0].val(preDefined[0]);
+                els[2].val(preDefined[1]);
+            }
+            // This is add responsive functionality to the logic button without redrawing everything else
+            that.s.dt.one('draw.dtsb', function () {
+                that.s.topGroup.trigger('dtsb-redrawLogic');
+            });
+            return els;
+        };
+        /**
+         * Default function for select elements to validate condition
+         */
+        Criteria.isInputValidSelect = function (el) {
+            var allFilled = true;
+            // Check each element to make sure that the selections are valid
+            for (var _i = 0, el_1 = el; _i < el_1.length; _i++) {
+                var element = el_1[_i];
+                if (element.children('option:selected').length ===
+                    element.children('option').length -
+                        element.children('option.' + Criteria.classes.notItalic).length &&
+                    element.children('option:selected').length === 1 &&
+                    element.children('option:selected')[0] === element.children('option')[0]) {
+                    allFilled = false;
+                }
+            }
+            return allFilled;
+        };
+        /**
+         * Default function for input and date elements to validate condition
+         */
+        Criteria.isInputValidInput = function (el) {
+            var allFilled = true;
+            // Check each element to make sure that the inputs are valid
+            for (var _i = 0, el_2 = el; _i < el_2.length; _i++) {
+                var element = el_2[_i];
+                if (element.is('input') && element.val().length === 0) {
+                    allFilled = false;
+                }
+            }
+            return allFilled;
+        };
+        /**
+         * Default function for getting select conditions
+         */
+        Criteria.inputValueSelect = function (el) {
+            var values = [];
+            // Go through the select elements and push each selected option to the return array
+            for (var _i = 0, el_3 = el; _i < el_3.length; _i++) {
+                var element = el_3[_i];
+                if (element.is('select')) {
+                    values.push(Criteria._escapeHTML(element.children('option:selected').data('sbv')));
+                }
+            }
+            return values;
+        };
+        /**
+         * Default function for getting input conditions
+         */
+        Criteria.inputValueInput = function (el) {
+            var values = [];
+            // Go through the input elements and push each value to the return array
+            for (var _i = 0, el_4 = el; _i < el_4.length; _i++) {
+                var element = el_4[_i];
+                if (element.is('input')) {
+                    values.push(Criteria._escapeHTML(element.val()));
+                }
+            }
+            return values.map(dataTable$2.util.diacritics);
+        };
+        /**
+         * Function that is run on each element as a call back when a search should be triggered
+         */
+        Criteria.updateListener = function (that, el, code) {
+            // When the value is changed the criteria is now complete so can be included in searches
+            // Get the condition from the map based on the key that has been selected for the condition
+            var condition = that.s.conditions[that.s.condition];
+            var i;
+            that.s.filled = condition.isInputValid(that.dom.value, that);
+            that.s.value = condition.inputValue(that.dom.value, that);
+            if (!that.s.filled) {
+                if (!that.c.enterSearch &&
+                    !(that.s.dt.settings()[0].oInit.search !== undefined &&
+                        that.s.dt.settings()[0].oInit.search["return"]) ||
+                    code === 13) {
+                    that.doSearch();
+                }
+                return;
+            }
+            if (!Array.isArray(that.s.value)) {
+                that.s.value = [that.s.value];
+            }
+            for (i = 0; i < that.s.value.length; i++) {
+                // If the value is an array we need to sort it
+                if (Array.isArray(that.s.value[i])) {
+                    that.s.value[i].sort();
+                }
+            }
+            // Take note of the cursor position so that we can refocus there later
+            var idx = null;
+            var cursorPos = null;
+            for (i = 0; i < that.dom.value.length; i++) {
+                if (el === that.dom.value[i][0]) {
+                    idx = i;
+                    if (el.selectionStart !== undefined) {
+                        cursorPos = el.selectionStart;
+                    }
+                }
+            }
+            if (!that.c.enterSearch &&
+                !(that.s.dt.settings()[0].oInit.search !== undefined &&
+                    that.s.dt.settings()[0].oInit.search["return"]) ||
+                code === 13) {
+                // Trigger a search
+                that.doSearch();
+            }
+            // Refocus the element and set the correct cursor position
+            if (idx !== null) {
+                that.dom.value[idx].removeClass(that.classes.italic);
+                that.dom.value[idx].focus();
+                if (cursorPos !== null) {
+                    that.dom.value[idx][0].setSelectionRange(cursorPos, cursorPos);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.dateConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.equals', i18n.conditions.date.equals);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    return value === comparison[0];
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.not', i18n.conditions.date.not);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    return value !== comparison[0];
+                }
+            },
+            '<': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.before', i18n.conditions.date.before);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    return value < comparison[0];
+                }
+            },
+            '>': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.after', i18n.conditions.date.after);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    return value > comparison[0];
+                }
+            },
+            'between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.between', i18n.conditions.date.between);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    if (comparison[0] < comparison[1]) {
+                        return comparison[0] <= value && value <= comparison[1];
+                    }
+                    else {
+                        return comparison[1] <= value && value <= comparison[0];
+                    }
+                }
+            },
+            '!between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notBetween', i18n.conditions.date.notBetween);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    value = value.replace(/(\/|-|,)/g, '-');
+                    if (comparison[0] < comparison[1]) {
+                        return !(comparison[0] <= value && value <= comparison[1]);
+                    }
+                    else {
+                        return !(comparison[1] <= value && value <= comparison[0]);
+                    }
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.empty', i18n.conditions.date.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notEmpty', i18n.conditions.date.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.momentDateConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.equals', i18n.conditions.date.equals);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return moment()(value, that.s.dateFormat).valueOf() ===
+                        moment()(comparison[0], that.s.dateFormat).valueOf();
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.not', i18n.conditions.date.not);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return moment()(value, that.s.dateFormat).valueOf() !==
+                        moment()(comparison[0], that.s.dateFormat).valueOf();
+                }
+            },
+            '<': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.before', i18n.conditions.date.before);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return moment()(value, that.s.dateFormat).valueOf() < moment()(comparison[0], that.s.dateFormat).valueOf();
+                }
+            },
+            '>': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.after', i18n.conditions.date.after);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return moment()(value, that.s.dateFormat).valueOf() > moment()(comparison[0], that.s.dateFormat).valueOf();
+                }
+            },
+            'between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.between', i18n.conditions.date.between);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    var val = moment()(value, that.s.dateFormat).valueOf();
+                    var comp0 = moment()(comparison[0], that.s.dateFormat).valueOf();
+                    var comp1 = moment()(comparison[1], that.s.dateFormat).valueOf();
+                    if (comp0 < comp1) {
+                        return comp0 <= val && val <= comp1;
+                    }
+                    else {
+                        return comp1 <= val && val <= comp0;
+                    }
+                }
+            },
+            '!between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notBetween', i18n.conditions.date.notBetween);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    var val = moment()(value, that.s.dateFormat).valueOf();
+                    var comp0 = moment()(comparison[0], that.s.dateFormat).valueOf();
+                    var comp1 = moment()(comparison[1], that.s.dateFormat).valueOf();
+                    if (comp0 < comp1) {
+                        return !(+comp0 <= +val && +val <= +comp1);
+                    }
+                    else {
+                        return !(+comp1 <= +val && +val <= +comp0);
+                    }
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.empty', i18n.conditions.date.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notEmpty', i18n.conditions.date.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.luxonDateConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.equals', i18n.conditions.date.equals);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return luxon().DateTime.fromFormat(value, that.s.dateFormat).ts
+                        === luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.not', i18n.conditions.date.not);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return luxon().DateTime.fromFormat(value, that.s.dateFormat).ts
+                        !== luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                }
+            },
+            '<': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.before', i18n.conditions.date.before);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return luxon().DateTime.fromFormat(value, that.s.dateFormat).ts
+                        < luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                }
+            },
+            '>': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.after', i18n.conditions.date.after);
+                },
+                init: Criteria.initDate,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    return luxon().DateTime.fromFormat(value, that.s.dateFormat).ts
+                        > luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                }
+            },
+            'between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.between', i18n.conditions.date.between);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    var val = luxon().DateTime.fromFormat(value, that.s.dateFormat).ts;
+                    var comp0 = luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                    var comp1 = luxon().DateTime.fromFormat(comparison[1], that.s.dateFormat).ts;
+                    if (comp0 < comp1) {
+                        return comp0 <= val && val <= comp1;
+                    }
+                    else {
+                        return comp1 <= val && val <= comp0;
+                    }
+                }
+            },
+            '!between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notBetween', i18n.conditions.date.notBetween);
+                },
+                init: Criteria.init2Date,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, that) {
+                    var val = luxon().DateTime.fromFormat(value, that.s.dateFormat).ts;
+                    var comp0 = luxon().DateTime.fromFormat(comparison[0], that.s.dateFormat).ts;
+                    var comp1 = luxon().DateTime.fromFormat(comparison[1], that.s.dateFormat).ts;
+                    if (comp0 < comp1) {
+                        return !(+comp0 <= +val && +val <= +comp1);
+                    }
+                    else {
+                        return !(+comp1 <= +val && +val <= +comp0);
+                    }
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.empty', i18n.conditions.date.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.date.notEmpty', i18n.conditions.date.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.numConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.equals', i18n.conditions.number.equals);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    return +value === +comparison[0];
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.not', i18n.conditions.number.not);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    return +value !== +comparison[0];
+                }
+            },
+            '<': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.lt', i18n.conditions.number.lt);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return +value < +comparison[0];
+                }
+            },
+            '<=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.lte', i18n.conditions.number.lte);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return +value <= +comparison[0];
+                }
+            },
+            '>=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.gte', i18n.conditions.number.gte);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return +value >= +comparison[0];
+                }
+            },
+            '>': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.gt', i18n.conditions.number.gt);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return +value > +comparison[0];
+                }
+            },
+            'between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.between', i18n.conditions.number.between);
+                },
+                init: Criteria.init2Input,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    if (+comparison[0] < +comparison[1]) {
+                        return +comparison[0] <= +value && +value <= +comparison[1];
+                    }
+                    else {
+                        return +comparison[1] <= +value && +value <= +comparison[0];
+                    }
+                }
+            },
+            '!between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.notBetween', i18n.conditions.number.notBetween);
+                },
+                init: Criteria.init2Input,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    if (+comparison[0] < +comparison[1]) {
+                        return !(+comparison[0] <= +value && +value <= +comparison[1]);
+                    }
+                    else {
+                        return !(+comparison[1] <= +value && +value <= +comparison[0]);
+                    }
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.empty', i18n.conditions.number.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.notEmpty', i18n.conditions.number.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.numFmtConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.equals', i18n.conditions.number.equals);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) === criteria.parseNumber(comparison[0]);
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.not', i18n.conditions.number.not);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) !== criteria.parseNumber(comparison[0]);
+                }
+            },
+            '<': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.lt', i18n.conditions.number.lt);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) < criteria.parseNumber(comparison[0]);
+                }
+            },
+            '<=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.lte', i18n.conditions.number.lte);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) <= criteria.parseNumber(comparison[0]);
+                }
+            },
+            '>=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.gte', i18n.conditions.number.gte);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) >= criteria.parseNumber(comparison[0]);
+                }
+            },
+            '>': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.gt', i18n.conditions.number.gt);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    return criteria.parseNumber(value) > criteria.parseNumber(comparison[0]);
+                }
+            },
+            'between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.between', i18n.conditions.number.between);
+                },
+                init: Criteria.init2Input,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    var val = criteria.parseNumber(value);
+                    var comp0 = criteria.parseNumber(comparison[0]);
+                    var comp1 = criteria.parseNumber(comparison[1]);
+                    if (+comp0 < +comp1) {
+                        return +comp0 <= +val && +val <= +comp1;
+                    }
+                    else {
+                        return +comp1 <= +val && +val <= +comp0;
+                    }
+                }
+            },
+            '!between': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.notBetween', i18n.conditions.number.notBetween);
+                },
+                init: Criteria.init2Input,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison, criteria) {
+                    var val = criteria.parseNumber(value);
+                    var comp0 = criteria.parseNumber(comparison[0]);
+                    var comp1 = criteria.parseNumber(comparison[1]);
+                    if (+comp0 < +comp1) {
+                        return !(+comp0 <= +val && +val <= +comp1);
+                    }
+                    else {
+                        return !(+comp1 <= +val && +val <= +comp0);
+                    }
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.empty', i18n.conditions.number.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.number.notEmpty', i18n.conditions.number.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Has to be in this order so that they are displayed correctly in select elements
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.stringConditions = {
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.equals', i18n.conditions.string.equals);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    return value === comparison[0];
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.not', i18n.conditions.string.not);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return value !== comparison[0];
+                }
+            },
+            'starts': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.startsWith', i18n.conditions.string.startsWith);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return value.toLowerCase().indexOf(comparison[0].toLowerCase()) === 0;
+                }
+            },
+            '!starts': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.notStartsWith', i18n.conditions.string.notStartsWith);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return value.toLowerCase().indexOf(comparison[0].toLowerCase()) !== 0;
+                }
+            },
+            'contains': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.contains', i18n.conditions.string.contains);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return value.toLowerCase().includes(comparison[0].toLowerCase());
+                }
+            },
+            '!contains': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.notContains', i18n.conditions.string.notContains);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return !value.toLowerCase().includes(comparison[0].toLowerCase());
+                }
+            },
+            'ends': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.endsWith', i18n.conditions.string.endsWith);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return value.toLowerCase().endsWith(comparison[0].toLowerCase());
+                }
+            },
+            '!ends': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.notEndsWith', i18n.conditions.string.notEndsWith);
+                },
+                init: Criteria.initInput,
+                inputValue: Criteria.inputValueInput,
+                isInputValid: Criteria.isInputValidInput,
+                search: function (value, comparison) {
+                    return !value.toLowerCase().endsWith(comparison[0].toLowerCase());
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.empty', i18n.conditions.string.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.string.notEmpty', i18n.conditions.string.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return !(value === null || value === undefined || value.length === 0);
+                }
+            }
+        };
+        // The order of the conditions will make eslint sad :(
+        // Also have to disable member ordering for this as the private methods used are not yet declared otherwise
+        Criteria.arrayConditions = {
+            'contains': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.contains', i18n.conditions.array.contains);
+                },
+                init: Criteria.initSelectArray,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    return value.includes(comparison[0]);
+                }
+            },
+            'without': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.without', i18n.conditions.array.without);
+                },
+                init: Criteria.initSelectArray,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    return value.indexOf(comparison[0]) === -1;
+                }
+            },
+            '=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.equals', i18n.conditions.array.equals);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    if (value.length === comparison[0].length) {
+                        for (var i = 0; i < value.length; i++) {
+                            if (value[i] !== comparison[0][i]) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            },
+            '!=': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.not', i18n.conditions.array.not);
+                },
+                init: Criteria.initSelect,
+                inputValue: Criteria.inputValueSelect,
+                isInputValid: Criteria.isInputValidSelect,
+                search: function (value, comparison) {
+                    if (value.length === comparison[0].length) {
+                        for (var i = 0; i < value.length; i++) {
+                            if (value[i] !== comparison[0][i]) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            'null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.empty', i18n.conditions.array.empty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value === null || value === undefined || value.length === 0;
+                }
+            },
+            '!null': {
+                conditionName: function (dt, i18n) {
+                    return dt.i18n('searchBuilder.conditions.array.notEmpty', i18n.conditions.array.notEmpty);
+                },
+                init: Criteria.initNoValue,
+                inputValue: function () {
+                    return;
+                },
+                isInputValid: function () {
+                    return true;
+                },
+                search: function (value) {
+                    return value !== null && value !== undefined && value.length !== 0;
+                }
+            }
+        };
+        // eslint will be sad because we have to disable member ordering for this as the
+        // private static properties used are not yet declared otherwise
+        Criteria.defaults = {
+            columns: true,
+            conditions: {
+                'array': Criteria.arrayConditions,
+                'date': Criteria.dateConditions,
+                'html': Criteria.stringConditions,
+                'html-num': Criteria.numConditions,
+                'html-num-fmt': Criteria.numFmtConditions,
+                'luxon': Criteria.luxonDateConditions,
+                'moment': Criteria.momentDateConditions,
+                'num': Criteria.numConditions,
+                'num-fmt': Criteria.numFmtConditions,
+                'string': Criteria.stringConditions
+            },
+            depthLimit: false,
+            enterSearch: false,
+            filterChanged: undefined,
+            greyscale: false,
+            i18n: {
+                add: 'Add Condition',
+                button: {
+                    0: 'Search Builder',
+                    _: 'Search Builder (%d)'
+                },
+                clearAll: 'Clear All',
+                condition: 'Condition',
+                data: 'Data',
+                "delete": '&times',
+                deleteTitle: 'Delete filtering rule',
+                left: '<',
+                leftTitle: 'Outdent criteria',
+                logicAnd: 'And',
+                logicOr: 'Or',
+                right: '>',
+                rightTitle: 'Indent criteria',
+                search: 'Search',
+                title: {
+                    0: 'Custom Search Builder',
+                    _: 'Custom Search Builder (%d)'
+                },
+                value: 'Value',
+                valueJoiner: 'and'
+            },
+            liveSearch: true,
+            logic: 'AND',
+            orthogonal: {
+                display: 'display',
+                search: 'filter'
+            },
+            preDefined: false
+        };
+        return Criteria;
+    }());
+
+    var $$2;
+    /**
+     * Sets the value of jQuery for use in the file
+     *
+     * @param jq the instance of jQuery to be set
+     */
+    function setJQuery$1(jq) {
+        $$2 = jq;
+        jq.fn.dataTable;
+    }
+    /**
+     * The Group class is used within SearchBuilder to represent a group of criteria
+     */
+    var Group = /** @class */ (function () {
+        function Group(table, opts, topGroup, index, isChild, depth, serverData) {
+            if (index === void 0) { index = 0; }
+            if (isChild === void 0) { isChild = false; }
+            if (depth === void 0) { depth = 1; }
+            if (serverData === void 0) { serverData = undefined; }
+            this.classes = $$2.extend(true, {}, Group.classes);
+            // Get options from user
+            this.c = $$2.extend(true, {}, Group.defaults, opts);
+            this.s = {
+                criteria: [],
+                depth: depth,
+                dt: table,
+                index: index,
+                isChild: isChild,
+                logic: undefined,
+                opts: opts,
+                preventRedraw: false,
+                serverData: serverData,
+                toDrop: undefined,
+                topGroup: topGroup
+            };
+            this.dom = {
+                add: $$2('<button/>')
+                    .addClass(this.classes.add)
+                    .addClass(this.classes.button)
+                    .attr('type', 'button'),
+                clear: $$2('<button>&times</button>')
+                    .addClass(this.classes.button)
+                    .addClass(this.classes.clearGroup)
+                    .attr('type', 'button'),
+                container: $$2('<div/>')
+                    .addClass(this.classes.group),
+                logic: $$2('<button><div/></button>')
+                    .addClass(this.classes.logic)
+                    .addClass(this.classes.button)
+                    .attr('type', 'button'),
+                logicContainer: $$2('<div/>')
+                    .addClass(this.classes.logicContainer),
+                search: $$2('<button/>')
+                    .addClass(this.classes.search)
+                    .addClass(this.classes.button)
+                    .attr('type', 'button')
+                    .css('display', 'none')
+            };
+            // A reference to the top level group is maintained throughout any subgroups and criteria that may be created
+            if (this.s.topGroup === undefined) {
+                this.s.topGroup = this.dom.container;
+            }
+            this._setup();
+            return this;
+        }
+        /**
+         * Destroys the groups buttons, clears the internal criteria and removes it from the dom
+         */
+        Group.prototype.destroy = function () {
+            // Turn off listeners
+            this.dom.add.off('.dtsb');
+            this.dom.logic.off('.dtsb');
+            this.dom.search.off('.dtsb');
+            // Trigger event for groups at a higher level to pick up on
+            this.dom.container
+                .trigger('dtsb-destroy')
+                .remove();
+            this.s.criteria = [];
+        };
+        /**
+         * Gets the details required to rebuild the group
+         */
+        // Eslint upset at empty object but needs to be done
+        Group.prototype.getDetails = function (deFormatDates) {
+            if (deFormatDates === void 0) { deFormatDates = false; }
+            if (this.s.criteria.length === 0) {
+                return {};
+            }
+            var details = {
+                criteria: [],
+                logic: this.s.logic
+            };
+            // NOTE here crit could be either a subgroup or a criteria
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                details.criteria.push(crit.criteria.getDetails(deFormatDates));
+            }
+            return details;
+        };
+        /**
+         * Getter for the node for the container of the group
+         *
+         * @returns Node for the container of the group
+         */
+        Group.prototype.getNode = function () {
+            return this.dom.container;
+        };
+        /**
+         * Rebuilds the group based upon the details passed in
+         *
+         * @param loadedDetails the details required to rebuild the group
+         */
+        Group.prototype.rebuild = function (loadedDetails) {
+            var crit;
+            // If no criteria are stored then just return
+            if (loadedDetails.criteria === undefined ||
+                loadedDetails.criteria === null ||
+                Array.isArray(loadedDetails.criteria) && loadedDetails.criteria.length === 0) {
+                return;
+            }
+            this.s.logic = loadedDetails.logic;
+            this.dom.logic.children().first().html(this.s.logic === 'OR'
+                ? this.s.dt.i18n('searchBuilder.logicOr', this.c.i18n.logicOr)
+                : this.s.dt.i18n('searchBuilder.logicAnd', this.c.i18n.logicAnd));
+            // Add all of the criteria, be it a sub group or a criteria
+            if (Array.isArray(loadedDetails.criteria)) {
+                for (var _i = 0, _a = loadedDetails.criteria; _i < _a.length; _i++) {
+                    crit = _a[_i];
+                    if (crit.logic !== undefined) {
+                        this._addPrevGroup(crit);
+                    }
+                    else if (crit.logic === undefined) {
+                        this._addPrevCriteria(crit);
+                    }
+                }
+            }
+            // For all of the criteria children, update the arrows incase they require changing and set the listeners
+            for (var _b = 0, _c = this.s.criteria; _b < _c.length; _b++) {
+                crit = _c[_b];
+                if (crit.criteria instanceof Criteria) {
+                    crit.criteria.updateArrows(this.s.criteria.length > 1);
+                    this._setCriteriaListeners(crit.criteria);
+                }
+            }
+        };
+        /**
+         * Redraws the Contents of the searchBuilder Groups and Criteria
+         */
+        Group.prototype.redrawContents = function () {
+            if (this.s.preventRedraw) {
+                return;
+            }
+            // Clear the container out and add the basic elements
+            this.dom.container.children().detach();
+            this.dom.container
+                .append(this.dom.logicContainer)
+                .append(this.dom.add);
+            if (!this.c.liveSearch) {
+                this.dom.container.append(this.dom.search);
+            }
+            // Sort the criteria by index so that they appear in the correct order
+            this.s.criteria.sort(function (a, b) {
+                if (a.criteria.s.index < b.criteria.s.index) {
+                    return -1;
+                }
+                else if (a.criteria.s.index > b.criteria.s.index) {
+                    return 1;
+                }
+                return 0;
+            });
+            this.setListeners();
+            for (var i = 0; i < this.s.criteria.length; i++) {
+                var crit = this.s.criteria[i].criteria;
+                if (crit instanceof Criteria) {
+                    // Reset the index to the new value
+                    this.s.criteria[i].index = i;
+                    this.s.criteria[i].criteria.s.index = i;
+                    // Add to the group
+                    this.s.criteria[i].criteria.dom.container.insertBefore(this.dom.add);
+                    // Set listeners for various points
+                    this._setCriteriaListeners(crit);
+                    this.s.criteria[i].criteria.s.preventRedraw = this.s.preventRedraw;
+                    this.s.criteria[i].criteria.rebuild(this.s.criteria[i].criteria.getDetails());
+                    this.s.criteria[i].criteria.s.preventRedraw = false;
+                }
+                else if (crit instanceof Group && crit.s.criteria.length > 0) {
+                    // Reset the index to the new value
+                    this.s.criteria[i].index = i;
+                    this.s.criteria[i].criteria.s.index = i;
+                    // Add the sub group to the group
+                    this.s.criteria[i].criteria.dom.container.insertBefore(this.dom.add);
+                    // Redraw the contents of the group
+                    crit.s.preventRedraw = this.s.preventRedraw;
+                    crit.redrawContents();
+                    crit.s.preventRedraw = false;
+                    this._setGroupListeners(crit);
+                }
+                else {
+                    // The group is empty so remove it
+                    this.s.criteria.splice(i, 1);
+                    i--;
+                }
+            }
+            this.setupLogic();
+        };
+        /**
+         * Resizes the logic button only rather than the entire dom.
+         */
+        Group.prototype.redrawLogic = function () {
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                if (crit.criteria instanceof Group) {
+                    crit.criteria.redrawLogic();
+                }
+            }
+            this.setupLogic();
+        };
+        /**
+         * Search method, checking the row data against the criteria in the group
+         *
+         * @param rowData The row data to be compared
+         * @returns boolean The result of the search
+         */
+        Group.prototype.search = function (rowData, rowIdx) {
+            if (this.s.logic === 'AND') {
+                return this._andSearch(rowData, rowIdx);
+            }
+            else if (this.s.logic === 'OR') {
+                return this._orSearch(rowData, rowIdx);
+            }
+            return true;
+        };
+        /**
+         * Locates the groups logic button to the correct location on the page
+         */
+        Group.prototype.setupLogic = function () {
+            // Remove logic button
+            this.dom.logicContainer.remove();
+            this.dom.clear.remove();
+            // If there are no criteria in the group then keep the logic removed and return
+            if (this.s.criteria.length < 1) {
+                if (!this.s.isChild) {
+                    this.dom.container.trigger('dtsb-destroy');
+                    // Set criteria left margin
+                    this.dom.container.css('margin-left', 0);
+                }
+                this.dom.search.css('display', 'none');
+                return;
+            }
+            this.dom.clear.height('0px');
+            this.dom.logicContainer.append(this.dom.clear);
+            if (!this.s.isChild) {
+                this.dom.search.css('display', 'inline-block');
+            }
+            // Prepend logic button
+            this.dom.container.prepend(this.dom.logicContainer);
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                if (crit.criteria instanceof Criteria) {
+                    crit.criteria.setupButtons();
+                }
+            }
+            // Set width, take 2 for the border
+            var height = this.dom.container.outerHeight() - 1;
+            this.dom.logicContainer.width(height);
+            this._setLogicListener();
+            // Set criteria left margin
+            this.dom.container.css('margin-left', this.dom.logicContainer.outerHeight(true));
+            var logicOffset = this.dom.logicContainer.offset();
+            // Set horizontal alignment
+            var currentLeft = logicOffset.left;
+            var groupLeft = this.dom.container.offset().left;
+            var shuffleLeft = currentLeft - groupLeft;
+            var newPos = currentLeft - shuffleLeft - this.dom.logicContainer.outerHeight(true);
+            this.dom.logicContainer.offset({ left: newPos });
+            // Set vertical alignment
+            var firstCrit = this.dom.logicContainer.next();
+            var currentTop = logicOffset.top;
+            var firstTop = $$2(firstCrit).offset().top;
+            var shuffleTop = currentTop - firstTop;
+            var newTop = currentTop - shuffleTop;
+            this.dom.logicContainer.offset({ top: newTop });
+            this.dom.clear.outerHeight(this.dom.logicContainer.height());
+            this._setClearListener();
+        };
+        /**
+         * Sets listeners on the groups elements
+         */
+        Group.prototype.setListeners = function () {
+            var _this = this;
+            this.dom.add.unbind('click');
+            this.dom.add.on('click.dtsb', function () {
+                // If this is the parent group then the logic button has not been added yet
+                if (!_this.s.isChild) {
+                    _this.dom.container.prepend(_this.dom.logicContainer);
+                }
+                _this.addCriteria();
+                _this.dom.container.trigger('dtsb-add');
+                _this.s.dt.state.save();
+                return false;
+            });
+            this.dom.search
+                .off('click.dtsb')
+                .on('click.dtsb', function () {
+                _this.s.dt.draw();
+            });
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                crit.criteria.setListeners();
+            }
+            this._setClearListener();
+            this._setLogicListener();
+        };
+        /**
+         * Adds a criteria to the group
+         *
+         * @param crit Instance of Criteria to be added to the group
+         */
+        Group.prototype.addCriteria = function (crit) {
+            if (crit === void 0) { crit = null; }
+            var index = crit === null ? this.s.criteria.length : crit.s.index;
+            var criteria = new Criteria(this.s.dt, this.s.opts, this.s.topGroup, index, this.s.depth, this.s.serverData, this.c.liveSearch);
+            // If a Criteria has been passed in then set the values to continue that
+            if (crit !== null) {
+                criteria.c = crit.c;
+                criteria.s = crit.s;
+                criteria.s.depth = this.s.depth;
+                criteria.classes = crit.classes;
+            }
+            criteria.populate();
+            var inserted = false;
+            for (var i = 0; i < this.s.criteria.length; i++) {
+                if (i === 0 && this.s.criteria[i].criteria.s.index > criteria.s.index) {
+                    // Add the node for the criteria at the start of the group
+                    criteria.getNode().insertBefore(this.s.criteria[i].criteria.dom.container);
+                    inserted = true;
+                }
+                else if (i < this.s.criteria.length - 1 &&
+                    this.s.criteria[i].criteria.s.index < criteria.s.index &&
+                    this.s.criteria[i + 1].criteria.s.index > criteria.s.index) {
+                    // Add the node for the criteria in the correct location
+                    criteria.getNode().insertAfter(this.s.criteria[i].criteria.dom.container);
+                    inserted = true;
+                }
+            }
+            if (!inserted) {
+                criteria.getNode().insertBefore(this.dom.add);
+            }
+            // Add the details for this criteria to the array
+            this.s.criteria.push({
+                criteria: criteria,
+                index: index
+            });
+            this.s.criteria = this.s.criteria.sort(function (a, b) { return a.criteria.s.index - b.criteria.s.index; });
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var opt = _a[_i];
+                if (opt.criteria instanceof Criteria) {
+                    opt.criteria.updateArrows(this.s.criteria.length > 1);
+                }
+            }
+            this._setCriteriaListeners(criteria);
+            criteria.setListeners();
+            this.setupLogic();
+        };
+        /**
+         * Checks the group to see if it has any filled criteria
+         */
+        Group.prototype.checkFilled = function () {
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                if (crit.criteria instanceof Criteria && crit.criteria.s.filled ||
+                    crit.criteria instanceof Group && crit.criteria.checkFilled()) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        /**
+         * Gets the count for the number of criteria in this group and any sub groups
+         */
+        Group.prototype.count = function () {
+            var count = 0;
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                if (crit.criteria instanceof Group) {
+                    count += crit.criteria.count();
+                }
+                else {
+                    count++;
+                }
+            }
+            return count;
+        };
+        /**
+         * Rebuilds a sub group that previously existed
+         *
+         * @param loadedGroup The details of a group within this group
+         */
+        Group.prototype._addPrevGroup = function (loadedGroup) {
+            var idx = this.s.criteria.length;
+            var group = new Group(this.s.dt, this.c, this.s.topGroup, idx, true, this.s.depth + 1, this.s.serverData);
+            // Add the new group to the criteria array
+            this.s.criteria.push({
+                criteria: group,
+                index: idx,
+                logic: group.s.logic
+            });
+            // Rebuild it with the previous conditions for that group
+            group.rebuild(loadedGroup);
+            this.s.criteria[idx].criteria = group;
+            this.s.topGroup.trigger('dtsb-redrawContents');
+            this._setGroupListeners(group);
+        };
+        /**
+         * Rebuilds a criteria of this group that previously existed
+         *
+         * @param loadedCriteria The details of a criteria within the group
+         */
+        Group.prototype._addPrevCriteria = function (loadedCriteria) {
+            var idx = this.s.criteria.length;
+            var criteria = new Criteria(this.s.dt, this.s.opts, this.s.topGroup, idx, this.s.depth, this.s.serverData);
+            criteria.populate();
+            // Add the new criteria to the criteria array
+            this.s.criteria.push({
+                criteria: criteria,
+                index: idx
+            });
+            // Rebuild it with the previous conditions for that criteria
+            criteria.s.preventRedraw = this.s.preventRedraw;
+            criteria.rebuild(loadedCriteria);
+            criteria.s.preventRedraw = false;
+            this.s.criteria[idx].criteria = criteria;
+            if (!this.s.preventRedraw) {
+                this.s.topGroup.trigger('dtsb-redrawContents');
+            }
+        };
+        /**
+         * Checks And the criteria using AND logic
+         *
+         * @param rowData The row data to be checked against the search criteria
+         * @returns boolean The result of the AND search
+         */
+        Group.prototype._andSearch = function (rowData, rowIdx) {
+            // If there are no criteria then return true for this group
+            if (this.s.criteria.length === 0) {
+                return true;
+            }
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                // If the criteria is not complete then skip it
+                if (crit.criteria instanceof Criteria && !crit.criteria.s.filled) {
+                    continue;
+                }
+                // Otherwise if a single one fails return false
+                else if (!crit.criteria.search(rowData, rowIdx)) {
+                    return false;
+                }
+            }
+            // If we get to here then everything has passed, so return true for the group
+            return true;
+        };
+        /**
+         * Checks And the criteria using OR logic
+         *
+         * @param rowData The row data to be checked against the search criteria
+         * @returns boolean The result of the OR search
+         */
+        Group.prototype._orSearch = function (rowData, rowIdx) {
+            // If there are no criteria in the group then return true
+            if (this.s.criteria.length === 0) {
+                return true;
+            }
+            // This will check to make sure that at least one criteria in the group is complete
+            var filledfound = false;
+            for (var _i = 0, _a = this.s.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                if (crit.criteria instanceof Criteria && crit.criteria.s.filled) {
+                    // A completed criteria has been found so set the flag
+                    filledfound = true;
+                    // If the search passes then return true
+                    if (crit.criteria.search(rowData, rowIdx)) {
+                        return true;
+                    }
+                }
+                else if (crit.criteria instanceof Group && crit.criteria.checkFilled()) {
+                    filledfound = true;
+                    if (crit.criteria.search(rowData, rowIdx)) {
+                        return true;
+                    }
+                }
+            }
+            // If we get here we need to return the inverse of filledfound,
+            //  as if any have been found and we are here then none have passed
+            return !filledfound;
+        };
+        /**
+         * Removes a criteria from the group
+         *
+         * @param criteria The criteria instance to be removed
+         */
+        Group.prototype._removeCriteria = function (criteria, group) {
+            if (group === void 0) { group = false; }
+            var i;
+            // If removing a criteria and there is only then then just destroy the group
+            if (this.s.criteria.length <= 1 && this.s.isChild) {
+                this.destroy();
+            }
+            else {
+                // Otherwise splice the given criteria out and redo the indexes
+                var last = void 0;
+                for (i = 0; i < this.s.criteria.length; i++) {
+                    if (this.s.criteria[i].index === criteria.s.index &&
+                        (!group || this.s.criteria[i].criteria instanceof Group)) {
+                        last = i;
+                    }
+                }
+                // We want to remove the last element with the desired index, as its replacement will be inserted before it
+                if (last !== undefined) {
+                    this.s.criteria.splice(last, 1);
+                }
+                for (i = 0; i < this.s.criteria.length; i++) {
+                    this.s.criteria[i].index = i;
+                    this.s.criteria[i].criteria.s.index = i;
+                }
+            }
+        };
+        /**
+         * Sets the listeners in group for a criteria
+         *
+         * @param criteria The criteria for the listeners to be set on
+         */
+        Group.prototype._setCriteriaListeners = function (criteria) {
+            var _this = this;
+            criteria.dom["delete"]
+                .unbind('click')
+                .on('click.dtsb', function () {
+                _this._removeCriteria(criteria);
+                criteria.dom.container.remove();
+                for (var _i = 0, _a = _this.s.criteria; _i < _a.length; _i++) {
+                    var crit = _a[_i];
+                    if (crit.criteria instanceof Criteria) {
+                        crit.criteria.updateArrows(_this.s.criteria.length > 1);
+                    }
+                }
+                criteria.destroy();
+                _this.s.dt.draw();
+                _this.s.topGroup.trigger('dtsb-redrawContents');
+                return false;
+            });
+            criteria.dom.right
+                .unbind('click')
+                .on('click.dtsb', function () {
+                var idx = criteria.s.index;
+                var group = new Group(_this.s.dt, _this.s.opts, _this.s.topGroup, criteria.s.index, true, _this.s.depth + 1, _this.s.serverData);
+                // Add the criteria that is to be moved to the new group
+                group.addCriteria(criteria);
+                // Update the details in the current groups criteria array
+                _this.s.criteria[idx].criteria = group;
+                _this.s.criteria[idx].logic = 'AND';
+                _this.s.topGroup.trigger('dtsb-redrawContents');
+                _this._setGroupListeners(group);
+                return false;
+            });
+            criteria.dom.left
+                .unbind('click')
+                .on('click.dtsb', function () {
+                _this.s.toDrop = new Criteria(_this.s.dt, _this.s.opts, _this.s.topGroup, criteria.s.index, undefined, _this.s.serverData);
+                _this.s.toDrop.s = criteria.s;
+                _this.s.toDrop.c = criteria.c;
+                _this.s.toDrop.classes = criteria.classes;
+                _this.s.toDrop.populate();
+                // The dropCriteria event mutates the reference to the index so need to store it
+                var index = _this.s.toDrop.s.index;
+                _this.dom.container.trigger('dtsb-dropCriteria');
+                criteria.s.index = index;
+                _this._removeCriteria(criteria);
+                // By tracking the top level group we can directly trigger a redraw on it,
+                //  bubbling is also possible, but that is slow with deep levelled groups
+                _this.s.topGroup.trigger('dtsb-redrawContents');
+                _this.s.dt.draw();
+                return false;
+            });
+        };
+        /**
+         * Set's the listeners for the group clear button
+         */
+        Group.prototype._setClearListener = function () {
+            var _this = this;
+            this.dom.clear
+                .unbind('click')
+                .on('click.dtsb', function () {
+                if (!_this.s.isChild) {
+                    _this.dom.container.trigger('dtsb-clearContents');
+                    return false;
+                }
+                _this.destroy();
+                _this.s.topGroup.trigger('dtsb-redrawContents');
+                return false;
+            });
+        };
+        /**
+         * Sets listeners for sub groups of this group
+         *
+         * @param group The sub group that the listeners are to be set on
+         */
+        Group.prototype._setGroupListeners = function (group) {
+            var _this = this;
+            // Set listeners for the new group
+            group.dom.add
+                .unbind('click')
+                .on('click.dtsb', function () {
+                _this.setupLogic();
+                _this.dom.container.trigger('dtsb-add');
+                return false;
+            });
+            group.dom.container
+                .unbind('dtsb-add')
+                .on('dtsb-add.dtsb', function () {
+                _this.setupLogic();
+                _this.dom.container.trigger('dtsb-add');
+                return false;
+            });
+            group.dom.container
+                .unbind('dtsb-destroy')
+                .on('dtsb-destroy.dtsb', function () {
+                _this._removeCriteria(group, true);
+                group.dom.container.remove();
+                _this.setupLogic();
+                return false;
+            });
+            group.dom.container
+                .unbind('dtsb-dropCriteria')
+                .on('dtsb-dropCriteria.dtsb', function () {
+                var toDrop = group.s.toDrop;
+                toDrop.s.index = group.s.index;
+                toDrop.updateArrows(_this.s.criteria.length > 1);
+                _this.addCriteria(toDrop);
+                return false;
+            });
+            group.setListeners();
+        };
+        /**
+         * Sets up the Group instance, setting listeners and appending elements
+         */
+        Group.prototype._setup = function () {
+            this.setListeners();
+            this.dom.add.html(this.s.dt.i18n('searchBuilder.add', this.c.i18n.add));
+            this.dom.search.html(this.s.dt.i18n('searchBuilder.search', this.c.i18n.search));
+            this.dom.logic.children().first().html(this.c.logic === 'OR'
+                ? this.s.dt.i18n('searchBuilder.logicOr', this.c.i18n.logicOr)
+                : this.s.dt.i18n('searchBuilder.logicAnd', this.c.i18n.logicAnd));
+            this.s.logic = this.c.logic === 'OR' ? 'OR' : 'AND';
+            if (this.c.greyscale) {
+                this.dom.logic.addClass(this.classes.greyscale);
+            }
+            this.dom.logicContainer.append(this.dom.logic).append(this.dom.clear);
+            // Only append the logic button immediately if this is a sub group,
+            //  otherwise it will be prepended later when adding a criteria
+            if (this.s.isChild) {
+                this.dom.container.append(this.dom.logicContainer);
+            }
+            this.dom.container.append(this.dom.add);
+            if (!this.c.liveSearch) {
+                this.dom.container.append(this.dom.search);
+            }
+        };
+        /**
+         * Sets the listener for the logic button
+         */
+        Group.prototype._setLogicListener = function () {
+            var _this = this;
+            this.dom.logic
+                .unbind('click')
+                .on('click.dtsb', function () {
+                _this._toggleLogic();
+                _this.s.dt.draw();
+                for (var _i = 0, _a = _this.s.criteria; _i < _a.length; _i++) {
+                    var crit = _a[_i];
+                    crit.criteria.setListeners();
+                }
+            });
+        };
+        /**
+         * Toggles the logic for the group
+         */
+        Group.prototype._toggleLogic = function () {
+            if (this.s.logic === 'OR') {
+                this.s.logic = 'AND';
+                this.dom.logic.children().first().html(this.s.dt.i18n('searchBuilder.logicAnd', this.c.i18n.logicAnd));
+            }
+            else if (this.s.logic === 'AND') {
+                this.s.logic = 'OR';
+                this.dom.logic.children().first().html(this.s.dt.i18n('searchBuilder.logicOr', this.c.i18n.logicOr));
+            }
+        };
+        Group.version = '1.1.0';
+        Group.classes = {
+            add: 'dtsb-add',
+            button: 'dtsb-button',
+            clearGroup: 'dtsb-clearGroup',
+            greyscale: 'dtsb-greyscale',
+            group: 'dtsb-group',
+            inputButton: 'dtsb-iptbtn',
+            logic: 'dtsb-logic',
+            logicContainer: 'dtsb-logicContainer',
+            search: 'dtsb-search'
+        };
+        Group.defaults = {
+            columns: true,
+            conditions: {
+                'date': Criteria.dateConditions,
+                'html': Criteria.stringConditions,
+                'html-num': Criteria.numConditions,
+                'html-num-fmt': Criteria.numFmtConditions,
+                'luxon': Criteria.luxonDateConditions,
+                'moment': Criteria.momentDateConditions,
+                'num': Criteria.numConditions,
+                'num-fmt': Criteria.numFmtConditions,
+                'string': Criteria.stringConditions
+            },
+            depthLimit: false,
+            enterSearch: false,
+            filterChanged: undefined,
+            greyscale: false,
+            liveSearch: true,
+            i18n: {
+                add: 'Add Condition',
+                button: {
+                    0: 'Search Builder',
+                    _: 'Search Builder (%d)'
+                },
+                clearAll: 'Clear All',
+                condition: 'Condition',
+                data: 'Data',
+                "delete": '&times',
+                deleteTitle: 'Delete filtering rule',
+                left: '<',
+                leftTitle: 'Outdent criteria',
+                logicAnd: 'And',
+                logicOr: 'Or',
+                right: '>',
+                rightTitle: 'Indent criteria',
+                search: 'Search',
+                title: {
+                    0: 'Custom Search Builder',
+                    _: 'Custom Search Builder (%d)'
+                },
+                value: 'Value',
+                valueJoiner: 'and'
+            },
+            logic: 'AND',
+            orthogonal: {
+                display: 'display',
+                search: 'filter'
+            },
+            preDefined: false
+        };
+        return Group;
+    }());
+
+    var $$1;
+    var dataTable$1;
+    /**
+     * Sets the value of jQuery for use in the file
+     *
+     * @param jq the instance of jQuery to be set
+     */
+    function setJQuery(jq) {
+        $$1 = jq;
+        dataTable$1 = jq.fn.DataTable;
+    }
+    /**
+     * SearchBuilder class for DataTables.
+     * Allows for complex search queries to be constructed and implemented on a DataTable
+     */
+    var SearchBuilder = /** @class */ (function () {
+        function SearchBuilder(builderSettings, opts) {
+            var _this = this;
+            // Check that the required version of DataTables is included
+            if (!dataTable$1 || !dataTable$1.versionCheck || !dataTable$1.versionCheck('2')) {
+                throw new Error('SearchBuilder requires DataTables 2 or newer');
+            }
+            var table = new dataTable$1.Api(builderSettings);
+            this.classes = $$1.extend(true, {}, SearchBuilder.classes);
+            // Get options from user
+            this.c = $$1.extend(true, {}, SearchBuilder.defaults, opts);
+            this.dom = {
+                clearAll: $$1('<button type="button">' + table.i18n('searchBuilder.clearAll', this.c.i18n.clearAll) + '</button>')
+                    .addClass(this.classes.clearAll)
+                    .addClass(this.classes.button)
+                    .attr('type', 'button'),
+                container: $$1('<div/>')
+                    .addClass(this.classes.container),
+                title: $$1('<div/>')
+                    .addClass(this.classes.title),
+                titleRow: $$1('<div/>')
+                    .addClass(this.classes.titleRow),
+                topGroup: undefined
+            };
+            this.s = {
+                dt: table,
+                opts: opts,
+                search: undefined,
+                serverData: undefined,
+                topGroup: undefined
+            };
+            // If searchbuilder is already defined for this table then return
+            if (table.settings()[0]._searchBuilder !== undefined) {
+                return;
+            }
+            table.settings()[0]._searchBuilder = this;
+            // If using SSP we want to include the previous state in the very first server call
+            if (this.s.dt.page.info().serverSide) {
+                this.s.dt.on('preXhr.dtsb', function (e, settings, data) {
+                    var loadedState = _this.s.dt.state.loaded();
+                    if (loadedState && loadedState.searchBuilder) {
+                        data.searchBuilder = _this._collapseArray(loadedState.searchBuilder);
+                    }
+                });
+                this.s.dt.on('xhr.dtsb', function (e, settings, json) {
+                    if (json && json.searchBuilder && json.searchBuilder.options) {
+                        _this.s.serverData = json.searchBuilder.options;
+                    }
+                });
+            }
+            // Run the remaining setup when the table is initialised
+            if (this.s.dt.settings()[0]._bInitComplete) {
+                this._setUp();
+            }
+            else {
+                table.one('init.dt', function () {
+                    _this._setUp();
+                });
+            }
+            return this;
+        }
+        /**
+         * Gets the details required to rebuild the SearchBuilder as it currently is
+         */
+        // eslint upset at empty object but that is what it is
+        SearchBuilder.prototype.getDetails = function (deFormatDates) {
+            if (deFormatDates === void 0) { deFormatDates = false; }
+            return this.s.topGroup
+                ? this.s.topGroup.getDetails(deFormatDates)
+                : {};
+        };
+        /**
+         * Getter for the node of the container for the searchBuilder
+         *
+         * @returns JQuery<HTMLElement> the node of the container
+         */
+        SearchBuilder.prototype.getNode = function () {
+            return this.dom.container;
+        };
+        /**
+         * Rebuilds the SearchBuilder to a state that is provided
+         *
+         * @param details The details required to perform a rebuild
+         */
+        SearchBuilder.prototype.rebuild = function (details) {
+            this.dom.clearAll.click();
+            // If there are no details to rebuild then return
+            if (details === undefined || details === null) {
+                return this;
+            }
+            this.s.topGroup.s.preventRedraw = true;
+            this.s.topGroup.rebuild(details);
+            this.s.topGroup.s.preventRedraw = false;
+            this._checkClear();
+            this._updateTitle(this.s.topGroup.count());
+            this.s.topGroup.redrawContents();
+            this.s.dt.draw(false);
+            this.s.topGroup.setListeners();
+            return this;
+        };
+        /**
+         * Applies the defaults to preDefined criteria
+         *
+         * @param preDef the array of criteria to be processed.
+         */
+        SearchBuilder.prototype._applyPreDefDefaults = function (preDef) {
+            var _this = this;
+            if (preDef.criteria !== undefined && preDef.logic === undefined) {
+                preDef.logic = 'AND';
+            }
+            var _loop_1 = function (crit) {
+                // Apply the defaults to any further criteria
+                if (crit.criteria !== undefined) {
+                    crit = this_1._applyPreDefDefaults(crit);
+                }
+                else {
+                    this_1.s.dt.columns().every(function (index) {
+                        if (_this.s.dt.settings()[0].aoColumns[index].sTitle === crit.data) {
+                            crit.dataIdx = index;
+                        }
+                    });
+                }
+            };
+            var this_1 = this;
+            for (var _i = 0, _a = preDef.criteria; _i < _a.length; _i++) {
+                var crit = _a[_i];
+                _loop_1(crit);
+            }
+            return preDef;
+        };
+        /**
+         * Set's up the SearchBuilder
+         */
+        SearchBuilder.prototype._setUp = function (loadState) {
+            var _this = this;
+            if (loadState === void 0) { loadState = true; }
+            // Register an Api method for getting the column type. DataTables 2 has
+            // this built in
+            if (typeof this.s.dt.column().type !== 'function') {
+                DataTable.Api.registerPlural('columns().types()', 'column().type()', function () {
+                    return this.iterator('column', function (settings, column) {
+                        return settings.aoColumns[column].sType;
+                    }, 1);
+                });
+            }
+            // Check that DateTime is included, If not need to check if it could be used
+            // eslint-disable-next-line no-extra-parens
+            if (!dataTable$1.DateTime) {
+                var types = this.s.dt.columns().types().toArray();
+                if (types === undefined || types.includes(undefined) || types.includes(null)) {
+                    types = [];
+                    for (var _i = 0, _a = this.s.dt.settings()[0].aoColumns; _i < _a.length; _i++) {
+                        var colInit = _a[_i];
+                        types.push(colInit.searchBuilderType !== undefined ? colInit.searchBuilderType : colInit.sType);
+                    }
+                }
+                var columnIdxs = this.s.dt.columns().toArray();
+                // If the column type is still unknown use the internal API to detect type
+                if (types === undefined || types.includes(undefined) || types.includes(null)) {
+                    // This can only happen in DT1 - DT2 will do the invalidation of the type itself
+                    if ($$1.fn.dataTable.ext.oApi) {
+                        $$1.fn.dataTable.ext.oApi._fnColumnTypes(this.s.dt.settings()[0]);
+                    }
+                    types = this.s.dt.columns().types().toArray();
+                }
+                for (var i = 0; i < columnIdxs[0].length; i++) {
+                    var column = columnIdxs[0][i];
+                    var type = types[column];
+                    if (
+                    // Check if this column can be filtered
+                    (this.c.columns === true ||
+                        Array.isArray(this.c.columns) &&
+                            this.c.columns.includes(i)) &&
+                        // Check if the type is one of the restricted types
+                        (type.includes('date') ||
+                            type.includes('moment') ||
+                            type.includes('luxon'))) {
+                        alert('SearchBuilder Requires DateTime when used with dates.');
+                        throw new Error('SearchBuilder requires DateTime');
+                    }
+                }
+            }
+            this.s.topGroup = new Group(this.s.dt, this.c, undefined, undefined, undefined, undefined, this.s.serverData);
+            this._setClearListener();
+            this.s.dt.on('stateSaveParams.dtsb', function (e, settings, data) {
+                data.searchBuilder = _this.getDetails();
+                if (!data.scroller) {
+                    data.page = _this.s.dt.page();
+                }
+                else {
+                    data.start = _this.s.dt.state().start;
+                }
+            });
+            this.s.dt.on('stateLoadParams.dtsb', function (e, settings, data) {
+                _this.rebuild(data.searchBuilder);
+            });
+            this._build();
+            this.s.dt.on('preXhr.dtsb', function (e, settings, data) {
+                if (_this.s.dt.page.info().serverSide) {
+                    data.searchBuilder = _this._collapseArray(_this.getDetails(true));
+                }
+            });
+            this.s.dt.on('columns-reordered', function () {
+                _this.rebuild(_this.getDetails());
+            });
+            if (loadState) {
+                var loadedState = this.s.dt.state.loaded();
+                // If the loaded State is not null rebuild based on it for statesave
+                if (loadedState !== null && loadedState.searchBuilder !== undefined) {
+                    this.s.topGroup.rebuild(loadedState.searchBuilder);
+                    this.s.topGroup.dom.container.trigger('dtsb-redrawContents');
+                    // If using SSP we want to restrict the amount of server calls that take place
+                    //  and this information will already have been processed
+                    if (!this.s.dt.page.info().serverSide) {
+                        if (loadedState.page) {
+                            this.s.dt.page(loadedState.page).draw('page');
+                        }
+                        else if (this.s.dt.scroller && loadedState.scroller) {
+                            this.s.dt.scroller().scrollToRow(loadedState.scroller.topRow);
+                        }
+                    }
+                    this.s.topGroup.setListeners();
+                }
+                // Otherwise load any predefined options
+                else if (this.c.preDefined !== false) {
+                    this.c.preDefined = this._applyPreDefDefaults(this.c.preDefined);
+                    this.rebuild(this.c.preDefined);
+                }
+            }
+            this._setEmptyListener();
+            this.s.dt.state.save();
+        };
+        SearchBuilder.prototype._collapseArray = function (criteria) {
+            if (criteria.logic === undefined) {
+                if (criteria.value !== undefined) {
+                    criteria.value.sort(function (a, b) {
+                        if (!isNaN(+a)) {
+                            a = +a;
+                            b = +b;
+                        }
+                        if (a < b) {
+                            return -1;
+                        }
+                        else if (b < a) {
+                            return 1;
+                        }
+                        else {
+                            return 0;
+                        }
+                    });
+                    criteria.value1 = criteria.value[0];
+                    criteria.value2 = criteria.value[1];
+                }
+            }
+            else {
+                for (var i = 0; i < criteria.criteria.length; i++) {
+                    criteria.criteria[i] = this._collapseArray(criteria.criteria[i]);
+                }
+            }
+            return criteria;
+        };
+        /**
+         * Updates the title of the SearchBuilder
+         *
+         * @param count the number of filters in the SearchBuilder
+         */
+        SearchBuilder.prototype._updateTitle = function (count) {
+            this.dom.title.html(this.s.dt.i18n('searchBuilder.title', this.c.i18n.title, count));
+        };
+        /**
+         * Builds all of the dom elements together
+         */
+        SearchBuilder.prototype._build = function () {
+            var _this = this;
+            // Empty and setup the container
+            this.dom.clearAll.remove();
+            this.dom.container.empty();
+            var count = this.s.topGroup.count();
+            this._updateTitle(count);
+            this.dom.titleRow.append(this.dom.title);
+            this.dom.container.append(this.dom.titleRow);
+            this.dom.topGroup = this.s.topGroup.getNode();
+            this.dom.container.append(this.dom.topGroup);
+            this._setRedrawListener();
+            var tableNode = this.s.dt.table(0).node();
+            if (!$$1.fn.dataTable.ext.search.includes(this.s.search)) {
+                // Custom search function for SearchBuilder
+                this.s.search = function (settings, searchData, dataIndex) {
+                    if (settings.nTable !== tableNode) {
+                        return true;
+                    }
+                    return _this.s.topGroup.search(searchData, dataIndex);
+                };
+                // Add SearchBuilder search function to the dataTables search array
+                $$1.fn.dataTable.ext.search.push(this.s.search);
+            }
+            this.s.dt.on('destroy.dtsb', function () {
+                _this.dom.container.remove();
+                _this.dom.clearAll.remove();
+                var searchIdx = $$1.fn.dataTable.ext.search.indexOf(_this.s.search);
+                while (searchIdx !== -1) {
+                    $$1.fn.dataTable.ext.search.splice(searchIdx, 1);
+                    searchIdx = $$1.fn.dataTable.ext.search.indexOf(_this.s.search);
+                }
+                _this.s.dt.off('.dtsb');
+                $$1(_this.s.dt.table().node()).off('.dtsb');
+            });
+        };
+        /**
+         * Checks if the clearAll button should be added or not
+         */
+        SearchBuilder.prototype._checkClear = function () {
+            if (this.s.topGroup.s.criteria.length > 0) {
+                this.dom.clearAll.insertAfter(this.dom.title);
+                this._setClearListener();
+            }
+            else {
+                this.dom.clearAll.remove();
+            }
+        };
+        /**
+         * Update the count in the title/button
+         *
+         * @param count Number of filters applied
+         */
+        SearchBuilder.prototype._filterChanged = function (count) {
+            var fn = this.c.filterChanged;
+            if (typeof fn === 'function') {
+                fn(count, this.s.dt.i18n('searchBuilder.button', this.c.i18n.button, count));
+            }
+        };
+        /**
+         * Set the listener for the clear button
+         */
+        SearchBuilder.prototype._setClearListener = function () {
+            var _this = this;
+            this.dom.clearAll.unbind('click');
+            this.dom.clearAll.on('click.dtsb', function () {
+                _this.s.topGroup = new Group(_this.s.dt, _this.c, undefined, undefined, undefined, undefined, _this.s.serverData);
+                _this._build();
+                _this.s.dt.draw();
+                _this.s.topGroup.setListeners();
+                _this.dom.clearAll.remove();
+                _this._setEmptyListener();
+                _this._filterChanged(0);
+                return false;
+            });
+        };
+        /**
+         * Set the listener for the Redraw event
+         */
+        SearchBuilder.prototype._setRedrawListener = function () {
+            var _this = this;
+            this.s.topGroup.dom.container.unbind('dtsb-redrawContents');
+            this.s.topGroup.dom.container.on('dtsb-redrawContents.dtsb', function () {
+                _this._checkClear();
+                _this.s.topGroup.redrawContents();
+                _this.s.topGroup.setupLogic();
+                _this._setEmptyListener();
+                var count = _this.s.topGroup.count();
+                _this._updateTitle(count);
+                _this._filterChanged(count);
+                // If using SSP we want to restrict the amount of server calls that take place
+                //  and this information will already have been processed
+                if (!_this.s.dt.page.info().serverSide) {
+                    _this.s.dt.draw();
+                }
+                _this.s.dt.state.save();
+            });
+            this.s.topGroup.dom.container.unbind('dtsb-redrawContents-noDraw');
+            this.s.topGroup.dom.container.on('dtsb-redrawContents-noDraw.dtsb', function () {
+                _this._checkClear();
+                _this.s.topGroup.s.preventRedraw = true;
+                _this.s.topGroup.redrawContents();
+                _this.s.topGroup.s.preventRedraw = false;
+                _this.s.topGroup.setupLogic();
+                _this._setEmptyListener();
+                var count = _this.s.topGroup.count();
+                _this._updateTitle(count);
+                _this._filterChanged(count);
+            });
+            this.s.topGroup.dom.container.unbind('dtsb-redrawLogic');
+            this.s.topGroup.dom.container.on('dtsb-redrawLogic.dtsb', function () {
+                _this.s.topGroup.redrawLogic();
+                var count = _this.s.topGroup.count();
+                _this._updateTitle(count);
+                _this._filterChanged(count);
+            });
+            this.s.topGroup.dom.container.unbind('dtsb-add');
+            this.s.topGroup.dom.container.on('dtsb-add.dtsb', function () {
+                var count = _this.s.topGroup.count();
+                _this._updateTitle(count);
+                _this._filterChanged(count);
+                _this._checkClear();
+            });
+            this.s.dt.on('postEdit.dtsb postCreate.dtsb postRemove.dtsb', function () {
+                _this.s.topGroup.redrawContents();
+            });
+            this.s.topGroup.dom.container.unbind('dtsb-clearContents');
+            this.s.topGroup.dom.container.on('dtsb-clearContents.dtsb', function () {
+                _this._setUp(false);
+                _this._filterChanged(0);
+                _this.s.dt.draw();
+            });
+        };
+        /**
+         * Sets listeners to check whether clearAll should be added or removed
+         */
+        SearchBuilder.prototype._setEmptyListener = function () {
+            var _this = this;
+            this.s.topGroup.dom.add.on('click.dtsb', function () {
+                _this._checkClear();
+            });
+            this.s.topGroup.dom.container.on('dtsb-destroy.dtsb', function () {
+                _this.dom.clearAll.remove();
+            });
+        };
+        SearchBuilder.version = '1.8.1';
+        SearchBuilder.classes = {
+            button: 'dtsb-button',
+            clearAll: 'dtsb-clearAll',
+            container: 'dtsb-searchBuilder',
+            inputButton: 'dtsb-iptbtn',
+            title: 'dtsb-title',
+            titleRow: 'dtsb-titleRow'
+        };
+        SearchBuilder.defaults = {
+            columns: true,
+            conditions: {
+                'date': Criteria.dateConditions,
+                'html': Criteria.stringConditions,
+                'html-num': Criteria.numConditions,
+                'html-num-fmt': Criteria.numFmtConditions,
+                'luxon': Criteria.luxonDateConditions,
+                'moment': Criteria.momentDateConditions,
+                'num': Criteria.numConditions,
+                'num-fmt': Criteria.numFmtConditions,
+                'string': Criteria.stringConditions
+            },
+            depthLimit: false,
+            enterSearch: false,
+            filterChanged: undefined,
+            greyscale: false,
+            liveSearch: true,
+            i18n: {
+                add: 'Add Condition',
+                button: {
+                    0: 'Search Builder',
+                    _: 'Search Builder (%d)'
+                },
+                clearAll: 'Clear All',
+                condition: 'Condition',
+                conditions: {
+                    array: {
+                        contains: 'Contains',
+                        empty: 'Empty',
+                        equals: 'Equals',
+                        not: 'Not',
+                        notEmpty: 'Not Empty',
+                        without: 'Without'
+                    },
+                    date: {
+                        after: 'After',
+                        before: 'Before',
+                        between: 'Between',
+                        empty: 'Empty',
+                        equals: 'Equals',
+                        not: 'Not',
+                        notBetween: 'Not Between',
+                        notEmpty: 'Not Empty'
+                    },
+                    // eslint-disable-next-line id-blacklist
+                    number: {
+                        between: 'Between',
+                        empty: 'Empty',
+                        equals: 'Equals',
+                        gt: 'Greater Than',
+                        gte: 'Greater Than Equal To',
+                        lt: 'Less Than',
+                        lte: 'Less Than Equal To',
+                        not: 'Not',
+                        notBetween: 'Not Between',
+                        notEmpty: 'Not Empty'
+                    },
+                    // eslint-disable-next-line id-blacklist
+                    string: {
+                        contains: 'Contains',
+                        empty: 'Empty',
+                        endsWith: 'Ends With',
+                        equals: 'Equals',
+                        not: 'Not',
+                        notContains: 'Does Not Contain',
+                        notEmpty: 'Not Empty',
+                        notEndsWith: 'Does Not End With',
+                        notStartsWith: 'Does Not Start With',
+                        startsWith: 'Starts With'
+                    }
+                },
+                data: 'Data',
+                "delete": '&times',
+                deleteTitle: 'Delete filtering rule',
+                left: '<',
+                leftTitle: 'Outdent criteria',
+                logicAnd: 'And',
+                logicOr: 'Or',
+                right: '>',
+                rightTitle: 'Indent criteria',
+                search: 'Search',
+                title: {
+                    0: 'Custom Search Builder',
+                    _: 'Custom Search Builder (%d)'
+                },
+                value: 'Value',
+                valueJoiner: 'and'
+            },
+            logic: 'AND',
+            orthogonal: {
+                display: 'display',
+                search: 'filter'
+            },
+            preDefined: false
+        };
+        return SearchBuilder;
+    }());
+
+    /*! SearchBuilder 1.8.1
+     * ©SpryMedia Ltd - datatables.net/license/mit
+     */
+    setJQuery($);
+    setJQuery$1($);
+    setJQuery$2($);
+    var dataTable = $.fn.dataTable;
+    // eslint-disable-next-line no-extra-parens
+    DataTable.SearchBuilder = SearchBuilder;
+    // eslint-disable-next-line no-extra-parens
+    dataTable.SearchBuilder = SearchBuilder;
+    // eslint-disable-next-line no-extra-parens
+    DataTable.Group = Group;
+    // eslint-disable-next-line no-extra-parens
+    dataTable.Group = Group;
+    // eslint-disable-next-line no-extra-parens
+    DataTable.Criteria = Criteria;
+    // eslint-disable-next-line no-extra-parens
+    dataTable.Criteria = Criteria;
+    // eslint-disable-next-line no-extra-parens
+    var apiRegister = DataTable.Api.register;
+    // Set up object for plugins
+    DataTable.ext.searchBuilder = {
+        conditions: {}
+    };
+    DataTable.ext.buttons.searchBuilder = {
+        action: function (e, dt, node, config) {
+            this.popover(config._searchBuilder.getNode(), {
+                align: 'container',
+                span: 'container'
+            });
+            var topGroup = config._searchBuilder.s.topGroup;
+            // Need to redraw the contents to calculate the correct positions for the elements
+            if (topGroup !== undefined) {
+                topGroup.dom.container.trigger('dtsb-redrawContents-noDraw');
+            }
+            if (topGroup.s.criteria.length === 0) {
+                $('.' + $.fn.dataTable.Group.classes.add.replace(/ /g, '.')).click();
+            }
+        },
+        config: {},
+        init: function (dt, node, config) {
+            var that = this;
+            var sb = new DataTable.SearchBuilder(dt, config.config);
+            dt.on('draw', function () {
+                var count = sb.s.topGroup
+                    ? sb.s.topGroup.count()
+                    : 0;
+                that.text(dt.i18n('searchBuilder.button', sb.c.i18n.button, count));
+            });
+            that.text(config.text || dt.i18n('searchBuilder.button', sb.c.i18n.button, 0));
+            config._searchBuilder = sb;
+        },
+        text: null
+    };
+    apiRegister('searchBuilder.getDetails()', function (deFormatDates) {
+        if (deFormatDates === void 0) { deFormatDates = false; }
+        var ctx = this.context[0];
+        // If SearchBuilder has not been initialised on this instance then return
+        return ctx._searchBuilder ?
+            ctx._searchBuilder.getDetails(deFormatDates) :
+            null;
+    });
+    apiRegister('searchBuilder.rebuild()', function (details) {
+        var ctx = this.context[0];
+        // If SearchBuilder has not been initialised on this instance then return
+        if (ctx._searchBuilder === undefined) {
+            return null;
+        }
+        ctx._searchBuilder.rebuild(details);
+        return this;
+    });
+    apiRegister('searchBuilder.container()', function () {
+        var ctx = this.context[0];
+        // If SearchBuilder has not been initialised on this instance then return
+        return ctx._searchBuilder ?
+            ctx._searchBuilder.getNode() :
+            null;
+    });
+    /**
+     * Init function for SearchBuilder
+     *
+     * @param settings the settings to be applied
+     * @param options the options for SearchBuilder
+     * @returns JQUERY<HTMLElement> Returns the node of the SearchBuilder
+     */
+    function _init(settings, options) {
+        var api = new DataTable.Api(settings);
+        var opts = options
+            ? options
+            : api.init().searchBuilder || DataTable.defaults.searchBuilder;
+        var searchBuilder = new SearchBuilder(api, opts);
+        var node = searchBuilder.getNode();
+        return node;
+    }
+    // Attach a listener to the document which listens for DataTables initialisation
+    // events so we can automatically initialise
+    $(document).on('preInit.dt.dtsp', function (e, settings) {
+        if (e.namespace !== 'dt') {
+            return;
+        }
+        if (settings.oInit.searchBuilder ||
+            DataTable.defaults.searchBuilder) {
+            if (!settings._searchBuilder) {
+                _init(settings);
+            }
+        }
+    });
+    // DataTables `dom` feature option
+    DataTable.ext.feature.push({
+        cFeature: 'Q',
+        fnInit: _init
+    });
+    // DataTables 2 layout feature
+    if (DataTable.feature) {
+        DataTable.feature.register('searchBuilder', _init);
+    }
+
+})();
+
+
+return DataTable;
+}));
+
+
+/*! Bootstrap 5 ui integration for DataTables' SearchBuilder
+ * © SpryMedia Ltd - datatables.net/license
+ */
+
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net-bs5', 'datatables.net-searchbuilder'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net-bs5')(root, $);
+			}
+
+			if ( ! $.fn.dataTable.SearchBuilder ) {
+				require('datatables.net-searchbuilder')(root, $);
+			}
+		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
+
+
+$.extend(true, DataTable.SearchBuilder.classes, {
+    clearAll: 'btn btn-secondary dtsb-clearAll'
+});
+$.extend(true, DataTable.Group.classes, {
+    add: 'btn btn-secondary dtsb-add',
+    clearGroup: 'btn btn-secondary dtsb-clearGroup',
+    logic: 'btn btn-secondary dtsb-logic',
+    search: 'btn btn-secondary dtsb-search'
+});
+$.extend(true, DataTable.Criteria.classes, {
+    condition: 'form-select dtsb-condition',
+    data: 'dtsb-data form-select',
+    "delete": 'btn btn-secondary dtsb-delete',
+    input: 'form-control dtsb-input',
+    left: 'btn btn-secondary dtsb-left',
+    right: 'btn btn-secondary dtsb-right',
+    select: 'form-select',
+    value: 'dtsb-value'
 });
 
 

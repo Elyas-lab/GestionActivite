@@ -22,7 +22,7 @@ final class SourceDemandeController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des sources de demande',
-            [['name' => 'Sources de demande', 'route' => 'app_source_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Sources de demande', 'route' => 'app_source_index']]
         );
 
         return $this->render('referentiel/source_demande/index.html.twig', [
@@ -50,7 +50,7 @@ final class SourceDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer une source de demande',
             [
-                ['name' => 'Sources de demande', 'route' => 'app_source_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Sources de demande', 'route' => 'app_source_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -67,7 +67,7 @@ final class SourceDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails de la source de demande : {$sourceDemande->getNom()}",
             [
-                ['name' => 'Sources de demande', 'route' => 'app_source_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Sources de demande', 'route' => 'app_source_index'],
                 ['name' => "Source de demande : {$sourceDemande->getNom()}", 'route' => null],
             ]
         );
@@ -95,7 +95,7 @@ final class SourceDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier la source de demande : {$sourceDemande->getNom()}",
             [
-                ['name' => 'Sources de demande', 'route' => 'app_source_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Sources de demande', 'route' => 'app_source_index'],
                 ['name' => "Modifier : {$sourceDemande->getNom()}", 'route' => null],
             ]
         );

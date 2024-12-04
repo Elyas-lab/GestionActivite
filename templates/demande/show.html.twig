@@ -21,7 +21,7 @@
             </tr>
             <tr>
                 <th>Date_insertion</th>
-                <td>{{ demande.date_creation|date('d-m-Y H:i:s') }}</td>
+                <td>{{ demande.getDateCreation()|date('d/M/Y ') }}</td>
             </tr>
         </tbody>
     </table>

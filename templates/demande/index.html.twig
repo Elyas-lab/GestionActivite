@@ -4,123 +4,104 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap5.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap5.min.css">
 {% endblock %}
 
 {% block main %}
-    <h1>Liste des Demandes</h1>
-
-    <a href="{{ path('app_demande_new') }}" class="btn btn-primary mb-3">Ajouter</a>
-
-    <form id="search-form" action="{{ path('app_demande_index') }}" method="get" class="mb-3">
-        <div class="row">
-            <div class="col-md-4">
-                <label for="search" class="form-label">Recherche:</label>
-                <input type="text" id="search" name="search" class="form-control" value="{{ app.request.query.get('search') }}" placeholder="Rechercher...">
-            </div>
-            <div class="col-md-3">
-                <label for="type" class="form-label">Type:</label>
-                <select id="type" name="type" class="form-select">
-                    <option value="">Tous les types</option>
-                    {# Add options for types #}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="status" class="form-label">Statut:</label>
-                <select id="status" name="status" class="form-select">
-                    <option value="">Tous les statuts</option>
-                    {# Add options for statuses #}
-                </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Rechercher</button>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Liste des Demandes</h3>
+            <a href="{{ path('app_demande_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter
+            </a>
         </div>
-    </form>
-
-    <table id="demande-table" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
-        <thead>
-            <tr>
-                <th>Numéro</th>
-                <th>Titre</th>
-                <th>Description</th>
-                <th>Date d'insertion</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-    </table>
+        <div class="card-body">
+            <table id="demandeTable" class="table table-striped table-bordered dt-responsive" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Titre</th>
+                        <th>Description</th>
+                        <th>Date d'insertion</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for demande in demandes %}
+                    <tr>
+                        <td>{{ demande.id }}</td>
+                        <td>{{ demande.titre }}</td>
+                        <td>{{ demande.description|slice(0, 50) }}{% if demande.description|length > 50 %}...{% endif %}</td>
+                        <td>{{ demande.getDateCreation()|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <span class="badge {% if demande.statut == 'En cours' %}bg-warning{% elseif demande.statut == 'Terminé' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ demande.statut.nom }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('app_demande_show', {'id': demande.id}) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>Details
+                                </a>
+                                <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>Modifier
+                                </a>
+                                <button class="btn btn-sm btn-danger delete-demande" data-id="{{ demande.id }}">
+                                    <i class="fas fa-trash"></i>Supprimer
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-        <script type="module">
-        // import $ from 'jquery';
-        if (typeof window.jQuery === 'undefined') {
-            window.$ = window.jQuery = $;
-        }
+{{ parent() }}
+<script type="module">
+    import $ from 'jquery';
+
+    // Ensure jQuery is available if not already loaded
+    if (typeof window.jQuery === 'undefined') {
+        window.$ = window.jQuery = $;
+    }
     $(document).ready(function() {
-        var table = $('#demande-table').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "responsive": true,
-            "ajax": {
-                "url": "{{ path('app_demande_data') }}",
-                "type": "POST",
-                "data": function(d) {
-                    d.search = $('#search').val();
-                    d.type = $('#type').val();
-                    d.status = $('#status').val();
-                }
+        $('#demandeTable').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
             },
-            "columns": [
-                {"data": "id"},
-                {"data": "titre"},
-                {"data": "description"},
-                {"data": "dateCreation"},
-                {"data": "actions", "orderable": false, "searchable": false}
+            columns: [
+                { orderable: true },
+                { orderable: true },
+                { orderable: false },
+                { orderable: true },
+                { orderable: true },
+                { orderable: false }
             ],
-            "order": [[0, "desc"]],
-            "pageLength": 10,
-            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
-            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                   "<'row'<'col-sm-12'tr>>" +
-                   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            "buttons": [
-                'copy', 'csv', 'excel', 'pdf', 'print', 'colvis'
-            ],
-            "language": {
-                "emptyTable": "Aucun résultat trouvé",
-                "lengthMenu": "Afficher _MENU_ demandes par page",
-                "zeroRecords": "Aucune demande trouvée",
-                "info": "Affichage de _START_ à _END_ sur _TOTAL_ demandes",
-                "infoEmpty": "Aucune demande disponible",
-                "infoFiltered": "(filtré parmi _MAX_ demandes totales)",
-                "search": "Rechercher:",
-                "paginate": {
-                    "first": "Premier",
-                    "last": "Dernier",
-                    "next": "Suivant",
-                    "previous": "Précédent"
-                },
-                "buttons": {
-                    "copy": "Copier",
-                    "print": "Imprimer",
-                    "colvis": "Colonnes visibles"
-                }
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]]
+        });
+
+        // Delete Demande Handler
+        $('.delete-demande').on('click', function() {
+            const demandeId = $(this).data('id');
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) {
+                $.ajax({
+                    url: "{{ path('app_demande_delete', {'id': 'PLACEHOLDER_ID'}) }}".replace('PLACEHOLDER_ID', demandeId),
+                    method: 'DELETE',
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Une erreur s\'est produite lors de la suppression.');
+                    }
+                });
             }
-        });
-
-        // Integrate search form with DataTables
-        $('#search-form').on('submit', function(e) {
-            e.preventDefault();
-            table.ajax.reload();
-        });
-
-        // Add event listeners for type and status selects
-        $('#type, #status').on('change', function() {
-            table.ajax.reload();
         });
     });
     </script>

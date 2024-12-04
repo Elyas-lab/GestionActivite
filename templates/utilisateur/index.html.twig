@@ -44,7 +44,7 @@
 
         <div class="card">
             <div class="card-body">
-                <table id="utilisateurTable" class="table table-striped table-bordered table-hover">
+                <table id="utilisateurTable" class="table table-striped table-bordered table-hover dt-responsive " style="width:100%">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -75,6 +75,8 @@
                 $('#utilisateurTable').DataTable({
                     "processing": true,
                     "serverSide": true,
+                    "orderable": true,
+                    "responsive": true,
                     "ajax": {
                         "url": "{{ path('app_utilisateur_list') }}",
                         "type": "GET",

@@ -22,7 +22,7 @@ final class StatutController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des statuts',
-            [['name' => 'Statuts', 'route' => 'app_statut_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Statuts', 'route' => 'app_statut_index']]
         );
 
         return $this->render('referentiel/statut/index.html.twig', [
@@ -50,7 +50,7 @@ final class StatutController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer un statut',
             [
-                ['name' => 'Statuts', 'route' => 'app_statut_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Statuts', 'route' => 'app_statut_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -67,7 +67,7 @@ final class StatutController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails du statut : {$statut->getNom()}",
             [
-                ['name' => 'Statuts', 'route' => 'app_statut_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Statuts', 'route' => 'app_statut_index'],
                 ['name' => "Statut : {$statut->getNom()}", 'route' => null],
             ]
         );
@@ -95,7 +95,7 @@ final class StatutController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier le statut : {$statut->getNom()}",
             [
-                ['name' => 'Statuts', 'route' => 'app_statut_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Statuts', 'route' => 'app_statut_index'],
                 ['name' => "Modifier : {$statut->getNom()}", 'route' => null],
             ]
         );

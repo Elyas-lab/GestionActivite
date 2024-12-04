@@ -1,60 +1,91 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}TypeDemande Index{% endblock %}
+{% block title %}Types de Demande{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
+    <style>
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .table-description {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     <script type="module">
-        // import $ from 'jquery';
-        if (typeof window.jQuery === 'undefined') {
-            window.$ = window.jQuery = $;
-        }
+        import $ from 'jquery';
+        
         $(document).ready(function() {
             $('#typeDemandeTable').DataTable({
-                "language": {
-                    "url": ""
-                }
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+                },
+                columnDefs: [
+                    { orderable: false, targets: [-1] },
+                    { width: '10%', targets: [0] }
+                ],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tout"]]
             });
         });
     </script>
 {% endblock %}
 
 {% block main %}
-    <h1 class="mb-4">TypeDemande Index</h1>
-
-    <div class="mb-3">
-        <a href="{{ path('app_type_new') }}" class="btn btn-primary">Create New</a>
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Gestion des Types de Demande</h2>
+            <a href="{{ path('app_type_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Créer un Nouveau Type
+            </a>
+        </div>
+        <div class="card-body">
+            <table id="typeDemandeTable" class="table table-striped table-bordered table-hover m-2">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for type_demande in type_demandes %}
+                    <tr>
+                        <td>{{ type_demande.id }}</td>
+                        <td>{{ type_demande.nom }}</td>
+                        <td class="table-description" title="{{ type_demande.description }}">
+                            {{ type_demande.description|slice(0, 100) }}{% if type_demande.description|length > 100 %}...{% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{{ path('app_type_show', {'id': type_demande.id}) }}" class="btn btn-sm btn-info" title="Détails">
+                                    <i class="fas fa-eye">Modifier</i>
+                                </a>
+                                <a href="{{ path('app_type_edit', {'id': type_demande.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                    <i class="fas fa-edit">Details</i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Aucun type de demande trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table id="typeDemandeTable" class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Numéro</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for type_demande in type_demandes %}
-            <tr>
-                <td>{{ type_demande.id }}</td>
-                <td>{{ type_demande.nom }}</td>
-                <td>{{ type_demande.description }}</td>
-                <td>
-                    <a href="{{ path('app_type_show', {'id': type_demande.id}) }}" class="btn btn-sm btn-info">Détails</a>
-                    <a href="{{ path('app_type_edit', {'id': type_demande.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4" class="text-center">No records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+</div>
 {% endblock %}

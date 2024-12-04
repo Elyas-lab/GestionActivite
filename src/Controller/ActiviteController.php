@@ -30,8 +30,10 @@ final class ActiviteController extends AbstractController
     }
 
     #[Route(name: 'app_activite_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(ActiviteRepository $activiteRepository): Response
     {
+        $activites = $activiteRepository->findAll();
+
         // Generate navbar data for the Activite section
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Activités',
@@ -43,66 +45,7 @@ final class ActiviteController extends AbstractController
 
         return $this->render('activite/index.html.twig', [
             'navbarData' => $navbarData,
-        ]);
-    }
-
-    #[Route('/data', name: 'app_activite_data', methods: ['GET'])]
-    public function listData(Request $request, ActiviteRepository $activiteRepository): JsonResponse
-    {
-        $draw = $request->query->getInt('draw');
-        $start = $request->query->getInt('start');
-        $length = $request->query->getInt('length');
-        $search = $request->query->get('search')['value'];
-        $orders = $request->query->all('order');
-
-        $columns = [
-            0 => 'id',
-            1 => 'titre',
-            2 => 'description',
-            3 => 'dateDebut',
-            4 => 'dateFin',
-            5 => 'statut'
-        ];
-
-        $totalData = $activiteRepository->count([]);
-
-        $query = $activiteRepository->createQueryBuilder('a');
-
-        if (!empty($search)) {
-            $query->where('a.titre LIKE :search OR a.description LIKE :search OR a.statut LIKE :search')
-                  ->setParameter('search', '%' . $search . '%');
-        }
-
-        foreach ($orders as $order) {
-            $orderColumn = $columns[$order['column']];
-            $orderDir = $order['dir'];
-            $query->addOrderBy('a.' . $orderColumn, $orderDir);
-        }
-
-        $query->setFirstResult($start)
-              ->setMaxResults($length);
-
-        $results = $query->getQuery()->getResult();
-        $totalFiltered = count($results);
-
-        $data = [];
-        foreach ($results as $activite) {
-            $data[] = [
-                "id" => $activite->getId(),
-                "titre" => $activite->getTitre(),
-                "description" => $activite->getDescription(),
-                "dateDebut" => $activite->getDateDebut() ? $activite->getDateDebut()->format('Y-m-d H:i') : 'N/A',
-                "dateFin" => $activite->getDateFin() ? $activite->getDateFin()->format('Y-m-d H:i') : 'N/A',
-                "statut" => $activite->getStatut(),
-                "actions" => $this->renderView('activite/_actions.html.twig', ['activite' => $activite])
-            ];
-        }
-
-        return new JsonResponse([
-            'draw' => $draw,
-            'recordsTotal' => $totalData,
-            'recordsFiltered' => $totalFiltered,
-            'data' => $data
+            'activites' => $activites
         ]);
     }
 

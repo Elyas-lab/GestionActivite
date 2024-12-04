@@ -25,7 +25,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column(nullable: true)]
     private array $roles = [];
 
     /**
@@ -38,7 +37,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Groupe>
      */
     #[ORM\ManyToMany(targetEntity: Groupe::class, inversedBy: 'utilisateurs')]
-    private Collection $groupe;
+    private Collection $groupes;
 
     /**
      * @var Collection<int, Assistance>
@@ -69,8 +68,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->groupe = new ArrayCollection();
+        $this->groupes = new ArrayCollection();
         $this->assistances = new ArrayCollection();
+        $this->projets = new ArrayCollection();
+        $this->activites = new ArrayCollection();
+        $this->taches = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,7 +137,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
@@ -148,20 +149,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    /**
-     * @return Collection<int, Groupe>
-     */
-    public function getGroupe(): Collection
+    public function getGroupes(): Collection
     {
-        return $this->groupe;
+        return $this->groupes;
     }
 
     public function addGroupe(Groupe $groupe): static
     {
-        if (!$this->groupe->contains($groupe)) {
-
-            $groupe->addUtilisateur( $this);
-
+        if (!$this->groupes->contains($groupe)) {
+            $this->groupes->add($groupe);
+            $groupe->addUtilisateur($this);
         }
 
         return $this;
@@ -169,8 +166,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeGroupe(Groupe $groupe): static
     {
-        $this->groupe->removeElement($groupe);
-
+        if ($this->groupes->removeElement($groupe)) {
+            $groupe->removeUtilisateur($this);
+        }  
         return $this;
     }
 
@@ -215,6 +213,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
     /**
      * @return Collection<int, Projet>
      */
@@ -227,7 +226,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->projets->contains($projet)) {
             $this->projets->add($projet);
-            $projet->addRessource($this); // Ensure bidirectional consistency if Projet has a method
+            $projet->addRessource($this);
         }
 
         return $this;
@@ -236,7 +235,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeProjet(Projet $projet): static
     {
         if ($this->projets->removeElement($projet)) {
-            $projet->removeRessource($this); // Ensure bidirectional consistency if Projet has a method
+            $projet->removeRessource($this);
         }
 
         return $this;
@@ -254,7 +253,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->activites->contains($activite)) {
             $this->activites->add($activite);
-            $activite->addRessource($this); // Ensure bidirectional consistency if Activite has a method
+            $activite->addRessource($this);
         }
 
         return $this;
@@ -263,7 +262,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeActivite(Activite $activite): static
     {
         if ($this->activites->removeElement($activite)) {
-            $activite->removeRessource($this); // Ensure bidirectional consistency if Activite has a method
+            $activite->removeRessource($this);
         }
 
         return $this;
@@ -281,7 +280,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->taches->contains($tache)) {
             $this->taches->add($tache);
-            $tache->addRessource($this); // Ensure bidirectional consistency if Tache has a method
+            $tache->addRessource($this);
         }
 
         return $this;
@@ -290,10 +289,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeTache(Tache $tache): static
     {
         if ($this->taches->removeElement($tache)) {
-            $tache->removeRessource($this); // Ensure bidirectional consistency if Tache has a method
+            $tache->removeRessource($this);
         }
 
         return $this;
     }
-
 }

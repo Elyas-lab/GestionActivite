@@ -22,7 +22,7 @@ final class TypeDemandeController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des types de demande',
-            [['name' => 'Types de demande', 'route' => 'app_type_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Types de demande', 'route' => 'app_type_index']]
         );
 
         return $this->render('referentiel/type_demande/index.html.twig', [
@@ -50,7 +50,7 @@ final class TypeDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer un type de demande',
             [
-                ['name' => 'Types de demande', 'route' => 'app_type_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Types de demande', 'route' => 'app_type_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -67,7 +67,7 @@ final class TypeDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails du type de demande : {$typeDemande->getNom()}",
             [
-                ['name' => 'Types de demande', 'route' => 'app_type_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Types de demande', 'route' => 'app_type_index'],
                 ['name' => "Type de demande : {$typeDemande->getNom()}", 'route' => null],
             ]
         );
@@ -95,7 +95,7 @@ final class TypeDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier le type de demande : {$typeDemande->getNom()}",
             [
-                ['name' => 'Types de demande', 'route' => 'app_type_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Types de demande', 'route' => 'app_type_index'],
                 ['name' => "Modifier : {$typeDemande->getNom()}", 'route' => null],
             ]
         );

@@ -23,7 +23,7 @@ final class GroupeController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des groupes',
-            [['name' => 'Groupes', 'route' => 'app_groupe_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Groupes', 'route' => 'app_groupe_index']]
         );
 
         return $this->render('referentiel/groupe/index.html.twig', [
@@ -49,7 +49,7 @@ final class GroupeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer un groupe',
             [
-                ['name' => 'Groupes', 'route' => 'app_groupe_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Groupes', 'route' => 'app_groupe_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -67,7 +67,7 @@ final class GroupeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails du groupe : {$groupe->getNom()}",
             [
-                ['name' => 'Groupes', 'route' => 'app_groupe_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Groupes', 'route' => 'app_groupe_index'],
                 ['name' => "Groupe : {$groupe->getNom()}", 'route' => null],
             ]
         );
@@ -93,7 +93,7 @@ final class GroupeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier le groupe : {$groupe->getNom()}",
             [
-                ['name' => 'Groupes', 'route' => 'app_groupe_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Groupes', 'route' => 'app_groupe_index'],
                 ['name' => "Modifier : {$groupe->getNom()}", 'route' => null],
             ]
         );
@@ -121,7 +121,7 @@ final class GroupeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Permissions du groupe : {$groupe->getNom()}",
             [
-                ['name' => 'Groupes', 'route' => 'app_groupe_index'], 
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Groupes', 'route' => 'app_groupe_index'], 
                 ['name' => "Permissions : {$groupe->getNom()}", 'route' => null],
             ]
         );

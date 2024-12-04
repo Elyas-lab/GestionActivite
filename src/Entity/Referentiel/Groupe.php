@@ -25,7 +25,7 @@ class Groupe
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'groupe')]
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'groupes')]
     private Collection $utilisateurs;
 
     /**
@@ -57,12 +57,12 @@ class Groupe
         return $this;
     }
 
-    public function getdescription(): ?string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setdescription(?string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 

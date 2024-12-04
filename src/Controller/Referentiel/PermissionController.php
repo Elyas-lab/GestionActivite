@@ -22,7 +22,7 @@ final class PermissionController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des permissions',
-            [['name' => 'Permissions', 'route' => 'app_permission_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Permissions', 'route' => 'app_permission_index']]
         );
 
         return $this->render('referentiel/permission/index.html.twig', [
@@ -50,7 +50,7 @@ final class PermissionController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer une permission',
             [
-                ['name' => 'Permissions', 'route' => 'app_permission_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Permissions', 'route' => 'app_permission_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -78,7 +78,7 @@ final class PermissionController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier la permission : {$permission->getNom()}",
             [
-                ['name' => 'Permissions', 'route' => 'app_permission_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Permissions', 'route' => 'app_permission_index'],
                 ['name' => "Modifier : {$permission->getNom()}", 'route' => null],
             ]
         );
@@ -96,7 +96,7 @@ final class PermissionController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails de la permission : {$permission->getNom()}",
             [
-                ['name' => 'Permissions', 'route' => 'app_permission_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Permissions', 'route' => 'app_permission_index'],
                 ['name' => "Permission : {$permission->getNom()}", 'route' => null],
             ]
         );

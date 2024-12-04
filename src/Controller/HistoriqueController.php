@@ -24,27 +24,7 @@ final class HistoriqueController extends AbstractController
     #[Route(name: 'app_historique_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        $type = $request->query->get('type');
-        $dateDebut = $request->query->get('dateDebut');
-        $dateFin = $request->query->get('dateFin');
-        $page = $request->query->getInt('page', 1);
-        $limit = 10;
-
-        $criteria = [];
-        if ($type) {
-            $criteria['typeElement'] = $type;
-        }
-        if ($dateDebut) {
-            $criteria['dateHistorique']['$gte'] = new \DateTime($dateDebut);
-        }
-        if ($dateFin) {
-            $criteria['dateHistorique']['$lte'] = new \DateTime($dateFin);
-        }
-
-        $offset = ($page - 1) * $limit;
-        $historique = $this->historiqueService->searchHistorique($criteria, ['dateHistorique' => 'DESC'], $limit, $offset);
-        $total = $this->historiqueRepository->count($criteria);
-
+        
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Historique',
             [
@@ -54,11 +34,7 @@ final class HistoriqueController extends AbstractController
         );
 
         return $this->render('historique/index.html.twig', [
-            'historique' => $historique,
-            'types' => TypeElement::cases(),
-            'page' => $page,
-            'limit' => $limit,
-            'total' => $total,
+            'historiques' => $this->historiqueRepository->findAll(),
             'navbarData' => $navbarData,
         ]);
     }

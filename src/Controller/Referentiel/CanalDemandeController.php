@@ -22,7 +22,7 @@ final class CanalDemandeController extends AbstractController
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Liste des canaux de demande',
-            [['name' => 'Canaux de demande', 'route' => 'app_canal_index']]
+            [['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Canaux de demande', 'route' => 'app_canal_index']]
         );
 
         return $this->render('referentiel/canal_demande/index.html.twig', [
@@ -48,7 +48,7 @@ final class CanalDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Créer un canal de demande',
             [
-                ['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
                 ['name' => 'Créer', 'route' => null],
             ]
         );
@@ -66,7 +66,7 @@ final class CanalDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Détails du canal de demande : {$canalDemande->getNom()}",
             [
-                ['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
                 ['name' => "Canal : {$canalDemande->getNom()}", 'route' => null],
             ]
         );
@@ -92,7 +92,7 @@ final class CanalDemandeController extends AbstractController
         $navbarData = $this->navbarExtension->generateNavbarData(
             "Modifier le canal de demande : {$canalDemande->getNom()}",
             [
-                ['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],['name' => 'Canaux de demande', 'route' => 'app_canal_index'],
                 ['name' => "Modifier : {$canalDemande->getNom()}", 'route' => null],
             ]
         );
