@@ -32,7 +32,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         UserAuthenticationService $userAuthenticationService, 
         RouterInterface $router,
-        CsrfTokenManagerInterface $csrfTokenManager
+        CsrfTokenManagerInterface $csrfTokenManager,
         
     ) {
         $this->userAuthenticationService = $userAuthenticationService;
@@ -68,7 +68,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
             function($credentials) use ($username, $password) {
                     // Attempt authentication through the service
                     $authenticationResult = $this->userAuthenticationService->authenticate($username, $password);
-                    
+                    dd($authenticationResult);
                     // If authentication fails, throw an exception
                     if (!$authenticationResult) {
                         throw new BadCredentialsException('Authentication failed');
@@ -89,6 +89,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
     
         // Create the UserBadge with the correct user retrieval method
         $user = $this->userAuthenticationService->getUser($username);
+        dd($user);
 
         // Ensure the user is loaded
         if (!$user) {

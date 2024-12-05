@@ -1,32 +1,47 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Create CanalDemande{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-{% endblock %}
+{% block title %}Créer CanalDemande{% endblock %}
 
 {% block main %}
-    <h1>Ajouter CanalDemande</h1>
+<div class="card">
+    <div class="card-header">
+        Ajouter un Canal de demande
+    </div>
+    <div class="card-body">
+        {{ form_start(form) }}
 
-    {{ form_start(form) }}
-    <div class="form-group">
-        {{ form_label(form.nom, 'Nom') }}
-        {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        <div class="mt-4 row d-flex flex-column align-items-center">
+            <div class="col-md-10">
+                <!-- Nom -->
+                <div class="mb-3">
+                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom du canal'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description du canal', 'rows': '5'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <!-- Actif -->
+                <div class="mb-3 form-check">
+                    {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_label(form.isActive, 'Actif', {'label_attr': {'class': 'form-check-label'}}) }}
+                    {{ form_errors(form.isActive) }}
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="my-4 col-md-10 d-flex justify-content-between">
+                <a href="{{ path('app_canal_index') }}" class="btn btn-secondary ">Retour</a>
+                <button type="submit" class="btn btn-primary ">Créer</button>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
     </div>
-    <div class="form-group">
-        {{ form_label(form.description, 'Description') }}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-    </div>
-    <div class="form-group">
-        {{ form_label(form.isActive, 'IsActive') }}
-        {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
-    </div>
-    <button type="submit" class="btn btn-success mt-3">Create</button>
-    <a href="{{ path('app_canal_index') }}" class="btn btn-secondary mt-3">Retour</a>
-    {{ form_end(form) }}
+</div>
 {% endblock %}

@@ -1,11 +1,39 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}New Permission{% endblock %}
+{% block title %}Créer Permission{% endblock %}
 
 {% block main %}
-    <h1>Ajouter Permission</h1>
+    <div class="card">
+        <div class="card-header">
+            Ajouter une Permission
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="mt-4 row d-flex flex-column align-items-center">
+                    <div class="col-md-10">
+                        <div class="mb-3">
+                            {{ form_label(form.nom, 'Nom') }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la permission'}}) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.description, 'Description') }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description détaillée', 'rows':'5'}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.Categorie, 'Catégorie') }}
+                            {{ form_widget(form.Categorie, {'attr': {'class': 'form-control', 'placeholder': 'Catégorie de la permission'}}) }}
+                            {{ form_errors(form.Categorie) }}
+                        </div>
+                    </div>
 
-    {{ include('referentiel/permission/_form.html.twig') }}
-
-    <a href="{{ path('app_permission_index') }}">back to list</a>
+                    <div class="my-4 col-md-10 d-flex justify-content-between">
+                        <a href="{{ path('app_permission_index') }}" class="btn btn-secondary ">Retour</a>
+                        <button type="submit" class="btn btn-primary ">Créer</button>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}

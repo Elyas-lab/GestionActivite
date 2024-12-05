@@ -27,19 +27,19 @@ class AssistanceType extends AbstractType
             ])
             ->add('Source', EntityType::class, [
                 'class' => SourceDemande::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('type', EntityType::class, [
                 'class' => TypeDemande::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('canal', EntityType::class, [
                 'class' => CanalDemande::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('statut', EntityType::class, [
                 'class' => Statut::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('responsable', EntityType::class, [
                 'class' => Utilisateur::class,

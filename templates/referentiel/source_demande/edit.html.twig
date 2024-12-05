@@ -1,26 +1,40 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Create SourceDemande{% endblock %}
+{% block title %}Modifier Source de Demande{% endblock %}
 
 {% block main %}
-    <h1>Create New SourceDemande</h1>
-
-    <form method="post">
+<div class="card">
+    <div class="card-header">
+        Modifier une Source de Demande (Entité demandeur)
+    </div>
+    <div class="card-body">
         {{ form_start(form) }}
-        
-        <div class="mb-3">
-            {{ form_label(form.nom) }}
-            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
-        </div>
-        
-        <div class="mb-3">
-            {{ form_label(form.description) }}
-            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-        </div>
 
-        <button class="btn btn-primary" type="submit">Save</button>
-        <a href="{{ path('app_source_index') }}" class="btn btn-secondary">Back</a>
+        <div class="mt-4 row d-flex flex-column align-items-center">
+            <div class="col-md-10">
+                <!-- Nom -->
+                <div class="mb-3">
+                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la source'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description de la source', 'rows': '5'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="my-4 col-md-10 d-flex justify-content-between">
+                <a href="{{ path('app_source_index') }}" class="btn btn-secondary ">Retour</a>
+                <button type="submit" class="btn btn-success ">Enregistrer</button>
+            </div>
+        </div>
 
         {{ form_end(form) }}
-    </form>
+    </div>
+</div>
 {% endblock %}

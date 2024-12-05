@@ -1,0 +1,17 @@
+dn: ou=people,dc=example,dc=com
+objectClass: organizationalUnit
+ou: people
+
+dn: uid=user1,ou=people,dc=example,dc=com
+objectClass: inetOrgPerson
+uid: user1
+sn: User1
+cn: User One
+userPassword: {SSHA}azertyuiop
+
+dn: uid=user2,ou=people,dc=example,dc=com
+objectClass: inetOrgPerson
+uid: user2
+sn: User2
+cn: User Two
+userPassword: {SSHA}qwertyuiop

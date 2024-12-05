@@ -67,7 +67,7 @@ final class DemandeController extends AbstractController
             }
             
             $this->historiqueService->addHistorique(
-                TypeElement::Activite,
+                TypeElement::Demande,
                 $demande->getId(),
                 'Création d\'une nouvelle demande'
             );
@@ -116,7 +116,18 @@ final class DemandeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            try{
+                $entityManager->persist($demande);
+                $entityManager->flush();
+            }catch(Exception $e){
+                
+            }
+            
+            $this->historiqueService->addHistorique(
+                TypeElement::Demande,
+                $demande->getId(),
+                'Modification d\'une nouvelle demande'
+            );
 
             return $this->redirectToRoute('app_demande_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -141,8 +152,18 @@ final class DemandeController extends AbstractController
     public function delete(Request $request, Demande $demande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$demande->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($demande);
-            $entityManager->flush();
+            try{                
+                $entityManager->remove($demande);
+                $entityManager->flush();
+            }catch(Exception $e){
+               error_log($e); 
+            }
+            
+            $this->historiqueService->addHistorique(
+                TypeElement::Demande,
+                $demande->getId(),
+                'Suppression de la demande'
+            );
         }
 
         return $this->redirectToRoute('app_demande_index', [], Response::HTTP_SEE_OTHER);

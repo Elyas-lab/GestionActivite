@@ -4,77 +4,145 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
+<style>
+    /* Responsive Category Grid */
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Scrollable Permission List */
+    .permission-list {
+        max-height: 500px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f1;
+    }
+
+    /* Scrollbar Styling */
+    .permission-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .permission-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .permission-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    /* Permission Item Hover Effect */
+    .permission-item {
+        transition: background-color 0.3s ease;
+    }
+
+    .permission-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Hidden Class for Filtering */
+    .hidden {
+        display: none !important;
+    }
+
+    /* Checkbox Styling */
+    .permission-item input[type="checkbox"] {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #6b7280;
+        border-radius: 4px;
+        outline: none;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .permission-item input[type="checkbox"]:checked {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+
+    .permission-item input[type="checkbox"]:checked::after {
+        content: '✓';
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
         .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
         }
-        .permission-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-    </style>
+    }
+</style>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('permission-search');
-            const categoryContainers = document.querySelectorAll('.category-container');
-            const permissionItems = document.querySelectorAll('.permission-item');
-            const selectAllCheckboxes = document.querySelectorAll('.select-all-category');
+    <script type="module">
+        import $ from "jquery";
+     $(document).ready(function() {
+        const $searchInput = $('#permission-search');
+        const $categoryContainers = $('.category-container');
+        const $permissionItems = $('.permission-item');
+        const $selectAllCheckboxes = $('.select-all-category');
 
-            function filterPermissions() {
-                const searchTerm = searchInput.value.toLowerCase();
+        function filterPermissions() {
+            const searchTerm = $searchInput.val().toLowerCase();
 
-                categoryContainers.forEach(container => {
-                    let hasVisiblePermissions = false;
-                    const permissions = container.querySelectorAll('.permission-item');
+            $categoryContainers.each(function() {
+                const $container = $(this);
+                const $permissions = $container.find('.permission-item');
+                let hasVisiblePermissions = false;
 
-                    permissions.forEach(item => {
-                        const text = item.textContent.toLowerCase();
-                        const isVisible = text.includes(searchTerm);
-                        item.classList.toggle('hidden', !isVisible);
-                        if (isVisible) hasVisiblePermissions = true;
-                    });
-
-                    container.classList.toggle('hidden', !hasVisiblePermissions);
+                $permissions.each(function() {
+                    const $item = $(this);
+                    const text = $item.text().toLowerCase();
+                    const isVisible = text.includes(searchTerm);
+                    $item.toggleClass('hidden', !isVisible);
+                    if (isVisible) hasVisiblePermissions = true;
                 });
 
-                updateSelectAllCheckboxes();
-            }
-
-            function updateSelectAllCheckboxes() {
-                selectAllCheckboxes.forEach(checkbox => {
-                    const category = checkbox.closest('.category-container');
-                    const visiblePermissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]');
-                    const checkedPermissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]:checked');
-                    
-                    checkbox.checked = visiblePermissions.length > 0 && visiblePermissions.length === checkedPermissions.length;
-                    checkbox.indeterminate = checkedPermissions.length > 0 && checkedPermissions.length < visiblePermissions.length;
-                });
-            }
-
-            function toggleCategory(checkbox) {
-                const category = checkbox.closest('.category-container');
-                const permissions = category.querySelectorAll('.permission-item:not(.hidden) input[type="checkbox"]');
-                permissions.forEach(permission => permission.checked = checkbox.checked);
-            }
-
-            searchInput.addEventListener('input', filterPermissions);
-
-            selectAllCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', () => toggleCategory(checkbox));
-            });
-
-            permissionItems.forEach(item => {
-                item.querySelector('input[type="checkbox"]').addEventListener('change', updateSelectAllCheckboxes);
+                $container.toggleClass('hidden', !hasVisiblePermissions);
             });
 
             updateSelectAllCheckboxes();
+        }
+
+        function updateSelectAllCheckboxes() {
+            $selectAllCheckboxes.each(function() {
+                const $checkbox = $(this);
+                const $category = $checkbox.closest('.category-container');
+                const $visiblePermissions = $category.find('.permission-item:not(.hidden) input[type="checkbox"]');
+                const $checkedPermissions = $category.find('.permission-item:not(.hidden) input[type="checkbox"]:checked');
+                
+                $checkbox.prop('checked', $visiblePermissions.length > 0 && $visiblePermissions.length === $checkedPermissions.length);
+                $checkbox.prop('indeterminate', $checkedPermissions.length > 0 && $checkedPermissions.length < $visiblePermissions.length);
+            });
+        }
+
+        function toggleCategory($checkbox) {
+            const $category = $checkbox.closest('.category-container');
+            const $permissions = $category.find('.permission-item:not(.hidden) input[type="checkbox"]');
+            $permissions.prop('checked', $checkbox.prop('checked'));
+        }
+
+        $searchInput.on('input', filterPermissions);
+
+        $selectAllCheckboxes.on('change', function() {
+            toggleCategory($(this));
         });
+
+        $permissionItems.find('input[type="checkbox"]').on('change', updateSelectAllCheckboxes);
+
+        updateSelectAllCheckboxes();
+    });
     </script>
 {% endblock %}
 

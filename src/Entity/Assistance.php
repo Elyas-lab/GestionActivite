@@ -52,7 +52,7 @@ class Assistance
         return $this->id;
     }
 
-    public function getSource():?Demande {
+    public function getSource():?SourceDemande {
         return $this->Source;
     }
     public function getType():?TypeDemande{

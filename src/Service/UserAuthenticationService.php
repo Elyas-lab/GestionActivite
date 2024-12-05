@@ -3,36 +3,52 @@ namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Utilisateur;
+use App\Security\LdapAuthenticationService;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
 class UserAuthenticationService
 {
     private $entityManager;
+    private $ldapAuthService;
 
-    public function __construct(EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager, 
+        LdapAuthenticationService $ldapAuthService
+    ) {
         $this->entityManager = $entityManager;
+        $this->ldapAuthService = $ldapAuthService;
     }
 
     public function authenticate(string $username, string $password): bool
     {
-        // Chercher l'utilisateur par son nom d'utilisateur
-        $user = $this->entityManager->getRepository(Utilisateur::class)->findOneBy(['matricule' => $username]);
+        // Vérifier d'abord si l'utilisateur existe localement
+        $user = $this->entityManager->getRepository(Utilisateur::class)
+            ->findOneBy(['matricule' => $username]);
 
-        if (!$user || !password_verify($password, $user->getPassword())) {
-            // dd( password_verify($password, $user->getPassword()));
-            throw new BadCredentialsException('Mot de passe éroné.');
+        // Si l'utilisateur n'existe pas localement, refuser l'accès
+        if (!$user) {
+                $ldapSuccess = $this->ldapAuthService->authenticateWithLdap($username, $password);
+                if ($ldapSuccess) {
+                    return true;
+                }
+        }else if(password_verify($password, $user->getPassword())) {
+            // Tenter l'authentification via LDAP
+            return true;
         }
-
-        return true;
-    }
+        else{
+        throw new BadCredentialsException('Authentification échouée.');
+        return false;
+       }
+}
 
     public function getUser(string $username): Utilisateur
     {
-        $user = $this->entityManager->getRepository(Utilisateur::class)->findOneBy(['matricule' => $username]);
+        $user = $this->entityManager->getRepository(Utilisateur::class)
+            ->findOneBy(['matricule' => $username]);
 
         if (!$user) {
-            throw new BadCredentialsException('Utilisateur not found.');
+            throw new AccessDeniedException('Utilisateur non autorisé.');
         }
 
         return $user;

@@ -20,7 +20,7 @@ class AcceuilController extends AbstractController
     }
 
     #[Route('/', name: 'app_acceuil')]
-    public function index(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
         // Génération des données de la navbar
         $navbarData = $this->navbarExtension->generateNavbarData(

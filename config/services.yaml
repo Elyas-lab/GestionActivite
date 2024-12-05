@@ -22,5 +22,26 @@ services:
 
     App\Service\OracleService:
 
+    # App\Service\UserAuthenticationService:
+    #     arguments:
+    #         - '@doctrine.orm.entity_manager'
+    #         - '@App\Security\LdapAuthenticationService'
+
+        # LDAP service alias
+    ldap_service:
+        class: Symfony\Component\Ldap\Ldap
+        factory: ['Symfony\Component\Ldap\Ldap', 'create']
+        arguments:
+            - 'ext_ldap'
+        calls:
+            - method: 'bind'
+              arguments:
+                - '%env(resolve:LDAP_DN)%'
+                - '%env(resolve:LDAP_PASSWORD)%'
+
+    # Register the LDAP service directly for the user provider
+    Symfony\Component\Ldap\Ldap:
+        alias: ldap_service
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

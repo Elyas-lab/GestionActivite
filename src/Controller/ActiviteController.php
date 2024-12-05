@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Activite;
+use App\Entity\Referentiel\TypeElement;
 use App\Form\ActiviteType;
 use App\Repository\ActiviteRepository;
 use App\Service\_navbarExtension;// Import the NavbarExtension service
+use App\Service\HistoriqueService;
 use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +26,8 @@ final class ActiviteController extends AbstractController
     // Update the constructor to include OracleService
     public function __construct(
         _navbarExtension $navbarExtension, 
-        OracleService $oracleService
+        OracleService $oracleService,
+        private HistoriqueService $historiqueService
     ) {
         $this->navbarExtension = $navbarExtension;
         $this->oracleService = $oracleService; // Store the OracleService
@@ -58,8 +62,18 @@ final class ActiviteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($activite);
-            $entityManager->flush();
+            try{
+                $entityManager->persist($activite);
+                $entityManager->flush();
+            }catch(Exception $e){
+                error_log($e);
+            }
+            
+            $this->historiqueService->addHistorique(
+                TypeElement::Activite,
+                $activite->getId(),
+                'Création d\'une nouvelle activite'
+            );
 
             return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
         }

@@ -30,10 +30,10 @@
                 <tbody>
                     {% for assistance in assistances %}
                     <tr>
-                        <td>{{ assistance.numero }}</td>
+                        <td>{{ assistance.id }}</td>
                         <td>{{ assistance.titre }}</td>
                         <td>{{ assistance.description|slice(0, 50) }}{% if assistance.description|length > 50 %}...{% endif %}</td>
-                        <td>{{ assistance.dateInsertion|date('d/m/Y H:i') }}</td>
+                        <td>{{ assistance.getDateCreation()|date('d/m/Y H:i') }}</td>
                         <td>
                             <span class="badge {% if assistance.statut.nom == 'En cours' %}bg-warning{% elseif assistance.statut.nom == 'Terminé' %}bg-success{% else %}bg-secondary{% endif %}">
                                 {{ assistance.statut.nom }}

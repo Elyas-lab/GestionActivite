@@ -1,29 +1,39 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Create New Utilisateur{% endblock %}
+{% block title %}Créer un nouvel Utilisateur{% endblock %}
 
 {% block main %}
-    <div class="container mt-5">
-        <h1>Create New Utilisateur</h1>
-        {{ form_start(form) }}
+    <div class="card">
+        <div class="card-header">
+            Créer un nouvel utilisateur
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="mt-4 row d-flex flex-column align-items-center">
+                    <div class="col-md-10">
+                        <div class="mb-3">
+                            {{ form_label(form.nom, 'Nom') }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'utilisateur'}}) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.matricule, 'Matricule') }}
+                            {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'Matricule'}}) }}
+                            {{ form_errors(form.matricule) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.password, 'Mot de passe') }}
+                            {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe'}}) }}
+                            {{ form_errors(form.password) }}
+                        </div>
+                    </div>
 
-            <div class="mb-3">
-                {{ form_label(form.nom, 'Nom') }}
-                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.matricule, 'Matricule') }}
-                {{ form_widget(form.matricule, {'attr': {'class': 'form-control'}}) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.password, 'Password') }}
-                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
-            </div>
-
-            <button type="submit" class="btn btn-primary">Create</button>
-            <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary">Back to List</a>
-        {{ form_end(form) }}
+                    <div class="my-4 col-md-10 d-flex justify-content-between">
+                        <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                        <button type="submit" class="btn btn-primary">Créer</button>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
     </div>
 {% endblock %}

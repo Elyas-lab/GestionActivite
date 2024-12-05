@@ -31,7 +31,7 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date de Création</span>
                                 <span class="badge bg-secondary">
-                                    {{ assistance.dateCreation ? assistance.dateCreation|date('d/m/Y H:i') : 'Non définie' }}
+                                    {{ assistance.getDateCreation() ? assistance.getDateCreation()|date('d/m/Y H:i') : 'Non définie' }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -57,7 +57,7 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Source de la Demande</span>
                                 <span class="badge bg-primary">
-                                    {{ assistance.source.nom }}
+                                    {{ assistance.getSource().getNom() }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -81,27 +81,6 @@
                                 <i class="fas fa-envelope me-2"></i>{{ assistance.responsable.Matricule }}
                             </p>
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header bg-danger text-white">
-                            <i class="fas fa-chart-line me-2"></i>Actions à Prendre
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            {% if assistance.statut.nom == 'En cours' %}
-                                <li class="list-group-item text-muted">
-                                    <i class="fas fa-hourglass-half me-2"></i>Suivi en cours
-                                </li>
-                            {% elseif assistance.statut.nom == 'Nouveau' %}
-                                <li class="list-group-item text-muted">
-                                    <i class="fas fa-exclamation-circle me-2"></i>Nécessite une action immédiate
-                                </li>
-                            {% else %}
-                                <li class="list-group-item text-muted">
-                                    <i class="fas fa-check-circle me-2"></i>Aucune action requise
-                                </li>
-                            {% endif %}
-                        </ul>
                     </div>
                 </div>
             </div>
