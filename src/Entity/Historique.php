@@ -13,7 +13,7 @@ use App\Entity\Referentiel\TypeElement;
 class Historique
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 

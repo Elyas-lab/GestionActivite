@@ -149,23 +149,23 @@ final class DemandeController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'app_demande_delete', methods: ['POST'])]
-    public function delete(Request $request, Demande $demande, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Demande $demande, EntityManagerInterface $entityManager, HistoriqueService $historiqueService): Response
     {
         if ($this->isCsrfTokenValid('delete'.$demande->getId(), $request->request->get('_token'))) {
-            try{                
+            try {
                 $entityManager->remove($demande);
                 $entityManager->flush();
-            }catch(Exception $e){
-               error_log($e); 
+    
+                $historiqueService->addHistorique(
+                    TypeElement::Demande,
+                    $demande->getId(),
+                    'Suppression de la demande'
+                );
+            } catch (\Exception $e) {
+                error_log($e);
             }
-            
-            $this->historiqueService->addHistorique(
-                TypeElement::Demande,
-                $demande->getId(),
-                'Suppression de la demande'
-            );
         }
-
+    
         return $this->redirectToRoute('app_demande_index', [], Response::HTTP_SEE_OTHER);
     }
 }

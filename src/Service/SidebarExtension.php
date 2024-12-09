@@ -68,7 +68,6 @@ class SidebarExtension
         $result = array_filter($menu, function ($item) use ($permissions) {
             return $this->hasPermission($item['required_permissions'], $permissions);
         });
-        dd($result);
         return $result;
     }
 

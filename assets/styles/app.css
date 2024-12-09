@@ -1,3 +1,9 @@
 body {
-    background-color: skyblue;
+    background-color: skyblue;   
+}
+.blue{
+    color: #0a3869;
+}
+.link{
+    color: #ce8921;
 }

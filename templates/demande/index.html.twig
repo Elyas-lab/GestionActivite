@@ -90,8 +90,9 @@
             const demandeId = $(this).data('id');
             if (confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) {
                 $.ajax({
-                    url: "{{ path('app_demande_delete', {'id': 'PLACEHOLDER_ID'}) }}".replace('PLACEHOLDER_ID', demandeId),
-                    method: 'DELETE',
+                    url: "{{ path("app_demande_delete", {'id': 'PLACEHOLDER_ID'}) }}".replace('PLACEHOLDER_ID', demandeId),
+                    method: 'POST',
+                    data: { _token: $('meta[name="csrf-token"]').attr('content') },
                     success: function(response) {
                         location.reload();
                     },
