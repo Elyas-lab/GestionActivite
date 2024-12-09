@@ -1,0 +1,9 @@
+# Activate mod_rewrite
+RewriteEngine On
+
+# Ensure that the rewrite rules work for Symfony
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect all requests to the front controller
+RewriteRule ^(.*)$ index.php [QSA,L]

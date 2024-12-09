@@ -9,6 +9,21 @@ security:
             entity:
                 class: App\Entity\Utilisateur
                 property: matricule
+        # ldap:
+        #    ldap:
+        #        service: Symfony\Component\Ldap\Ldap
+        #        base_dn: "%env(LDAP_BASE_DN)%"
+
+        #        # Identifiants pour la connexion au LDAP
+        #        search_dn: "%env(LDAP_SEARCH_DN)%"
+        #        search_password: "%env(LDAP_SEARCH_PASSWORD)%"
+
+        #        # Rôle par défaut pour nos utilisateurs LDAP
+        #        default_roles: ROLE_USER
+        #        # Clé contenant notre identifiant unique
+        #        uid_key: uid
+        #        # Clé contenant le mot de passe
+        #        password_attribute: 'userPassword'
 
     firewalls:
         dev:

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -7,15 +6,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use App\Service\UserAuthenticationService;
-use Symfony\Component\Console\Output\OutputInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Csrf\CsrfToken;
@@ -24,116 +23,127 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCre
 
 class UserAuthenticator extends AbstractLoginFormAuthenticator
 {
-    private $userAuthenticationService;
-    private $router;
-    private $csrfTokenManager;
-
+    private UserAuthenticationService $userAuthenticationService;
+    private RouterInterface $router;
+    private CsrfTokenManagerInterface $csrfTokenManager;
+    private LoggerInterface $logger;
 
     public function __construct(
-        UserAuthenticationService $userAuthenticationService, 
+        UserAuthenticationService $userAuthenticationService,
         RouterInterface $router,
         CsrfTokenManagerInterface $csrfTokenManager,
-        
+        LoggerInterface $logger
     ) {
         $this->userAuthenticationService = $userAuthenticationService;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
-        
+        $this->logger = $logger;
     }
 
     public function supports(Request $request): bool
     {
-        // Log request method and route to check if they match the expected values
-         // Log method
-        // dd($request->attributes->get('_route')); // Log route
-    
-        if ( $request->isMethod('POST') && $request->attributes->get('_route') === 'app_login'){ 
-            
-            // dd($request->getMethod());
-            return true;}
-
-        return false;
+        return $request->isMethod('POST') && $request->attributes->get('_route') === 'app_login';
     }
-    
 
     public function authenticate(Request $request): Passport
     {
         $username = $request->request->get('username', '');
         $password = $request->request->get('password', '');
-        // CSRF Token retrieval
         $csrfToken = $request->request->get('_csrf_token');
-    
-        // Create custom credentials with authentication validation
+
+        $this->logger->info('Authentication attempt', [
+            'username' => $username,
+            'route' => $request->attributes->get('_route')
+        ]);
+        $this->logger->info('Session Contents', [
+            'session' => $request->getSession()->all(),
+        ]);
+        
+
         $customCredentials = new CustomCredentials(
-            function($credentials) use ($username, $password) {
-                    // Attempt authentication through the service
+            function() use ($username, $password) {
+                try {
                     $authenticationResult = $this->userAuthenticationService->authenticate($username, $password);
-                    dd($authenticationResult);
-                    // If authentication fails, throw an exception
+
+                    $this->logger->info('Authentication result', [
+                        'username' => $username,
+                        'result' => $authenticationResult
+                    ]);
+
                     if (!$authenticationResult) {
                         throw new BadCredentialsException('Authentication failed');
-                        return false;
                     }
-                    
+
                     return true;
+                } catch (\Exception $e) {
+                    $this->logger->error('Authentication error', [
+                        'username' => $username,
+                        'error' => $e->getMessage()
+                    ]);
+                    throw $e;
+                }
             },
             [
                 'username' => $username,
                 'password' => $password
             ]
         );
-        // dd($customCredentials);
-    
-        // Store the last username in the session
-        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
-    
-        // Create the UserBadge with the correct user retrieval method
-        $user = $this->userAuthenticationService->getUser($username);
-        dd($user);
 
-        // Ensure the user is loaded
-        if (!$user) {
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
+
+        try {
+            $user = $this->userAuthenticationService->getUser($username);
+        } catch (AccessDeniedException $e) {
+            $this->logger->warning('User not found', ['username' => $username]);
             throw new AuthenticationException('User not found.');
         }
 
-        // Now create the UserBadge with the user object
-        $userBadge = new UserBadge($username, function() use ($user) {
-            return $user;
-        });
-        // dd($userBadge);
-    
-        // Valider le token CSRF
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
+            $this->logger->warning('Invalid CSRF token', ['username' => $username]);
             throw new InvalidCsrfTokenException('Invalid CSRF token.');
-            dd($userBadge,$csrfToken,$customCredentials);
         }
-        $csrfTokenBadge = new CsrfTokenBadge('authenticate', $csrfToken);
-        // dd($csrfTokenBadge);
-    
-        // Return the Passport with custom credentials
-        return new Passport($userBadge, $customCredentials, [$csrfTokenBadge]);
-    }
 
+        return new Passport(
+            new UserBadge($username, fn() => $user),
+            $customCredentials,
+            [new CsrfTokenBadge('authenticate', $csrfToken)]
+        );
+    }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
-        if ($request->hasSession()) {
-            $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
-        }
-
-        $url = $this->getLoginUrl($request);
-
-        return new RedirectResponse($url);
+             // Add flash message
+        $flashMessage = $this->getErrorMessage($exception);
+        // $request->getSession()->getFlashBag()->add('danger', [$flashMessage]);
+        $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
+    
+        return new RedirectResponse($this->getLoginUrl($request));
     }
+    
+    private function getErrorMessage(AuthenticationException $exception): string
+    {
+        switch (true) {
+            case $exception instanceof BadCredentialsException:
+                return 'Nom d/’utilisateur ou mot de passe incorrect.';
+            case $exception instanceof InvalidCsrfTokenException:
+                return 'Le jeton CSRF est invalide. Veuillez réessayer.';
+            case $exception instanceof AccessDeniedException:
+                return 'Vous n/’êtes pas autorisé à vous connecter.';
+            default:
+                return 'Une erreur inconnue est survenue. Veuillez réessayer.';
+        }
+    }
+    
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // $request->getSession()->getBag('flashes')->set('success', ['Connexion réussie !']);
         return new RedirectResponse($this->router->generate('app_acceuil'));
     }
+    
 
     protected function getLoginUrl(Request $request): string
     {
         return $this->router->generate('app_login');
     }
 }
-
