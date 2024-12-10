@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241209121740 extends AbstractMigration
+final class Version20241209122931 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -29,7 +29,7 @@ final class Version20241209121740 extends AbstractMigration
         $this->addSql('ALTER TABLE HISTORIQUE MODIFY (date_historique DATE DEFAULT NULL)');
         $this->addSql('ALTER TABLE PROJET MODIFY (date_debut_reel DATE DEFAULT NULL, date_fin_reel DATE DEFAULT NULL, date_debut_estimee DATE DEFAULT NULL, date_fin_estimee DATE DEFAULT NULL)');
         $this->addSql('ALTER TABLE TACHE MODIFY (date_debut_reel DATE DEFAULT NULL, date_fin_reel DATE DEFAULT NULL, date_debut_estimee DATE DEFAULT NULL, date_fin_estimee DATE DEFAULT NULL)');
-        //$this->addSql('ALTER TABLE MESSENGER_MESSAGES MODIFY (id NUMBER(20) DEFAULT messenger_messages_seq.nextval, created_at TIMESTAMP(0) DEFAULT NULL)');
+        // $this->addSql('ALTER TABLE MESSENGER_MESSAGES MODIFY (id NUMBER(20) DEFAULT messenger_messages_seq.nextval, created_at TIMESTAMP(0) DEFAULT NULL)');
     }
 
     public function down(Schema $schema): void

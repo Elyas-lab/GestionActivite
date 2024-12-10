@@ -14,9 +14,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_MATRICULE', fields: ['matricule'])]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
+#[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: false)]
+    #[ORM\SequenceGenerator(sequenceName: 'utilisateur_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]

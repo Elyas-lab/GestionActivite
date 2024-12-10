@@ -7,7 +7,7 @@
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 class="mb-0">
-                <i class="fas fa-life-ring me-2"></i>Détails de l'Assistance
+                <i class="me-1 fas fa-life-ring me-2"></i>Détails de l'Assistance
             </h2>
             <span class="badge bg-light text-primary">Réf: {{ assistance.id }}</span>
         </div>
@@ -17,7 +17,7 @@
                 <div class="col-md-8">
                     <div class="card mb-4">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                            <i class="me-1 fas fa-info-circle me-2"></i>Informations Principales
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -45,7 +45,7 @@
 
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-white">
-                            <i class="fas fa-tags me-2"></i>Caractéristiques de l'Assistance
+                            <i class="me-1 fas fa-tags me-2"></i>Caractéristiques de l'Assistance
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -73,12 +73,12 @@
                 <div class="col-md-4">
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">
-                            <i class="fas fa-user-tie me-2"></i>Responsable
+                            <i class="me-1 fas fa-user-tie me-2"></i>Responsable
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">{{ assistance.responsable.nom }}</h5>
                             <p class="card-text text-muted">
-                                <i class="fas fa-envelope me-2"></i>{{ assistance.responsable.Matricule }}
+                                <i class="me-1 fas fa-envelope me-2"></i>{{ assistance.responsable.Matricule }}
                             </p>
                         </div>
                     </div>
@@ -89,10 +89,10 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between">
                 <a href="{{ path('app_assistance_edit', {'id': assistance.id}) }}" class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Modifier
+                    <i class="me-1 fas fa-edit me-2"></i>Modifier
                 </a>
                 <a href="{{ path('app_assistance_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour
+                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>

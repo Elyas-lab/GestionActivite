@@ -13,7 +13,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
-use App\Service\UserAuthenticationService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
@@ -23,18 +22,18 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCre
 
 class UserAuthenticator extends AbstractLoginFormAuthenticator
 {
-    private UserAuthenticationService $userAuthenticationService;
+    private LdapAuthenticationService $ldap;
     private RouterInterface $router;
     private CsrfTokenManagerInterface $csrfTokenManager;
     private LoggerInterface $logger;
 
     public function __construct(
-        UserAuthenticationService $userAuthenticationService,
+        LdapAuthenticationService $ldap,
         RouterInterface $router,
         CsrfTokenManagerInterface $csrfTokenManager,
         LoggerInterface $logger
     ) {
-        $this->userAuthenticationService = $userAuthenticationService;
+        $this->ldap = $ldap;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->logger = $logger;
@@ -51,11 +50,11 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
         $password = $request->request->get('password', '');
         $csrfToken = $request->request->get('_csrf_token');
 
-        $this->logger->info('Authentication attempt', [
+        $this->logger->debug('Authentication attempt', [
             'username' => $username,
             'route' => $request->attributes->get('_route')
         ]);
-        $this->logger->info('Session Contents', [
+        $this->logger->debug('Session Contents', [
             'session' => $request->getSession()->all(),
         ]);
         
@@ -63,7 +62,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
         $customCredentials = new CustomCredentials(
             function() use ($username, $password) {
                 try {
-                    $authenticationResult = $this->userAuthenticationService->authenticate($username, $password);
+                    $authenticationResult = $this->ldap->authenticate($username, $password);
 
                     $this->logger->info('Authentication result', [
                         'username' => $username,
@@ -92,7 +91,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
 
         try {
-            $user = $this->userAuthenticationService->getUser($username);
+            $user = $this->ldap->getUser($username);
         } catch (AccessDeniedException $e) {
             $this->logger->warning('User not found', ['username' => $username]);
             throw new AuthenticationException('User not found.');

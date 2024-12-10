@@ -48,27 +48,43 @@ class PermissionService
     private function getPermissionList(): array
     {
         return [
-            'Utilisateur' => [
-                'ACCES' => 'Permission d’accéder à l’entité Utilisateur',
-                'CREATION' => 'Permission de créer un utilisateur',
-                'MODIFICATION' => 'Permission de modifier un utilisateur',
-                'SUPPRESSION' => 'Permission de supprimer un utilisateur',
-                'TOUS' => 'Permission de tout gérer pour Utilisateur',
-            ],
-            'Groupe' => [
-                'ACCES' => 'Permission d’accéder à l’entité Groupe',
-                'CREATION' => 'Permission de créer un groupe',
-                'MODIFICATION' => 'Permission de modifier un groupe',
-                'SUPPRESSION' => 'Permission de supprimer un groupe',
-                'TOUS' => 'Permission de tout gérer pour Groupe',
-            ],
             'Demande' => [
-                'ACCES' => 'Permission d’accéder à l’entité Demande',
-                'CREATION' => 'Permission de créer une demande',
-                'MODIFICATION' => 'Permission de modifier une demande',
-                'SUPPRESSION' => 'Permission de supprimer une demande',
-                'TOUS' => 'Permission de tout gérer pour Demande',
+                'ACCES_Demande' => 'Permission d\'accéder à l\'entité Demande',
+                'CREATION_Demande' => 'Permission de créer une demande',
+                'MODIFICATION_Demande' => 'Permission de modifier une demande',
+                'SUPPRESSION_Demande' => 'Permission de supprimer une demande',
             ],
+            'Projet' => [
+                'ACCES_Projet' => 'Permission d\'accéder à l\'entité Projet',
+                'CREATION_Projet' => 'Permission de créer un projet',
+                'MODIFICATION_Projet' => 'Permission de modifier un projet',
+                'SUPPRESSION_Projet' => 'Permission de supprimer un projet',
+            ],
+            'Assistance' => [
+                'ACCES_Assistance' => 'Permission d\'accéder à l\'entité Assistance',
+                'CREATION_Assistance' => 'Permission de créer un Assistance',
+                'MODIFICATION_Assistance' => 'Permission de modifier un Assistance',
+                'SUPPRESSION_Assistance' => 'Permission de supprimer un Assistance',
+            ],
+            'Activité' => [
+                'ACCES_Activité' => 'Permission d\'accéder à l\'entité Activité',
+                'CREATION_Activité' => 'Permission de créer un Activité',
+                'MODIFICATION_Activité' => 'Permission de modifier un Activité',
+                'SUPPRESSION_Activité' => 'Permission de supprimer un Activité',
+            ],
+            'Tache' => [
+                'ACCES_Tache' => 'Permission d\'accéder à l\'entité Tache',
+                'CREATION_Tache' => 'Permission de créer un Tache',
+                'MODIFICATION_Tache' => 'Permission de modifier un Tache',
+                'SUPPRESSION_Tache' => 'Permission de supprimer un Tache',
+            ],
+            'Referentiel' => [
+                'ACCES_Referentiel' => 'Permission d\'accéder à l\'entité Referentiel',
+                'CREATION_Referentiel' => 'Permission de créer un Referentiel',
+                'MODIFICATION_Referentiel' => 'Permission de modifier un Referentiel',
+                'SUPPRESSION_Referentiel' => 'Permission de supprimer un Referentiel',
+            ],
+
             // Ajoutez d'autres catégories ici
         ];
     }

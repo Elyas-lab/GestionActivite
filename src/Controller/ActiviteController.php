@@ -6,13 +6,12 @@ use App\Entity\Activite;
 use App\Entity\Referentiel\TypeElement;
 use App\Form\ActiviteType;
 use App\Repository\ActiviteRepository;
-use App\Service\_navbarExtension;// Import the NavbarExtension service
+use App\Service\_navbarExtension;
 use App\Service\HistoriqueService;
 use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,29 +20,29 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ActiviteController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
-    private OracleService $oracleService; // Add this property
+    private OracleService $oracleService;
 
-    // Update the constructor to include OracleService
     public function __construct(
         _navbarExtension $navbarExtension, 
         OracleService $oracleService,
         private HistoriqueService $historiqueService
     ) {
         $this->navbarExtension = $navbarExtension;
-        $this->oracleService = $oracleService; // Store the OracleService
+        $this->oracleService = $oracleService;
     }
 
-    #[Route(name: 'app_activite_index', methods: ['GET'])]
+    #[Route('/', name: 'app_activite_index', methods: ['GET'])]
     public function index(ActiviteRepository $activiteRepository): Response
     {
+        $this->oracleService->setOracleSessionParams();
+        
         $activites = $activiteRepository->findAll();
 
-        // Generate navbar data for the Activite section
         $navbarData = $this->navbarExtension->generateNavbarData(
-            'Activités',
+            'Liste des activités',
             [
                 ['name' => 'Accueil', 'route' => 'app_acceuil'],
-                ['name' => 'Liste des activités', 'route' => 'app_activite_index'],
+                ['name' => 'Activités', 'route' => null],
             ]
         );
 
@@ -62,18 +61,19 @@ final class ActiviteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            try{
+            try {
                 $entityManager->persist($activite);
                 $entityManager->flush();
-            }catch(Exception $e){
+
+                $this->historiqueService->addHistorique(
+                    TypeElement::Activite,
+                    $activite->getId(),
+                    'Création d\'une nouvelle activité'
+                );
+            } catch(Exception $e) {
+                // Log the exception
                 error_log($e);
             }
-            
-            $this->historiqueService->addHistorique(
-                TypeElement::Activite,
-                $activite->getId(),
-                'Création d\'une nouvelle activite'
-            );
 
             return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -82,32 +82,14 @@ final class ActiviteController extends AbstractController
             'Créer une activité',
             [
                 ['name' => 'Accueil', 'route' => 'app_acceuil'],
-                ['name' => 'Liste des activités', 'route' => 'app_activite_index'],
-                ['name' => 'Créer une activité', 'route' => null],
+                ['name' => 'Activités', 'route' => 'app_activite_index'],
+                ['name' => 'Créer', 'route' => null],
             ]
         );
 
         return $this->render('activite/new.html.twig', [
             'activite' => $activite,
             'form' => $form,
-            'navbarData' => $navbarData,
-        ]);
-    }
-
-    #[Route('/{id}/show', name: 'app_activite_show', methods: ['GET'])]
-    public function show(Activite $activite): Response
-    {
-        $navbarData = $this->navbarExtension->generateNavbarData(
-            'Détails de l\'activité',
-            [
-                ['name' => 'Accueil', 'route' => 'app_acceuil'],
-                ['name' => 'Liste des activités', 'route' => 'app_activite_index'],
-                ['name' => 'Détails de l\'activité', 'route' => null],
-            ]
-        );
-
-        return $this->render('activite/show.html.twig', [
-            'activite' => $activite,
             'navbarData' => $navbarData,
         ]);
     }
@@ -120,7 +102,18 @@ final class ActiviteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            try {
+                $entityManager->flush();
+
+                $this->historiqueService->addHistorique(
+                    TypeElement::Activite,
+                    $activite->getId(),
+                    'Modification de l\'activité'
+                );
+            } catch(Exception $e) {
+                // Log the exception
+                error_log($e);
+            }
 
             return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -129,8 +122,8 @@ final class ActiviteController extends AbstractController
             'Modifier une activité',
             [
                 ['name' => 'Accueil', 'route' => 'app_acceuil'],
-                ['name' => 'Liste des activités', 'route' => 'app_activite_index'],
-                ['name' => 'Modifier une activité', 'route' => null],
+                ['name' => 'Activités', 'route' => 'app_activite_index'],
+                ['name' => 'Modifier', 'route' => null],
             ]
         );
 
@@ -141,14 +134,50 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'app_activite_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_activite_delete', methods: ['POST'])]
     public function delete(Request $request, Activite $activite, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$activite->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($activite);
-            $entityManager->flush();
+            try {
+                $this->historiqueService->addHistorique(
+                    TypeElement::Activite,
+                    $activite->getId(),
+                    'Suppression de l\'activité'
+                );
+
+                $entityManager->remove($activite);
+                $entityManager->flush();
+            } catch(Exception $e) {
+                // Log the exception
+                error_log($e);
+            }
         }
 
         return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/show', name: 'app_activite_show', methods: ['GET'])]
+    public function show(Activite $activite): Response
+    {
+        $historiques = $this->historiqueService->getHistorique(
+            'Activite', 
+            $activite->getId(), 
+            10 // Limit to 10 entries
+        );
+
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            'Détails de l\'activité',
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Activités', 'route' => 'app_activite_index'],
+                ['name' => 'Détails', 'route' => null],
+            ]
+        );
+
+        return $this->render('activite/show.html.twig', [
+            'activite' => $activite,
+            'navbarData' => $navbarData,
+            'historiques' => $historiques,
+        ]);
     }
 }

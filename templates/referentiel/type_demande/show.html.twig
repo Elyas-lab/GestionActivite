@@ -7,7 +7,7 @@
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 class="mb-0">
-                <i class="fas fa-file-alt me-2"></i>Détails Type de Demande
+                <i class="me-1 fas fa-file-alt me-2"></i>Détails Type de Demande
             </h2>
             <span class="badge bg-light text-primary">ID: {{ type_demande.id }}</span>
         </div>
@@ -16,7 +16,7 @@
                 <div class="col-md-8 offset-md-2">
                     <div class="card">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-bars me-2"></i>Informations du Type de Demande
+                            <i class="me-1 fas fa-bars me-2"></i>Informations du Type de Demande
                         </div>
                         <div>
                         <ul class="list-group list-group-flush">
@@ -40,10 +40,10 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between">
                 <a href="{{ path('app_type_edit', {'id': type_demande.id}) }}" class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Modifier
+                    <i class="me-1 fas fa-edit me-2"></i>Modifier
                 </a>
                 <a href="{{ path('app_type_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour
+                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>

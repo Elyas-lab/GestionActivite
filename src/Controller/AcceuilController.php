@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Utilisateur;
 use App\Service\_navbarExtension; // Importation du service _navbarExtension
+use App\Service\PermissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,7 @@ class AcceuilController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
 
-    public function __construct(_navbarExtension $navbarExtension)
+    public function __construct(_navbarExtension $navbarExtension,private PermissionService $permissionService)
     {
         $this->navbarExtension = $navbarExtension;
     }
@@ -22,6 +23,7 @@ class AcceuilController extends AbstractController
     #[Route('/', name: 'app_acceuil')]
     public function index(EntityManagerInterface $entityManager): Response
     {
+        $this->permissionService->initializePermissions();
         // Génération des données de la navbar
         $navbarData = $this->navbarExtension->generateNavbarData(
             'Tableau de bord',

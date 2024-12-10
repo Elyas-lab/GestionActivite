@@ -3,14 +3,14 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
-                <i class="fas fa-history me-2"></i>
+                <i class="me-1 fas fa-history me-2"></i>
                 Historique des modifications
             </h5>
             <a href="{{ path('app_historique_index', {
                 'type': type,
                 'idElement': id
             }) }}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-external-link-alt me-1"></i>
+                <i class="me-1 fas fa-external-link-alt me-1"></i>
                 Voir tout l'historique
             </a>
         </div>
@@ -26,7 +26,7 @@
                             <div class="d-flex">
                                 <div class="timeline-marker me-3">
                                     <div class="timeline-icon">
-                                        <i class="fas fa-circle text-primary"></i>
+                                        <i class="me-1 fas fa-circle text-primary"></i>
                                     </div>
                                     {% if not loop.last %}
                                         <div class="timeline-line"></div>
@@ -44,7 +44,7 @@
                                     <div class="text-muted">
                                         {% if entry.utilisateur %}
                                             <a href="{{ path('app_utilisateur_show', {id: entry.utilisateur.id}) }}" class="text-decoration-none">
-                                                <i class="fas fa-user me-1"></i>
+                                                <i class="me-1 fas fa-user me-1"></i>
                                                 {{ entry.utilisateur.prenom }} {{ entry.utilisateur.nom }}
                                             </a>
                                         {% else %}

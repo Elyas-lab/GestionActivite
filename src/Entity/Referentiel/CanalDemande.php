@@ -9,9 +9,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CanalDemandeRepository::class)]
 class CanalDemande
 {
-    #[ORM\Id]
+#[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: false)]
+    #[ORM\SequenceGenerator(sequenceName: 'canal_demande_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

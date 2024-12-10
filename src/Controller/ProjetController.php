@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Projet;
+use App\Entity\Referentiel\TypeElement;
 use App\Form\ProjetType;
 use App\Repository\ProjetRepository;
-use App\Service\_navbarExtension; // Import _navbarExtension service
+use App\Service\_navbarExtension;
+use App\Service\HistoriqueService;
 use App\Service\OracleService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,17 +20,16 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ProjetController extends AbstractController
 {
     private _navbarExtension $navbarExtension;
-    private OracleService $oracleService; // Add this property
+    private OracleService $oracleService;
 
-    // Update the constructor to include OracleService
     public function __construct(
         _navbarExtension $navbarExtension, 
-        OracleService $oracleService
+        OracleService $oracleService,
+        private HistoriqueService $historiqueService
     ) {
         $this->navbarExtension = $navbarExtension;
-        $this->oracleService = $oracleService; // Store the OracleService
+        $this->oracleService = $oracleService;
     }
-
 
     #[Route(name: 'app_projet_index', methods: ['GET'])]
     public function index(ProjetRepository $projetRepository): Response
@@ -55,8 +57,19 @@ final class ProjetController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($projet);
-            $entityManager->flush();
+            try {
+                $entityManager->persist($projet);
+                $entityManager->flush();
+
+                $this->historiqueService->addHistorique(
+                    TypeElement::Projet, // Assurez-vous que ce TypeElement existe
+                    $projet->getId(),
+                    'Création d\'un nouveau projet'
+                );
+            } catch(Exception $e) {
+                // Gérez l'exception si nécessaire
+                error_log($e);
+            }
 
             return $this->redirectToRoute('app_projet_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -77,24 +90,6 @@ final class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/show', name: 'app_projet_show', methods: ['GET'])]
-    public function show(Projet $projet): Response
-    {
-        $navbarData = $this->navbarExtension->generateNavbarData(
-            "Détails du projet : {$projet->getTitre()}",
-            [
-                ['name' => 'Accueil', 'route' => 'app_acceuil'],
-                ['name' => 'Projets', 'route' => 'app_projet_index'],
-                ['name' => "Projet : {$projet->getTitre()}", 'route' => null],
-            ]
-        );
-
-        return $this->render('projet/show.html.twig', [
-            'projet' => $projet,
-            'navbarData' => $navbarData,
-        ]);
-    }
-
     #[Route('/{id}/edit', name: 'app_projet_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Projet $projet, EntityManagerInterface $entityManager): Response
     {
@@ -103,7 +98,18 @@ final class ProjetController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            try {
+                $entityManager->flush();
+
+                $this->historiqueService->addHistorique(
+                    TypeElement::Projet,
+                    $projet->getId(),
+                    'Modification du projet'
+                );
+            } catch(Exception $e) {
+                // Gérez l'exception si nécessaire
+                error_log($e);
+            }
 
             return $this->redirectToRoute('app_projet_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -128,10 +134,46 @@ final class ProjetController extends AbstractController
     public function delete(Request $request, Projet $projet, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$projet->getId(), $request->get('_token'))) {
-            $entityManager->remove($projet);
-            $entityManager->flush();
+            try {
+                $this->historiqueService->addHistorique(
+                    TypeElement::Projet,
+                    $projet->getId(),
+                    'Suppression du projet'
+                );
+
+                $entityManager->remove($projet);
+                $entityManager->flush();
+            } catch(Exception $e) {
+                // Gérez l'exception si nécessaire
+                error_log($e);
+            }
         }
 
         return $this->redirectToRoute('app_projet_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/show', name: 'app_projet_show', methods: ['GET'])]
+    public function show(Projet $projet): Response
+    {
+        $historiques = $this->historiqueService->getHistorique(
+            'Projet', 
+            $projet->getId(), 
+            10 // Limiter à 10 entrées
+        );
+
+        $navbarData = $this->navbarExtension->generateNavbarData(
+            "Détails du projet : {$projet->getTitre()}",
+            [
+                ['name' => 'Accueil', 'route' => 'app_acceuil'],
+                ['name' => 'Projets', 'route' => 'app_projet_index'],
+                ['name' => "Projet : {$projet->getTitre()}", 'route' => null],
+            ]
+        );
+
+        return $this->render('projet/show.html.twig', [
+            'projet' => $projet,
+            'navbarData' => $navbarData,
+            'historiques' => $historiques, // Passer l'historique à la vue
+        ]);
     }
 }

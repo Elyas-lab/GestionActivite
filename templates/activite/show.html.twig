@@ -7,7 +7,7 @@
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 class="mb-0">
-                <i class="fas fa-project-diagram me-2"></i>Détails de l'activité
+                <i class="me-1 fas fa-project-diagram" ></i>Détails de l'activité
             </h2>
             <span class="badge bg-light text-primary">ID: {{ activite.id }}</span>
         </div>
@@ -17,7 +17,7 @@
                 <div class="col-md-8">
                     <div class="card mb-4">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                            <i class="me-1 fas fa-info-circle me-2"></i>Informations Principales
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -39,7 +39,7 @@
 
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-white">
-                            <i class="fas fa-calendar-alt me-2"></i>Dates et Délais
+                            <i class="me-1 fas fa-calendar-alt me-2"></i>Dates et Délais
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -91,7 +91,7 @@
                 <div class="col-md-4">
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">
-                            <i class="fas fa-users me-2"></i>Ressources
+                            <i class="me-1 fas fa-users me-2"></i>Ressources
                         </div>
                         <ul class="list-group list-group-flush">
                             {% for ressource in activite.ressources %}
@@ -108,10 +108,10 @@
                     <div class="card mb-4">
                         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                             <div>
-                                <i class="fas fa-tasks me-2"></i>Tâches
+                                <i class="me-1 fas fa-tasks me-2"></i>Tâches
                             </div>
                             <a href="{{ path('app_tache_new', {'activite_id': activite.id}) }}" class="btn btn-sm btn-outline-light">
-                                <i class="fas fa-plus me-1"></i>Ajouter
+                                <i class="me-1 fas fa-plus me-1"></i>Ajouter
                             </a>
                         </div>
                         <ul class="list-group list-group-flush">
@@ -128,7 +128,7 @@
 
                     <div class="card">
                         <div class="card-header bg-secondary text-white">
-                            <i class="fas fa-project-diagram me-2"></i>Projet Source
+                            <i class="me-1 fas fa-project-diagram me-2"></i>Projet Source
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">{{ activite.projetSource.titre }}</h5>
@@ -142,10 +142,10 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between">
                 <a href="{{ path('app_activite_edit', {'id': activite.id}) }}" class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Modifier
+                    <i class="me-1 fas fa-edit me-2"></i>Modifier
                 </a>
                 <a href="{{ path('app_activite_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour
+                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>

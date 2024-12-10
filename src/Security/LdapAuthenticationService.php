@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
@@ -9,6 +10,7 @@ use Symfony\Component\Ldap\Ldap;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use App\Exception\NonConformityException;
 use App\Exception\NotAuthorizedException;
+use App\Service\UtilisateurService;
 
 class LdapAuthenticationService
 {
@@ -16,7 +18,7 @@ class LdapAuthenticationService
     private LoggerInterface $logger;
     private EntityManagerInterface $entityManager;
 
-    public function __construct(Ldap $ldap, LoggerInterface $logger, EntityManagerInterface $entityManager)
+    public function __construct(Ldap $ldap, LoggerInterface $logger, EntityManagerInterface $entityManager, private UtilisateurService $utilisateurService)
     {
         $this->ldap = $ldap;
         $this->logger = $logger;
@@ -132,5 +134,38 @@ class LdapAuthenticationService
     {
         $escapedUsername = addslashes($username);
         return sprintf('(|(uid=%s)(cn=%s))', $escapedUsername, $escapedUsername);
+    }
+
+    public function getUser(string $username): ?Utilisateur
+    {
+        // Recherche de l'utilisateur avec plus de flexibilité
+        $user = $this->entityManager->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->where('u.matricule = :username')
+            ->setParameter('username', $username)
+            ->getQuery()
+            ->getOneOrNullResult();
+    
+        if (!$user) {
+            // Tentative de récupération des détails LDAP
+            try {
+                $ldapDetails = $this->getUserDetails($username);
+                if ($ldapDetails) {
+                    $user = new Utilisateur();
+                    $user->setMatricule($ldapDetails['uid'] ?? $username);
+                    $user->setNom($ldapDetails['cn'] ?? 'Unknown');
+                    $user->setPassword('temp');
+                    $user= $this->utilisateurService->createUser($user);
+                
+                    return $user;
+                }
+            } catch (\Exception $e) {
+                // Log de l'erreur de récupération LDAP
+            }
+    
+            // throw new NotAuthorizedException('Utilisateur non autorisé.');
+        }
+    
+        return $user;
     }
 }

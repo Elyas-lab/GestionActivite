@@ -7,7 +7,7 @@
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 class="mb-0">
-                <i class="fas fa-ticket-alt me-2"></i>Détails de la Demande
+                <i class="me-1 fas fa-ticket-alt me-2"></i>Détails de la Demande
             </h2>
             <span class="badge bg-light text-primary">Réf: {{ demande.id }}</span>
         </div>
@@ -17,7 +17,7 @@
                 <div class="col-md-8">
                     <div class="card mb-4">
                         <div class="card-header bg-info text-white">
-                            <i class="fas fa-info-circle me-2"></i>Informations Principales
+                            <i class="me-1 fas fa-info-circle me-2"></i>Informations Principales
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -45,7 +45,7 @@
 
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-white">
-                            <i class="fas fa-tags me-2"></i>Caractéristiques de la Demande
+                            <i class="me-1 fas fa-tags me-2"></i>Caractéristiques de la Demande
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -74,10 +74,10 @@
                     <div class="card">
                         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                             <div>
-                                <i class="fas fa-project-diagram me-2"></i>Projets Générés
+                                <i class="me-1 fas fa-project-diagram me-2"></i>Projets Générés
                             </div>
                             <a href="{{ path('app_projet_new', {'demande_id': demande.id}) }}" class="btn btn-sm btn-outline-light">
-                                <i class="fas fa-plus me-1"></i>Ajouter
+                                <i class="me-1 fas fa-plus me-1"></i>Ajouter
                             </a>
                         </div>
                         <ul class="list-group list-group-flush">
@@ -98,10 +98,10 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between">
                 <a href="{{ path('app_demande_edit', {'id': demande.id}) }}" class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Modifier
+                    <i class="me-1 fas fa-edit me-2"></i>Modifier
                 </a>
                 <a href="{{ path('app_demande_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour
+                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>
