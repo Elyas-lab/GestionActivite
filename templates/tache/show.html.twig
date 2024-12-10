@@ -30,12 +30,61 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Statut</span>
-                                <span class="badge {% if tache.statut.libelle == 'Terminé' %}bg-success{% elseif tache.statut.libelle == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
-                                    {{ tache.statut.libelle }}
+                                <span class="badge {% if tache.statut.nom == 'Terminé' %}bg-success{% elseif tache.statut.nom == 'En cours' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ tache.statut.nom }}
                                 </span>
                             </li>
                         </ul>
                     </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="me-1 fas fa-calendar-alt me-2"></i>Dates et Délais
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début estimée</span>
+                                <span class="badge bg-info">
+                                    {{ tache.dateDebutEstimee ? tache.formatDate(tache.dateDebutEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin estimée</span>
+                                <span class="badge bg-info">
+                                    {{ tache.dateFinEstimee ? tache.formatDate(tache.dateFinEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début réelle</span>
+                                <span class="badge {% if tache.dateDebutReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ tache.dateDebutReel ? tache.formatDate(tache.dateDebutReel) : 'Non démarrée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin réelle</span>
+                                <span class="badge {% if tache.dateFinReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ tache.dateFinReel ? tache.formatDate(tache.dateFinReel) : 'Non terminée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée estimée</span>
+                                <span class="badge bg-primary">
+                                    {{ tache.dureeEstimee ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée réelle</span>
+                                <span class="badge bg-primary">
+                                    {{ tache.dureeReelle ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Retard</span>
+                                <span class="badge {% if tache.retard > 0 %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ tache.retard ?: 0 }} jours
+                                </span>
+                            </li>
+                        </ul>
+                    </div>                    
 
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-white">
@@ -44,8 +93,8 @@
                         <ul class="list-group list-group-flush">
                             {% for ressource in tache.ressources %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ ressource.nom }} {{ ressource.prenom }}
-                                    <span class="badge bg-primary">{{ ressource.email }}</span>
+                                    {{ ressource.nom }}
+                                    <span class="badge bg-primary">{{ ressource.Matricule }}</span>
                                 </li>
                             {% else %}
                                 <li class="list-group-item text-muted">Aucune ressource assignée</li>
@@ -66,7 +115,7 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date de Création</span>
-                                <span>{{ tache.dateCreation ? tache.dateCreation|date('d/m/Y H:i') : 'Non définie' }}</span>
+                                <span>{{ tache.activite.getDateDebutReel()|date('d/m/Y')|default(tache.activite.getDateDebutEstimee())|date('d/m/Y') }} </span>
                             </li>
                         </ul>
                     </div>

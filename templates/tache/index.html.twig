@@ -44,8 +44,8 @@
                         <td>{{ tache.id }}</td>
                         <td>{{ tache.titre }}</td>
                         <td>{{ tache.description|slice(0, 50) }}{% if tache.description|length > 50 %}...{% endif %}</td>
-                        <td>{{ (dateDebut ? tache.getDateDebutReel() : tache.getDateDebutEstimee())|date('d/m/Y') }}</td>
-                        <td>{{ (dateFin ? tache.getDateFinReel() : tache.getDateFinEstimee())|date('d/m/Y') }}</td>
+                        <td>{{ tache.getDateDebutReel()|date('d/m/Y')|default(tache.getDateDebutEstimee())|date('d/m/Y') }}</td>
+                        <td>{{tache.getDateFinReel()|date('d/m/Y')|default(tache.getDateFinEstimee())|date('d/m/Y') }}</td>
                         <td>
                             <span class="badge {% if tache.statut.nom == 'En cours' %}bg-warning{% elseif tache.statut.nom == 'Términer' %}bg-success{% else %}bg-secondary{% endif %}">
                                 {{ tache.statut.nom }}
@@ -54,15 +54,15 @@
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ path('app_tache_show', {'id': tache.id}) }}" class="btn btn-sm btn-info">
-                                    <i class="me-1 fas fa-eye"></i>
+                                    <i class="me-1 fas fa-eye"></i>Details
                                 </a>
                                 <a href="{{ path('app_tache_edit', {'id': tache.id}) }}" class="btn btn-sm btn-warning">
-                                    <i class="me-1 fas fa-edit"></i>
+                                    <i class="me-1 fas fa-edit"></i>Modifier
                                 </a>
                                 <form method="post" action="{{ path('app_tache_delete', {'id': tache.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
                                     <button class="btn btn-sm btn-danger delete-tache">
-                                        <i class="me-1 fas fa-trash"></i>
+                                        <i class="me-1 fas fa-trash"></i>Supprimer
                                     </button>
                                 </form>
                             </div>

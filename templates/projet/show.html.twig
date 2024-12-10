@@ -36,6 +36,55 @@
                             </li>
                         </ul>
                     </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-white">
+                            <i class="me-1 fas fa-calendar-alt me-2"></i>Dates et Délais
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début estimée</span>
+                                <span class="badge bg-info">
+                                    {{ projet.dateDebutEstimee ? projet.formatDate(projet.dateDebutEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin estimée</span>
+                                <span class="badge bg-info">
+                                    {{ projet.dateFinEstimee ? projet.formatDate(projet.dateFinEstimee) : 'Non définie' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date début réelle</span>
+                                <span class="badge {% if projet.dateDebutReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ projet.dateDebutReel ? projet.formatDate(projet.dateDebutReel) : 'Non démarrée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Date fin réelle</span>
+                                <span class="badge {% if projet.dateFinReel %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ projet.dateFinReel ? projet.formatDate(projet.dateFinReel) : 'Non terminée' }}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée estimée</span>
+                                <span class="badge bg-primary">
+                                    {{ projet.dureeEstimee ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Durée réelle</span>
+                                <span class="badge bg-primary">
+                                    {{ projet.dureeReelle ?: 'N/A' }} jours
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Retard</span>
+                                <span class="badge {% if projet.retard > 0 %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ projet.retard ?: 0 }} jours
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">

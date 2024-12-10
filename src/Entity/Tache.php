@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Referentiel\Statut;
 use App\Repository\TacheRepository;
 use App\Trait\DateManagementTrait;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -39,6 +40,11 @@ class Tache
 
     #[ORM\ManyToOne(inversedBy: 'taches')]
     private ?Activite $activite = null;
+
+    public function __construct()
+    {
+        $this->ressources = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -79,6 +85,9 @@ class Tache
     }    
     public function getStatut():?Statut{
         return $this->statut;
+    }
+    public function setStatut(Statut $statut){
+        $this->statut = $statut;
     }
 
     public function getActivite(): ?Activite
