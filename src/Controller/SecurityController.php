@@ -10,7 +10,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class SecurityController extends AbstractController
 {
-    #[Route('/login', name: 'app_login')]
+    
+#[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils,CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -24,7 +25,8 @@ class SecurityController extends AbstractController
         ]);
     }
     
-    #[Route('/logout', name: 'app_logout')]
+    
+#[Route('/logout', name: 'app_logout')]
     public function logout()
     {
         throw new \LogicException('Logout method can be blank');

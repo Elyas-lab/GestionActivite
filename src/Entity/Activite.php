@@ -52,6 +52,7 @@ class Activite
     public function __construct()
     {
         $this->taches = new ArrayCollection();
+        $this->ressources = new ArrayCollection();
     }
 
     public function getId(): ?int

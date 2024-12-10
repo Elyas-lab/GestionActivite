@@ -12,12 +12,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/referentiel/permission')]
 final class PermissionController extends AbstractController
 {
     public function __construct(private _navbarExtension $navbarExtension) {}
 
-    #[Route(name: 'app_permission_index', methods: ['GET'])]
+    
+#[Route(name: 'app_permission_index', methods: ['GET'])]
     public function index(PermissionRepository $permissionRepository): Response
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
@@ -31,7 +33,8 @@ final class PermissionController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_permission_new')]
+    
+#[Route('/new', name: 'app_permission_new')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $permission = new Permission();
@@ -61,7 +64,8 @@ final class PermissionController extends AbstractController
         ]);
     }
     
-    #[Route('/edit/{id}', name: 'app_permission_edit')]
+    
+#[Route('/edit/{id}', name: 'app_permission_edit')]
     public function edit(Permission $permission, Request $request, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PermissionType::class, $permission);
@@ -90,7 +94,8 @@ final class PermissionController extends AbstractController
         ]);
     }
     
-    #[Route('/{id}/show', name: 'app_permission_show', methods: ['GET'])]
+    
+#[Route('/{id}/show', name: 'app_permission_show', methods: ['GET'])]
     public function show(Permission $permission): Response
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
@@ -107,7 +112,8 @@ final class PermissionController extends AbstractController
         ]);
     }
     
-    #[Route('/{id}', name: 'app_permission_delete', methods: ['POST'])]
+    
+#[Route('/{id}', name: 'app_permission_delete', methods: ['POST'])]
     public function delete(Request $request, Permission $permission, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$permission->getId(), $request->get('_token'))) {

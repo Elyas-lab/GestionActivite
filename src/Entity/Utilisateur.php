@@ -22,7 +22,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     private ?string $matricule = null;
-
+    
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
+    
     /**
      * @var list<string> The user roles
      */
@@ -64,8 +67,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Tache::class)]
     private Collection $taches;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nom = null;
 
     public function __construct()
     {

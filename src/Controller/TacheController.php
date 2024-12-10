@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/tache')]
 final class TacheController extends AbstractController
 {
@@ -41,7 +42,8 @@ final class TacheController extends AbstractController
         return ReferentielTypeElement::Tache;// Retourne un objet TypeElement spécifique aux tâches
     }
 
-    #[Route(name: 'app_tache_index', methods: ['GET'])]
+    
+#[Route(name: 'app_tache_index', methods: ['GET'])]
     public function index(TacheRepository $tacheRepository): Response
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
@@ -58,7 +60,8 @@ final class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_tache_new', methods: ['GET', 'POST'])]
+    
+#[Route('/new', name: 'app_tache_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -96,7 +99,8 @@ final class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_tache_edit', methods: ['GET', 'POST'])]
+    
+#[Route('/{id}/edit', name: 'app_tache_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Tache $tache, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -132,7 +136,8 @@ final class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_tache_delete', methods: ['POST'])]
+    
+#[Route('/{id}', name: 'app_tache_delete', methods: ['POST'])]
     public function delete(Request $request, Tache $tache, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $tache->getId(), $request->get('_token'))) {
@@ -150,7 +155,8 @@ final class TacheController extends AbstractController
         return $this->redirectToRoute('app_tache_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/show', name: 'app_tache_show', methods: ['GET'])]
+    
+#[Route('/{id}/show', name: 'app_tache_show', methods: ['GET'])]
     public function show(Tache $tache): Response
     {
         // Récupérer l'historique de la tâche

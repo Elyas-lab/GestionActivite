@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/projet')]
 final class ProjetController extends AbstractController
 {
@@ -31,7 +32,8 @@ final class ProjetController extends AbstractController
         $this->oracleService = $oracleService;
     }
 
-    #[Route(name: 'app_projet_index', methods: ['GET'])]
+    
+#[Route(name: 'app_projet_index', methods: ['GET'])]
     public function index(ProjetRepository $projetRepository): Response
     {
         $navbarData = $this->navbarExtension->generateNavbarData(
@@ -48,7 +50,8 @@ final class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_projet_new', methods: ['GET', 'POST'])]
+    
+#[Route('/new', name: 'app_projet_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -90,7 +93,8 @@ final class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_projet_edit', methods: ['GET', 'POST'])]
+    
+#[Route('/{id}/edit', name: 'app_projet_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Projet $projet, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -130,7 +134,8 @@ final class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_projet_delete', methods: ['POST'])]
+    
+#[Route('/{id}', name: 'app_projet_delete', methods: ['POST'])]
     public function delete(Request $request, Projet $projet, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$projet->getId(), $request->get('_token'))) {
@@ -152,7 +157,8 @@ final class ProjetController extends AbstractController
         return $this->redirectToRoute('app_projet_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/show', name: 'app_projet_show', methods: ['GET'])]
+    
+#[Route('/{id}/show', name: 'app_projet_show', methods: ['GET'])]
     public function show(Projet $projet): Response
     {
         $historiques = $this->historiqueService->getHistorique(

@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/activite')]
 final class ActiviteController extends AbstractController
 {
@@ -31,6 +32,7 @@ final class ActiviteController extends AbstractController
         $this->oracleService = $oracleService;
     }
 
+   
     #[Route('/', name: 'app_activite_index', methods: ['GET'])]
     public function index(ActiviteRepository $activiteRepository): Response
     {
@@ -52,6 +54,7 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
+    
     #[Route('/new', name: 'app_activite_new', methods: ['GET','POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -94,6 +97,7 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
+    
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $entityManager): Response
     {
@@ -134,6 +138,7 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
+    
     #[Route('/{id}', name: 'app_activite_delete', methods: ['POST'])]
     public function delete(Request $request, Activite $activite, EntityManagerInterface $entityManager): Response
     {
@@ -156,6 +161,7 @@ final class ActiviteController extends AbstractController
         return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    
     #[Route('/{id}/show', name: 'app_activite_show', methods: ['GET'])]
     public function show(Activite $activite): Response
     {

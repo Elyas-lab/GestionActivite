@@ -33,12 +33,12 @@
                     <tr>
                         <td>{{ activite.id }}</td>
                         <td>{{ activite.titre }}</td>
-                        <td>{{ activite.description|slice(0, 50) }}{% if activite.description|length > 50 %}...{% endif %}</td>
-                        <td>{{ (activite.dateDebut ? activite.getDateDebutReel() : activite.getDateDebutEstimee())|date('d/m/Y') }}</td>
-                        <td>{{ (activite.dateFin ? activite.getDateFinReel() : activite.getDateFinEstimee())|date('d/m/Y') }}</td>
+                        <td>{{ activite.description|slice(0, 50)}}</td>
+                        <td>{{ activite.getDateDebutReel()|date('d/m/Y')|default(activite.getDateDebutEstimee())|date('d/m/Y') }}</td>
+                        <td>{{ activite.getDateFinReel()|date('d/m/Y')|default(activite.getDateFinEstimee())|date('d/m/Y') }}</td>
                         <td>
                             <span class="badge {% if activite.statut.nom == 'En cours' %}bg-warning{% elseif activite.statut.nom == 'Terminé' %}bg-success{% else %}bg-secondary{% endif %}">
-                                {{ activite.statut.nom ? activite.statut.nom : 'Non spécifié' }}
+                                {{ activite.statut.nom ?? 'Non spécifié' }}
                             </span>
                         </td>
                         <td>
@@ -51,7 +51,7 @@
                                 </a>
                                 <form method="post" action="{{ path('app_activite_delete', {'id': activite.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ activite.id) }}">
-                                    <button class="btn btn-sm btn-danger delete-activite" ">
+                                    <button class="btn btn-sm btn-danger delete-activite" type="submit">
                                         <i class="me-1 fas fa-trash"></i>Supprimer
                                     </button>
                                 </form>

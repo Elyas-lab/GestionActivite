@@ -206,6 +206,21 @@ php bin/console doctrine:migrations:migrate
 - Configurez les pools de connexions
 - Utilisez les requêtes préparées Doctrine
 
+### CONFIGURATION DE LDAP 
+
+ Prérequis pour LDAP: 
+- Un Serveur LDAP fonctionnel 
+- Extension PHP LDAP 
+- Package Symfony/Ldap 
+
+### Installation des prérequis pour LDAP 
+
+	Activez l'extension dans votre php.ini : 
+- Extension=ldap  
+- Extension=openssl 
+- Extension=mbstring 
+- Extension=intl 
+
 
 ## Conclusion
 

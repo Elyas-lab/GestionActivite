@@ -43,12 +43,12 @@ class ActiviteType extends AbstractType
                 'choice_label' => 'nom',
                 'multiple' => true,
                 'expanded' => true, // Set to true if you want checkboxes instead of a select list
-                'attr' => ['class' => 'form-select'],
+        
             ])
             ->add('statut', EntityType::class, [
                 'class' => Statut::class,
                 'choice_label' => 'nom', 
-                'attr' => ['class' => 'form-select'],
+        
             ])
             ->add('projet_source', EntityType::class, [
                 'class' => Projet::class,

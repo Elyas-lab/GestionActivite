@@ -17,7 +17,8 @@
             <main class="container-fluid col-md-9 col-sm-6 ms-sm-auto col-lg-10 px-md-4 ">
                 {% include 'index/navbar.html.twig' with { 'breadcrumbs': navbarData.breadcrumbs } %}
 
-                <h2>Bienvenue sur le site de gestion d'activités!</h2>
+                <h2>Bienvenue sur le site de gestion d'activités {{app.user.nom}}</h2>
+                    
 
                 <p>
                     Vous pouvez accéder à toutes les ressources disponibles dans le menu ci-dessus.

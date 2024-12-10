@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/assistance')]
 final class AssistanceController extends AbstractController
 {
@@ -31,7 +32,8 @@ final class AssistanceController extends AbstractController
         $this->oracleService = $oracleService;
     }
 
-    #[Route('/', name: 'app_assistance_index', methods: ['GET'])]
+    
+#[Route('/', name: 'app_assistance_index', methods: ['GET'])]
     public function index(AssistanceRepository $assistanceRepository): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -52,7 +54,8 @@ final class AssistanceController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_assistance_new', methods: ['GET','POST'])]
+    
+#[Route('/new', name: 'app_assistance_new', methods: ['GET','POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -94,7 +97,8 @@ final class AssistanceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_assistance_edit', methods: ['GET', 'POST'])]
+    
+#[Route('/{id}/edit', name: 'app_assistance_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Assistance $assistance, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -134,7 +138,8 @@ final class AssistanceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_assistance_delete', methods: ['POST'])]
+    
+#[Route('/{id}', name: 'app_assistance_delete', methods: ['POST'])]
     public function delete(Request $request, Assistance $assistance, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$assistance->getId(), $request->request->get('_token'))) {
@@ -156,7 +161,8 @@ final class AssistanceController extends AbstractController
         return $this->redirectToRoute('app_assistance_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/show', name: 'app_assistance_show', methods: ['GET'])]
+    
+#[Route('/{id}/show', name: 'app_assistance_show', methods: ['GET'])]
     public function show(Assistance $assistance): Response
     {
         $historiques = $this->historiqueService->getHistorique(

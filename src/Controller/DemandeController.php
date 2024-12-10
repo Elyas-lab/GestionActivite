@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
 #[Route('/demande')]
 final class DemandeController extends AbstractController
 {
@@ -31,7 +32,8 @@ final class DemandeController extends AbstractController
         $this->oracleService = $oracleService;
     }
 
-    #[Route('/', name: 'app_demande_index', methods: ['GET'])]
+    
+#[Route('/', name: 'app_demande_index', methods: ['GET'])]
     public function index(DemandeRepository $demandeRepository): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -52,7 +54,8 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_demande_new', methods: ['GET', 'POST'])]
+    
+#[Route('/new', name: 'app_demande_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -94,7 +97,8 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_demande_edit', methods: ['GET', 'POST'])]
+    
+#[Route('/{id}/edit', name: 'app_demande_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Demande $demande, EntityManagerInterface $entityManager): Response
     {
         $this->oracleService->setOracleSessionParams();
@@ -134,7 +138,8 @@ final class DemandeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_demande_delete', methods: ['POST'])]
+    
+#[Route('/{id}', name: 'app_demande_delete', methods: ['POST'])]
     public function delete(Request $request, Demande $demande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$demande->getId(), $request->request->get('_token'))) {
@@ -156,7 +161,8 @@ final class DemandeController extends AbstractController
         return $this->redirectToRoute('app_demande_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/show', name: 'app_demande_show', methods: ['GET'])]
+    
+#[Route('/{id}/show', name: 'app_demande_show', methods: ['GET'])]
     public function show(Demande $demande): Response
     {
         $historiques = $this->historiqueService->getHistorique(
