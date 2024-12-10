@@ -174,14 +174,14 @@ Dans votre `config/packages/doctrine.yaml`, ajoutez la configuration spécifique
 ```yaml
 doctrine:
     dbal:
-        driver: 'oci8'
-        host: '%env(ORACLE_HOST)%'
-        port: '%env(ORACLE_PORT)%'
-        dbname: '%env(ORACLE_DBNAME)%'
-        user: '%env(ORACLE_USER)%'
-        password: '%env(ORACLE_PASSWORD)%'
-        charset: 'AL32UTF8'
-```
+        url: '%env(resolve:DATABASE_URL)%'
+        server_version: '11g'
+        types:
+            oracle_date: App\Type\OracleDateType
+        mapping_types:
+            datetime: oracle_date
+        profiling_collect_backtrace: '%kernel.debug%'
+        use_savepoints: true
 
 ### Considérations Spécifiques à Oracle
 
