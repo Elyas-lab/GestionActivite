@@ -182,6 +182,7 @@ doctrine:
             datetime: oracle_date
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+```
 
 ### Considérations Spécifiques à Oracle
 
