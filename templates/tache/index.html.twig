@@ -1,6 +1,7 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Tâches index{% endblock %}
+{% block title %}Tâches 
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -44,8 +45,14 @@
                         <td>{{ tache.id }}</td>
                         <td>{{ tache.titre }}</td>
                         <td>{{ tache.description|slice(0, 50) }}{% if tache.description|length > 50 %}...{% endif %}</td>
-                        <td>{{ tache.getDateDebutReel()|date('d/m/Y')|default(tache.getDateDebutEstimee())|date('d/m/Y') }}</td>
-                        <td>{{tache.getDateFinReel()|date('d/m/Y')|default(tache.getDateFinEstimee())|date('d/m/Y') }}</td>
+                        <td>
+                            {% set startDate = tache.dateDebutReel ?? tache.dateDebutEstimee %}
+                            {{ startDate ? startDate|date('d/m/Y') : '' }}
+                        </td>
+                        <td>
+                            {% set endDate = tache.dateFinReel ?? tache.dateFinEstimee %}
+                            {{ endDate ? endDate|date('d/m/Y') : '' }}
+                        </td>
                         <td>
                             <span class="badge {% if tache.statut.nom == 'En cours' %}bg-warning{% elseif tache.statut.nom == 'Términer' %}bg-success{% else %}bg-secondary{% endif %}">
                                 {{ tache.statut.nom }}
@@ -113,32 +120,6 @@
                 { targets: [0, 1, 3, 4, 5], orderable: true },
                 { targets: [2, 6], orderable: false }
             ]
-        });
-
-        // Gestion de la suppression des tâches
-        document.querySelectorAll('.delete-tache').forEach(button => {
-            button.addEventListener('click', function() {
-                const tacheId = this.dataset.id;
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
-                    fetch(`/tache/${tacheId}/delete`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            alert('Une erreur s\'est produite lors de la suppression.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erreur:', error);
-                        alert('Une erreur s\'est produite lors de la suppression.');
-                    });
-                }
-            });
         });
     });
 </script>

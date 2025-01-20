@@ -1,5 +1,6 @@
 doctrine:
     dbal:
+        driver: 'oci8'
         url: '%env(resolve:DATABASE_URL)%'
         server_version: '11g'
         types:

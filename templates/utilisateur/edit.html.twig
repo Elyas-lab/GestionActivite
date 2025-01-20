@@ -17,7 +17,7 @@
                             {{ form_errors(form.nom) }}
                         </div>
                         <div class="mb-3">
-                            {{ form_label(form.matricule, 'Matricule') }}
+                            {{ form_label(form.matricule, 'Identifiant') }}
                             {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'Matricule'}}) }}
                             {{ form_errors(form.matricule) }}
                         </div>
@@ -29,8 +29,8 @@
                     </div>
 
                     <div class="my-4 col-md-10 d-flex justify-content-between">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                        <a href="{{ path('app_utilisateur_index') }}" class="btn btn-secondary w-50 me-1">Retour à la liste</a>
+                        <button type="submit" class="btn btn-primary w-50 me-1">Enregistrer</button>
                     </div>
                 </div>
             {{ form_end(form) }}

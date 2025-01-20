@@ -28,7 +28,7 @@
                     <tbody>
                         {% for action in historiques %}
                             <tr>
-                                <td>{{ action.dateHistorique|date('d/m/Y H:i') }}</td>
+                                <td>{{ action.dateHistorique|date('d/m/Y') }}</td>
                                 <td>{{ action.getTypeElementTitre() }}</td>
                                 <td>{{ action.getIdElement() }}</td>
                                 <td>{{ action.detailsHistorique }}</td>
@@ -38,7 +38,7 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#detailsModal" 
                                             data-id="{{ action.id }}" 
-                                            data-date="{{ action.dateHistorique|date('d/m/Y H:i') }}" 
+                                            data-date="{{ action.dateHistorique|date('d/m/Y') }}" 
                                             data-type="{{ action.getTypeElementTitre() }}" 
                                             data-element="{{ action.getIdElement() }}" 
                                             data-details="{{ action.detailsHistorique }}" 

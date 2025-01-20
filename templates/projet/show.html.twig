@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="card mb-4">
-                        <div class="card-header bg-info text-white">
+                        <div class="card-header ">
                             <i class="me-1 fas fa-info-circle me-2"></i>Informations Principales
                         </div>
                         <ul class="list-group list-group-flush">
@@ -43,13 +43,13 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date début estimée</span>
-                                <span class="badge bg-info">
+                                <span class="badge bg-primary ">
                                     {{ projet.dateDebutEstimee ? projet.formatDate(projet.dateDebutEstimee) : 'Non définie' }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date fin estimée</span>
-                                <span class="badge bg-info">
+                                <span class="badge bg-primary ">
                                     {{ projet.dateFinEstimee ? projet.formatDate(projet.dateFinEstimee) : 'Non définie' }}
                                 </span>
                             </li>
@@ -86,6 +86,22 @@
                         </ul>
                     </div>
 
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="me-1 fas fa-file-alt me-2"></i>Demande Source
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ projet.demandeSource.titre }}</h5>
+                            <p class="card-text text-muted">{{ projet.demandeSource.description ?: 'Aucune description' }}</p>
+                            <span class="badge ">
+                                <i class="me-1 fas fa-tag me-1"></i>{{ projet.demandeSource.type.nom }}
+                            </span>
+                        </div>
+                    </div>
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">
                             <i class="me-1 fas fa-tasks me-2"></i>Activités
@@ -101,9 +117,6 @@
                             {% endfor %}
                         </ul>
                     </div>
-                </div>
-
-                <div class="col-md-4">
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-white">
                             <i class="me-1 fas fa-users me-2"></i>Ressources
@@ -118,19 +131,6 @@
                                 <li class="list-group-item text-muted">Aucune ressource assignée</li>
                             {% endfor %}
                         </ul>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header bg-secondary text-white">
-                            <i class="me-1 fas fa-file-alt me-2"></i>Demande Source
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ projet.demandeSource.titre }}</h5>
-                            <p class="card-text text-muted">{{ projet.demandeSource.description ?: 'Aucune description' }}</p>
-                            <span class="badge bg-info">
-                                <i class="me-1 fas fa-tag me-1"></i>{{ projet.demandeSource.type.nom }}
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>

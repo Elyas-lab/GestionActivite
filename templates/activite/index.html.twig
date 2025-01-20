@@ -1,6 +1,7 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}Activités index{% endblock %}
+{% block title %}Activités 
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -34,8 +35,14 @@
                         <td>{{ activite.id }}</td>
                         <td>{{ activite.titre }}</td>
                         <td>{{ activite.description|slice(0, 50)}}</td>
-                        <td>{{ activite.getDateDebutReel()|date('d/m/Y')|default(activite.getDateDebutEstimee())|date('d/m/Y') }}</td>
-                        <td>{{ activite.getDateFinReel()|date('d/m/Y')|default(activite.getDateFinEstimee())|date('d/m/Y') }}</td>
+                        <td>
+                            {% set startDate = activite.dateDebutReel ?? activite.dateDebutEstimee %}
+                            {{ startDate ? startDate|date('d/m/Y') : '' }}
+                        </td>
+                        <td>
+                            {% set endDate = activite.dateFinReel ?? activite.dateFinEstimee %}
+                            {{ endDate ? endDate|date('d/m/Y') : '' }}
+                        </td>
                         <td>
                             <span class="badge {% if activite.statut.nom == 'En cours' %}bg-warning{% elseif activite.statut.nom == 'Terminé' %}bg-success{% else %}bg-secondary{% endif %}">
                                 {{ activite.statut.nom ?? 'Non spécifié' }}

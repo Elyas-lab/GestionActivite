@@ -42,13 +42,6 @@ class LdapAuthenticationService
             throw new NonConformityException('Format non conforme.');
         }
 
-        // Check user existence in the database
-        // $user = $this->entityManager->getRepository('App:Utilisateur')->findOneBy(['username' => $username]);
-        // if (!$user) {
-        //     throw new NotAuthorizedException('Utilisateur non autorisé.');
-        // }
-
-        // Proceed with LDAP authentication
         return $this->authenticateWithLdap($username, $password);
     }
     public function getUserDetails($username)
@@ -163,7 +156,7 @@ class LdapAuthenticationService
                 // Log de l'erreur de récupération LDAP
             }
     
-            // throw new NotAuthorizedException('Utilisateur non autorisé.');
+            throw new NotAuthorizedException('Utilisateur non autorisé.');
         }
     
         return $user;

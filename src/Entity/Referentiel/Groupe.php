@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Entity\Referentiel;
 
 use App\Entity\Utilisateur;

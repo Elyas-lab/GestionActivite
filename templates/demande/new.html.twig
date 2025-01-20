@@ -1,6 +1,6 @@
 {% extends 'inside.html.twig' %}
 
-{% block title %}New Demande{% endblock %}
+{% block title %}Creation Demande{% endblock %}
 
 {% block main %}
    <div class="card">
@@ -35,9 +35,9 @@
                     {{ form_row(form.statut) }}
                 </div>
             <div>
-            <div class="my-4 col-md-10 d-flex justify-content-between">
-                <a href="{{ path('app_assistance_index') }}" class="btn btn-secondary">Retour</a>
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <div class="my-4 col-md-12 d-flex justify-content-between">
+                <a href="{{ path('app_assistance_index') }}" class="btn btn-secondary w-50 me-1">Retour</a>
+                <button type="submit" class="btn btn-primary w-50 me-1">Enregistrer</button>
             </div>
         </div>
         {{ form_end(form) }}

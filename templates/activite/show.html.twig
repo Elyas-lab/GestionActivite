@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="card mb-4">
-                        <div class="card-header bg-info text-white">
+                        <div class="card-header ">
                             <i class="me-1 fas fa-info-circle me-2"></i>Informations Principales
                         </div>
                         <ul class="list-group list-group-flush">
@@ -44,13 +44,13 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date début estimée</span>
-                                <span class="badge bg-info">
+                                <span class="badge bg-primary">
                                     {{ activite.dateDebutEstimee ? activite.formatDate(activite.dateDebutEstimee) : 'Non définie' }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Date fin estimée</span>
-                                <span class="badge bg-info">
+                                <span class="badge bg-primary ">
                                     {{ activite.dateFinEstimee ? activite.formatDate(activite.dateFinEstimee) : 'Non définie' }}
                                 </span>
                             </li>

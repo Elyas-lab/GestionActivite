@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="card mb-4">
-                        <div class="card-header bg-info text-white">
+                        <div class="card-header ">
                             <i class="me-1 fas fa-info-circle me-2"></i>Informations du Groupe
                         </div>
                         <ul class="list-group list-group-flush">
@@ -45,11 +45,6 @@
                                     <div>
                                         <strong>{{ utilisateur.nom }}</strong>
                                         <small class="text-muted ms-2">{{ utilisateur.matricule }}</small>
-                                    </div>
-                                    <div>
-                                        {% for role in utilisateur.roles %}
-                                            <span class="badge bg-secondary me-1">{{ role }}</span>
-                                        {% endfor %}
                                     </div>
                                 </li>
                             {% else %}
@@ -88,6 +83,9 @@
 
         <div class="card-footer">
             <div class="d-flex justify-content-between">
+                <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">
+                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
+                </a>
                 <div>
                     <a href="{{ path('app_groupe_edit', {'id': groupe.id}) }}" class="btn btn-warning me-2">
                         <i class="me-1 fas fa-edit me-2"></i>Modifier
@@ -96,9 +94,6 @@
                         <i class="me-1 fas fa-lock me-2"></i>Gérer les permissions
                     </a>
                 </div>
-                <a href="{{ path('app_groupe_index') }}" class="btn btn-secondary">
-                    <i class="me-1 fas fa-arrow-left me-2"></i>Retour
-                </a>
             </div>
         </div>
     </div>

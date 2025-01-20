@@ -140,6 +140,7 @@ final class TacheController extends AbstractController
 #[Route('/{id}', name: 'app_tache_delete', methods: ['POST'])]
     public function delete(Request $request, Tache $tache, EntityManagerInterface $entityManager): Response
     {
+        $this->oracleService->setOracleSessionParams();
         if ($this->isCsrfTokenValid('delete' . $tache->getId(), $request->get('_token'))) {
             // Ajout d'une entrée dans l'historique avant la suppression
             $this->historiqueService->addHistorique(

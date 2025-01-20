@@ -28,8 +28,7 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
     private LoggerInterface $logger;
 
     public function __construct(
-        LdapAuthenticationService $ldap,
-        RouterInterface $router,
+        LdapAuthenticationService $ldap,RouterInterface $router,
         CsrfTokenManagerInterface $csrfTokenManager,
         LoggerInterface $logger
     ) {
@@ -58,7 +57,6 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
             'session' => $request->getSession()->all(),
         ]);
         
-
         $customCredentials = new CustomCredentials(
             function() use ($username, $password) {
                 try {
@@ -87,21 +85,17 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
                 'password' => $password
             ]
         );
-
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
-
         try {
             $user = $this->ldap->getUser($username);
         } catch (AccessDeniedException $e) {
             $this->logger->warning('User not found', ['username' => $username]);
             throw new AuthenticationException('User not found.');
         }
-
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
             $this->logger->warning('Invalid CSRF token', ['username' => $username]);
             throw new InvalidCsrfTokenException('Invalid CSRF token.');
         }
-
         return new Passport(
             new UserBadge($username, fn() => $user),
             $customCredentials,
@@ -133,13 +127,11 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
         }
     }
     
-
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // $request->getSession()->getBag('flashes')->set('success', ['Connexion réussie !']);
         return new RedirectResponse($this->router->generate('app_acceuil'));
     }
-    
 
     protected function getLoginUrl(Request $request): string
     {

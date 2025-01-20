@@ -37,7 +37,8 @@ class HistoriqueService
         $historique->setDetailsHistorique($details);
         
         // Use the provided date or current date if null
-        $historique->setDateHistorique($date ?? new \DateTime());
+        $timezone = new \DateTimeZone('Indian/Antananarivo');
+        $historique->setDateHistorique($date ?? new \DateTime('now', $timezone));
     
         $utilisateur = $this->security->getUser();
         if ($utilisateur) {
