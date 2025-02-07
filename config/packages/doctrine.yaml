@@ -1,8 +1,9 @@
 doctrine:
     dbal:
-        driver: 'oci8'
+        # driver: 'oci8'
+        # # driver: 'pdo_oci'
         url: '%env(resolve:DATABASE_URL)%'
-        server_version: '11g'
+        # server_version: '11g'
         types:
             oracle_date: App\Type\OracleDateType
         mapping_types:

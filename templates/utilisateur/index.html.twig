@@ -47,7 +47,6 @@
                             <th>ID</th>
                             <th>Matricule</th>
                             <th>Nom</th>
-                            <th>Groupes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -57,17 +56,6 @@
                                 <td>{{ utilisateur.id }}</td>
                                 <td>{{ utilisateur.matricule }}</td>
                                 <td>{{ utilisateur.nom }}</td>
-                                <td>
-                                    {% if utilisateur.getGroupes() is empty %}
-                                        <span>Aucun groupe</span>
-                                    {% else %}
-                                        <ul class="list-unstyled mb-0">
-                                            {% for groupe in utilisateur.getGroupes() %}
-                                                <li>{{ groupe.getNom()  }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
                                 <td>
                                     <a href="{{ path('app_utilisateur_show', {'id': utilisateur.id}) }}" class="btn btn-info btn-sm">
                                         <i class="me-1 fas fa-eye"></i> Détails

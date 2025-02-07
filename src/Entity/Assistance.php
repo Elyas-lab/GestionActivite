@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Assistance
 {
 #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer', nullable: false)]
     #[ORM\SequenceGenerator(sequenceName: 'assistance_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;
@@ -25,7 +25,7 @@ class Assistance
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'oracle_date',)]
+    #[ORM\Column(type: 'datetime',)]
     private ?\DateTime $date_creation = null;
 
     #[ORM\ManyToOne(inversedBy: 'assistances')]

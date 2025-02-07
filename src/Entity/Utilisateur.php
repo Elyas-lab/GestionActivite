@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
 #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer', nullable: false)]
     #[ORM\SequenceGenerator(sequenceName: 'utilisateur_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;

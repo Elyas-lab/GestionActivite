@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class TypeDemande
 {
 #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer', nullable: false)]
     #[ORM\SequenceGenerator(sequenceName: 'type_demande_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;

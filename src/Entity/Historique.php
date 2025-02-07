@@ -13,12 +13,12 @@ use App\Entity\Referentiel\TypeElement;
 class Historique
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
     #[ORM\SequenceGenerator(sequenceName: 'historique_id_seq', allocationSize: 1, initialValue: 1)]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'oracle_date')]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTime $dateHistorique = null;
 
     #[ORM\Column(type: 'string', length: 1000, nullable: true)]
