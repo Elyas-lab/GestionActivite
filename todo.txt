@@ -1,6 +1,0 @@
-gerer les entité source  et goupe
-            $this->historiqueService->addHistorique(
-                TypeElement::Activite,
-                $activite->getId(),
-                'Création d\'une nouvelle activité'
-            );
